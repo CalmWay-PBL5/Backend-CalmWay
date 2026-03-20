@@ -1,0 +1,29 @@
+{
+  "name": "Flying Class Backend Dev",
+  "dockerComposeFile": ["docker-compose.devcontainer.yml"],
+  "service": "backend",
+  "workspaceFolder": "/app",
+
+  "runServices": ["postgres", "redis", "backend"],
+  "shutdownAction": "stopCompose",
+
+  "remoteUser": "node",
+  "updateRemoteUserUID": true,
+
+  "containerEnv": {
+    "NODE_ENV": "development"
+  },
+
+  "postCreateCommand": "npm ci && npm run db:migrate:dev && npm run db:seed",
+  "forwardPorts": [3000],
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "firsttris.vscode-jest-runner",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
