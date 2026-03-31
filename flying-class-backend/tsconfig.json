@@ -11,5 +11,6 @@
     "outDir": "./dist",
     "strict": true,
     "skipLibCheck": true
-  }
+  },
+  "exclude": ["node_modules", "dist", "prisma/seed.ts"]
 }

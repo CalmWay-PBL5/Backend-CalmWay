@@ -5,8 +5,13 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // Giữ nguyên cấu hình kết nối theo bản clone hiện tại của bạn
   schemas  = ["public", "auth", "course", "lesson", "payment", "system"]
 }
+
+// ==========================================
+// SCHEMAS: AUTH (XÁC THỰC & NGƯỜI DÙNG)
+// ==========================================
 
 enum UserRole {
   ADMIN
@@ -27,6 +32,7 @@ model User {
   id           String     @id @default(uuid())
   email        String     @unique
   passwordHash String?
+  reviews       Review[]
   googleId     String?    @unique
   role         UserRole   @default(STUDENT)
   isVerified   Boolean    @default(false)
@@ -34,8 +40,14 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   
-  profile      Profile?
-  classes      Class[]    
+  profile       Profile?
+  classes       Class[]        // Lớp do GV tạo
+  enrollments   Enrollment[]   // Lớp do HS tham gia
+  submissions   Submission[]   // Bài thi HS đã nộp
+  transactions  Transaction[]
+  notifications Notification[]
+  aiUsageLogs   AiUsageLog[]
+  comments      Comment[]      // Thảo luận của người dùng
 
   @@schema("auth")
   @@map("users")
@@ -50,17 +62,23 @@ model Profile {
   bio             String?
   parentEmail     String?
   identifyCardUrl String?
+  degreeUrls      String[] // Đã khôi phục: Bằng cấp
+  experienceYears Int?     // Đã khôi phục: Số năm kinh nghiệm
   updatedAt       DateTime @updatedAt
 
-  user User @relation(fields: [userId], references:[id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@schema("auth")
   @@map("profiles")
 }
 
+// ==========================================
+// SCHEMAS: COURSE (LỚP HỌC, THI CỬ & THẢO LUẬN)
+// ==========================================
+
 model Subject {
-  id          String  @id @default(uuid())
-  name        String  @unique
+  id          String   @id @default(uuid())
+  name        String   @unique
   description String?
   classes     Class[]
 
@@ -69,21 +87,232 @@ model Subject {
 }
 
 model Class {
-  id          String   @id @default(uuid())
-  teacherId   String
-  subjectId   String?
-  title       String
-  description String?
-  price       Decimal  @default(0) @db.Decimal(12, 2)
-  classCode   String   @unique
-  type        String
-  status      String   @default("active")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(uuid())
+  teacherId       String
+  subjectId       String?
+  title           String
+  description     String?
+  reviews       Review[]
+  price           Decimal  @default(0) @db.Decimal(12, 2)
+  coverImage      String?
+  classCode       String   @unique
+  invitationToken String?  @unique
+  type            String   
+  status          String   @default("active") 
+  deletedAt       DateTime? 
+  
+  // 🔥 THÊM DÒNG NÀY VÀO: Giới hạn số lượng học sinh tối đa (mặc định là 50)
+  maxStudents     Int      @default(50)
 
-  teacher User     @relation(fields:[teacherId], references: [id])
-  subject Subject? @relation(fields: [subjectId], references:[id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  teacher      User          @relation(fields: [teacherId], references: [id])
+  subject      Subject?      @relation(fields: [subjectId], references: [id])
+  enrollments  Enrollment[]
+  lessons      Lesson[]
+  exams        Exam[]
+  schedules    Schedule[]
+  transactions Transaction[] 
+  comments     Comment[]     
 
   @@schema("course")
   @@map("classes")
+}
+model Review {
+  id        String   @id @default(uuid())
+  studentId String
+  classId   String
+  rating    Int      // Ví dụ: từ 1 đến 5 sao
+  content   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  student   User     @relation(fields: [studentId], references: [id])
+  class     Class    @relation(fields: [classId], references: [id])
+
+  @@schema("course")
+  @@map("reviews")
+}
+model Enrollment {
+  id        String   @id @default(uuid())
+  studentId String
+  classId   String
+  status    String   @default("ACTIVE")
+  joinedAt  DateTime @default(now())
+
+  student User  @relation(fields: [studentId], references: [id])
+  class   Class @relation(fields: [classId], references: [id])
+
+  @@unique([studentId, classId]) 
+  @@schema("course")
+  @@map("enrollments")
+}
+
+model Schedule {
+  id          String   @id @default(uuid())
+  classId     String
+  title       String?  
+  dayOfWeek   Int      // 1 (CN) -> 7 (Thứ 7)
+  startTime   String   
+  endTime     String   
+  meetUrl     String?  
+  createdAt   DateTime @default(now())
+
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@schema("course")
+  @@map("schedules")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  userId    String
+  classId   String?
+  lessonId  String?
+  createdAt DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id])
+  class  Class?  @relation(fields: [classId], references: [id])
+  lesson Lesson? @relation(fields: [lessonId], references: [id])
+
+  @@schema("course")
+  @@map("comments")
+}
+
+model Exam {
+  id              String   @id @default(uuid())
+  classId         String
+  title           String
+  durationMinutes Int
+  startDate       DateTime?
+  endDate         DateTime?
+  maxAttempts     Int      @default(1)
+  
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  questions   Question[]
+  submissions Submission[]
+
+  @@schema("course")
+  @@map("exams")
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  examId        String
+  questionText  String   @db.Text
+  type          String   
+  options       Json?    
+  correctAnswer String?  
+
+  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@schema("course")
+  @@map("questions")
+}
+
+model Submission {
+  id             String   @id @default(uuid())
+  examId         String
+  studentId      String
+  answers        Json     
+  score          Decimal? @db.Decimal(5, 2)
+  teacherComment String?  @db.Text
+  submittedAt    DateTime @default(now())
+
+  exam    Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@schema("course")
+  @@map("submissions")
+}
+
+// ==========================================
+// SCHEMAS: LESSON (BÀI GIẢNG & TÀI LIỆU) -> Đã tách theo ý Hội
+// ==========================================
+
+model Lesson {
+  id            String   @id @default(uuid())
+  classId       String
+  title         String
+  contentType   String   
+  url           String?  
+  bodyText      String?  @db.Text 
+  orderIndex    Int      @default(0)
+  aiSummaryText String?  @db.Text  
+  aiKeywords    Json?    
+
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  attachments Attachment[] 
+  comments    Comment[]    
+
+  @@schema("lesson")
+  @@map("lessons")
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  lessonId  String
+  name      String   
+  fileUrl   String
+  fileType  String   
+  createdAt DateTime @default(now())
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@schema("lesson")
+  @@map("attachments")
+}
+
+// ==========================================
+// SCHEMAS: PAYMENT (THANH TOÁN MOMO)
+// ==========================================
+
+model Transaction {
+  id          String   @id @default(uuid())
+  userId      String
+  classId     String
+  amount      Decimal  @db.Decimal(12, 2)
+  momoOrderId String   @unique 
+  status      String   @default("PENDING") 
+  createdAt   DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  class Class @relation(fields: [classId], references: [id]) 
+
+  @@schema("payment")
+  @@map("transactions")
+}
+
+// ==========================================
+// SCHEMAS: SYSTEM (HỆ THỐNG & AI TRACKING)
+// ==========================================
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
+  type      String   
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@schema("system")
+  @@map("notifications")
+}
+
+model AiUsageLog {
+  id           String   @id @default(uuid())
+  userId       String
+  featureType  String   
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  modelUsed    String   
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@schema("system")
+  @@map("ai_usage_logs")
 }

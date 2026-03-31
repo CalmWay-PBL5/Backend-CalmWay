@@ -67,6 +67,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA auth, course, lesso
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA auth, course, lesson, payment TO app_user;
 GRANT SELECT ON ALL TABLES IN SCHEMA auth, course, lesson, payment TO readonly_user;
 
+-- Explicit table creation permissions for app_user
+GRANT CREATE ON SCHEMA auth, course, lesson, payment TO app_user;
+
 ALTER DEFAULT PRIVILEGES FOR ROLE prisma_user IN SCHEMA auth, course, lesson, payment, system
 GRANT ALL ON TABLES TO prisma_user;
 ALTER DEFAULT PRIVILEGES FOR ROLE prisma_user IN SCHEMA auth, course, lesson, payment, system

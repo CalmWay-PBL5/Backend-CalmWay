@@ -5,8 +5,9 @@ import { Pool } from 'pg';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
+  private prismaClient: PrismaClient;
 
   constructor(configService: ConfigService) {
     const connectionString = configService.getOrThrow<string>('database.url');
@@ -15,11 +16,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     const pool = new Pool({ connectionString });
     const adapter = new PrismaPg(pool);
 
-    super({
+    this.prismaClient = new PrismaClient({
       adapter,
       transactionOptions: {
-        maxWait: 5000,    // Wait 5s to secure a connection from the pool
-        timeout: 10000,   // Allow 10s for the entire transaction to complete
+        maxWait: 5000,
+        timeout: 10000,
       },
       log:[
         { emit: 'event', level: 'query' },
@@ -30,19 +31,41 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     });
 
     if (nodeEnv === 'development') {
-      // @ts-ignore
-      this.$on('query', (e: any) => {
+      // @ts-ignore - Event types with adapter-pg are different
+      this.prismaClient.$on('query', (e: any) => {
         this.logger.debug(`Query: ${e.query} - Duration: ${e.duration}ms`);
       });
     }
 
-    // @ts-ignore
-    this.$on('info', (e: any) => this.logger.log(e.message));
-    // @ts-ignore
-    this.$on('warn', (e: any) => this.logger.warn(e.message));
-    // @ts-ignore
-    this.$on('error', (e: any) => this.logger.error(e.message));
+    // @ts-ignore - Event types with adapter-pg are different
+    this.prismaClient.$on('info', (e: any) => this.logger.log(e.message));
+    // @ts-ignore - Event types with adapter-pg are different
+    this.prismaClient.$on('warn', (e: any) => this.logger.warn(e.message));
+    // @ts-ignore - Event types with adapter-pg are different
+    this.prismaClient.$on('error', (e: any) => this.logger.error(e.message));
   }
+
+  // ✅ Expose all Prisma delegates with proper typing
+  get user() { return this.prismaClient.user; }
+  get profile() { return this.prismaClient.profile; }
+  get subject() { return this.prismaClient.subject; }
+  get class() { return this.prismaClient.class; }
+  get review() { return this.prismaClient.review; }
+  get enrollment() { return this.prismaClient.enrollment; }
+  get lesson() { return this.prismaClient.lesson; }
+  get exam() { return this.prismaClient.exam; }
+  get question() { return this.prismaClient.question; }
+  get submission() { return this.prismaClient.submission; }
+  get schedule() { return this.prismaClient.schedule; }
+  get comment() { return this.prismaClient.comment; }
+  get transaction() { return this.prismaClient.transaction; }
+  get notification() { return this.prismaClient.notification; }
+  get aiUsageLog() { return this.prismaClient.aiUsageLog; }
+  
+  // Expose Prisma utilities
+  get $queryRaw() { return this.prismaClient.$queryRaw; }
+  get $transaction() { return this.prismaClient.$transaction; }
+
 
   async withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
     let lastError: any;
@@ -66,12 +89,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
-    await this.$connect();
-    this.logger.log('Prisma successfully connected to the database');
+    await this.prismaClient.$connect();
+    this.logger.log('✅ Prisma successfully connected to database');
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
-    this.logger.log('Prisma connection gracefully closed');
+    await this.prismaClient.$disconnect();
+    this.logger.log('✅ Prisma connection gracefully closed');
   }
 }

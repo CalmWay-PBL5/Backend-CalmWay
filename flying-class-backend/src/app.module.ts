@@ -8,9 +8,21 @@ import { envValidationSchema } from './config/env.validation';
 import { LoggerModule } from 'nestjs-pino';
 import { randomUUID } from 'crypto';
 import { TerminusModule } from '@nestjs/terminus';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { TeacherModule } from './teacher/teacher.module'; 
+import { ClassModule } from './class/class.module';
+import { ClassMemberModule } from './class-member/class-member.module';
+import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
@@ -35,22 +47,26 @@ import { TerminusModule } from '@nestjs/terminus';
             
             level: isProduction ? 'info' : 'debug',
             transport: isProduction
-              ? undefined // In production, output raw JSON for Datadog/CloudWatch
+              ? undefined 
               : {
-                  target: 'pino-pretty', // In development, format JSON beautifully for your terminal
+                  target: 'pino-pretty', 
                   options: {
                     singleLine: false,
                     colorize: true,
                   },
                 },
             
-            autoLogging: true, // Automatically log request/response
+            autoLogging: true, 
           },
         };
       },
     }),
     TerminusModule,
-    InfrastructureModule
+    InfrastructureModule,
+    TeacherModule,
+    ClassModule,
+    ClassMemberModule,
+    AiAssistantModule,
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Version } from '@nestjs/common';
 import { AppService } from './app.service';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
 import { PrismaHealthIndicator } from './infrastructure/database/prisma/prisma.health';
@@ -11,7 +11,7 @@ export class AppController {
     private readonly prismaHealth: PrismaHealthIndicator,
     private readonly redisHealth: RedisHealthIndicator,
   ) {}
-
+  @Version('1')
   @Get('health')
   @HealthCheck()
   check() {

@@ -12,6 +12,7 @@ export class PrismaHealthIndicator {
   async isHealthy(key: string): Promise<HealthIndicatorResult> {
     const indicator = this.healthIndicatorService.check(key);
     try {
+      // @ts-ignore - $queryRaw is a Prisma utility
       await this.prismaService.$queryRaw`SELECT 1`;
       return indicator.up();
     } catch (error) {
