@@ -44,43 +44,43 @@ REVOKE ALL ON SCHEMA public FROM PUBLIC;
 
 GRANT CONNECT ON DATABASE ${POSTGRES_DB} TO db_owner, prisma_user, app_user, readonly_user;
 
--- FIX 1: Add prisma_user here so it has permission to CREATE schemas!
 GRANT CREATE ON DATABASE ${POSTGRES_DB} TO db_owner, prisma_user;
 
--- FIX 2: Change AUTHORIZATION to prisma_user so it owns the schemas and can reset them.
 CREATE SCHEMA IF NOT EXISTS auth AUTHORIZATION prisma_user;
 CREATE SCHEMA IF NOT EXISTS course AUTHORIZATION prisma_user;
 CREATE SCHEMA IF NOT EXISTS lesson AUTHORIZATION prisma_user;
 CREATE SCHEMA IF NOT EXISTS payment AUTHORIZATION prisma_user;
 CREATE SCHEMA IF NOT EXISTS system AUTHORIZATION prisma_user;
 
-GRANT USAGE ON SCHEMA auth, course, lesson, payment, system TO prisma_user;
-GRANT CREATE ON SCHEMA auth, course, lesson, payment, system TO prisma_user;
-GRANT USAGE ON SCHEMA auth, course, lesson, payment TO app_user;
-GRANT USAGE ON SCHEMA auth, course, lesson, payment TO readonly_user;
-
+-- Cấp quyền cho prisma_user
+GRANT USAGE, CREATE ON SCHEMA auth, course, lesson, payment, system TO prisma_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA auth, course, lesson, payment, system TO prisma_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA auth, course, lesson, payment, system TO prisma_user;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA auth, course, lesson, payment, system TO prisma_user;
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA auth, course, lesson, payment TO app_user;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA auth, course, lesson, payment TO app_user;
-GRANT SELECT ON ALL TABLES IN SCHEMA auth, course, lesson, payment TO readonly_user;
+-- 🔥 FIX 1: Thêm schema "system" cho app_user và readonly_user
+GRANT USAGE ON SCHEMA auth, course, lesson, payment, system TO app_user;
+GRANT USAGE ON SCHEMA auth, course, lesson, payment, system TO readonly_user;
 
--- Explicit table creation permissions for app_user
-GRANT CREATE ON SCHEMA auth, course, lesson, payment TO app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA auth, course, lesson, payment, system TO app_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA auth, course, lesson, payment, system TO app_user;
+GRANT CREATE ON SCHEMA auth, course, lesson, payment, system TO app_user;
+
+GRANT SELECT ON ALL TABLES IN SCHEMA auth, course, lesson, payment, system TO readonly_user;
+
+-- 🔥 FIX 2: Bắt buộc cấp quyền tự động cho cả bảng do 'postgres' tạo ra (vì file .env dùng postgres)
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA auth, course, lesson, payment, system
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA auth, course, lesson, payment, system
+GRANT USAGE, SELECT ON SEQUENCES TO app_user;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE prisma_user IN SCHEMA auth, course, lesson, payment, system
 GRANT ALL ON TABLES TO prisma_user;
 ALTER DEFAULT PRIVILEGES FOR ROLE prisma_user IN SCHEMA auth, course, lesson, payment, system
 GRANT ALL ON SEQUENCES TO prisma_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE prisma_user IN SCHEMA auth, course, lesson, payment, system
-GRANT EXECUTE ON FUNCTIONS TO prisma_user;
 
-ALTER DEFAULT PRIVILEGES FOR ROLE prisma_user IN SCHEMA auth, course, lesson, payment
+ALTER DEFAULT PRIVILEGES FOR ROLE prisma_user IN SCHEMA auth, course, lesson, payment, system
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE prisma_user IN SCHEMA auth, course, lesson, payment
+ALTER DEFAULT PRIVILEGES FOR ROLE prisma_user IN SCHEMA auth, course, lesson, payment, system
 GRANT USAGE, SELECT ON SEQUENCES TO app_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE prisma_user IN SCHEMA auth, course, lesson, payment
-GRANT SELECT ON TABLES TO readonly_user;
 SQL

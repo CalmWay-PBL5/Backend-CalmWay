@@ -69,6 +69,7 @@ async function main() {
     where: { email: 'teacher.tuan@flyingclass.com' },
     update: {},
     create: {
+      id: 'e350d7e6-ba21-4abf-ba8e-a36263f2434b', // 🔥 Đã thêm ID cứng cho Thầy Tuấn IT để test Frontend
       email: 'teacher.tuan@flyingclass.com',
       passwordHash: 'hashed_password_placeholder',
       role: 'TEACHER',
@@ -166,13 +167,13 @@ async function main() {
     // Lớp Toán
     { studentId: students[0].id, classId: class1.id },
     { studentId: students[1].id, classId: class1.id },
-    // Lớp IT
+    // Lớp IT (Có học sinh số 2 và số 3)
     { studentId: students[1].id, classId: class2.id },
     { studentId: students[2].id, classId: class2.id },
     // Lớp Ngoại ngữ
-    { studentId: students[4].id, classId: class3.id }, // Học sinh 5
-    { studentId: students[5].id, classId: class3.id }, // Học sinh 6
-    { studentId: students[6].id, classId: class3.id }, // Học sinh 7
+    { studentId: students[4].id, classId: class3.id }, 
+    { studentId: students[5].id, classId: class3.id }, 
+    { studentId: students[6].id, classId: class3.id }, 
   ];
 
   let newEnrollmentsCount = 0;
@@ -191,7 +192,6 @@ async function main() {
   // ==========================================
   // 7. TẠO ĐÁNH GIÁ (REVIEWS)
   // ==========================================
-  // (Xóa hết review cũ để tránh bị nhân bản khi chạy seed nhiều lần)
   await prisma.review.deleteMany();
 
   const math101Reviews = [
@@ -217,6 +217,91 @@ async function main() {
     await prisma.review.create({ data: review });
   }
   console.log(`✅ Đã nạp (hoặc làm mới) ${allReviews.length} Đánh giá (Reviews).`);
+
+  // ==========================================
+  // 8. TẠO DỮ LIỆU TIN NHẮN CHAT (MỚI)
+  // ==========================================
+  console.log('💬 Đang tạo dữ liệu Chat Realtime...');
+  await prisma.chatMessage.deleteMany(); 
+
+  const chatMessages = [
+    { classId: class2.id, senderId: students[1].id, content: 'Chào thầy Tuấn và mọi người ạ! 👋' },
+    { classId: class2.id, senderId: students[2].id, content: 'Em chào thầy ạ. Lớp mình hôm nay học bài gì vậy thầy?' },
+    { classId: class2.id, senderId: teacher2.id, content: 'Chào các em! Hôm nay chúng ta sẽ tìm hiểu về WebSockets và cách làm chức năng Chat Realtime nhé.' },
+  ];
+
+  for (const msg of chatMessages) {
+    await prisma.chatMessage.create({ data: msg });
+  }
+  console.log(`✅ Đã nạp ${chatMessages.length} tin nhắn mẫu.`);
+
+  // ==========================================
+  // 9. TẠO DỮ LIỆU BÀI GIẢNG (MỚI)
+  // ==========================================
+  console.log('📚 Đang tạo dữ liệu Bài giảng...');
+  await prisma.lesson.deleteMany();
+
+  await prisma.lesson.createMany({
+    data: [
+      { classId: class2.id, title: 'Bài 1: Tổng quan về ReactJS', contentType: 'VIDEO', url: 'https://youtube.com', orderIndex: 1 },
+      { classId: class2.id, title: 'Bài 2: Tích hợp NestJS', contentType: 'DOCUMENT', bodyText: 'Hướng dẫn API...', orderIndex: 2 }
+    ]
+  });
+  console.log('✅ Đã nạp dữ liệu Bài giảng.');
+
+  // ==========================================
+  // 10. TẠO DỮ LIỆU GIAO DỊCH (TRANSACTIONS)
+  // ==========================================
+  console.log('💰 Đang tạo dữ liệu Giao dịch thanh toán (Transactions)...');
+  await prisma.transaction.deleteMany();
+
+  const transactionsData = [
+    // Giao dịch cho lớp Toán (class1 - 500,000đ)
+    {
+      userId: students[0].id, classId: class1.id, amount: 500000,
+      momoOrderId: 'MOMO-MATH-001', status: 'SUCCESS',
+      createdAt: new Date('2026-01-15T10:00:00Z') // Tháng 1
+    },
+    {
+      userId: students[1].id, classId: class1.id, amount: 500000,
+      momoOrderId: 'MOMO-MATH-002', status: 'SUCCESS',
+      createdAt: new Date('2026-02-20T10:00:00Z') // Tháng 2
+    },
+
+    // Giao dịch cho lớp IT của Thầy Tuấn (class2 - 850,000đ) -> Dùng để test UI
+    {
+      userId: students[1].id, classId: class2.id, amount: 850000,
+      momoOrderId: 'MOMO-IT-001', status: 'SUCCESS',
+      createdAt: new Date('2026-01-10T10:00:00Z') // Tháng 1/2026
+    },
+    {
+      userId: students[2].id, classId: class2.id, amount: 850000,
+      momoOrderId: 'MOMO-IT-002', status: 'SUCCESS',
+      createdAt: new Date('2026-03-05T10:00:00Z') // Tháng 3/2026
+    },
+
+    // Giao dịch cho lớp Tiếng Nhật (class3 - 1,500,000đ)
+    {
+      userId: students[4].id, classId: class3.id, amount: 1500000,
+      momoOrderId: 'MOMO-JPN-001', status: 'SUCCESS',
+      createdAt: new Date('2026-04-01T10:00:00Z') // Tháng 4/2026
+    },
+    {
+      userId: students[5].id, classId: class3.id, amount: 1500000,
+      momoOrderId: 'MOMO-JPN-002', status: 'SUCCESS',
+      createdAt: new Date('2026-04-15T10:00:00Z') // Tháng 4/2026
+    },
+    {
+      userId: students[6].id, classId: class3.id, amount: 1500000,
+      momoOrderId: 'MOMO-JPN-003', status: 'SUCCESS',
+      createdAt: new Date('2026-06-20T10:00:00Z') // Tháng 6/2026
+    },
+  ];
+
+  for (const txn of transactionsData) {
+    await prisma.transaction.create({ data: txn });
+  }
+  console.log(`✅ Đã nạp ${transactionsData.length} giao dịch thành công.`);
 
   console.log('🎉 Hoàn tất quá trình Seeding toàn diện!');
 }

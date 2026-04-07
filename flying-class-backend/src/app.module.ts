@@ -15,6 +15,8 @@ import { TeacherModule } from './teacher/teacher.module';
 import { ClassModule } from './class/class.module';
 import { ClassMemberModule } from './class-member/class-member.module';
 import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
+import { ChatModule } from './chat/chat.module';
+import { RevenueModule } from './teacher/revenue/revenue.module'; // Import RevenueModule vào đây
 
 @Module({
   imports: [
@@ -67,6 +69,8 @@ import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
     ClassModule,
     ClassMemberModule,
     AiAssistantModule,
+    ChatModule,
+    RevenueModule,
   ],
   controllers: [AppController],
   providers: [AppService]

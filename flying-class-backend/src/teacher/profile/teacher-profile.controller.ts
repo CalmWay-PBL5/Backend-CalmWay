@@ -98,7 +98,7 @@ export class TeacherProfileController {
   )
   async updateProfile(
     @Req() req: any,
-    @Body() updateDto: UpdateTeacherProfileDto,
+    @Body() updateDto:UpdateTeacherProfileDto,
     @UploadedFiles() files: any,
   ) {
     console.log('🔥 PUT /api/v1/teachers/me/profile called!');
