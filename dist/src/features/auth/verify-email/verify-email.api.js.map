@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/features/auth/verify-email/verify-email.api.ts"],"sourcesContent":["import { IsString, IsNotEmpty } from \"class-validator\";\n\nexport class VerifyEmailQueryDto {\n  @IsString()\n  @IsNotEmpty()\n  token: string;\n}\n"],"names":["VerifyEmailQueryDto"],"mappings":";;;;+BAEaA;;;eAAAA;;;gCAFwB;;;;;;;;;;AAE9B,IAAA,AAAMA,sBAAN,MAAMA;AAIb"}

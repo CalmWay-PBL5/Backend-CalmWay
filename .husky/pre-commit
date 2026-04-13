@@ -1,0 +1,5 @@
+set -e
+
+node scripts/sync-env.mjs
+git add .env.example
+echo "Done syncing .env.example with .env"

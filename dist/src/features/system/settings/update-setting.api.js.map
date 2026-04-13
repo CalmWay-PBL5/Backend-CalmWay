@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/features/system/settings/update-setting.api.ts"],"sourcesContent":["import { IsString, IsNotEmpty } from \"class-validator\";\n\nexport class UpdateSettingDto {\n  @IsString()\n  @IsNotEmpty()\n  value: string;\n}\n"],"names":["UpdateSettingDto"],"mappings":";;;;+BAEaA;;;eAAAA;;;gCAFwB;;;;;;;;;;AAE9B,IAAA,AAAMA,mBAAN,MAAMA;AAIb"}

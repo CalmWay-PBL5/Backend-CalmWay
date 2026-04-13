@@ -1,0 +1,172 @@
+{
+  "info": {
+    "_postman_id": "1f2bb8f4-6f83-4b78-95c1-a0a0fceb90ef",
+    "name": "FlyingClass - Teacher Self Service",
+    "description": "Test các API giảng viên: profile, students, revenue.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "accessToken", "value": "" },
+    { "key": "lecturerEmail", "value": "lecturer@example.com" },
+    { "key": "lecturerPassword", "value": "password123" },
+    { "key": "studentId", "value": "" },
+    { "key": "courseId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Login Lecturer - Save access token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{lecturerEmail}}\",\n  \"password\": \"{{lecturerPassword}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data && data.access_token) {",
+                  "  pm.collectionVariables.set('accessToken', data.access_token);",
+                  "  pm.environment.set('accessToken', data.access_token);",
+                  "}",
+                  "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Teacher",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "GET /teachers/me/profile",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teachers/me/profile", "host": ["{{baseUrl}}"], "path": ["teachers", "me", "profile"] }
+          }
+        },
+        {
+          "name": "PUT /teachers/me/profile (JSON)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Lecturer Demo\",\n  \"phone\": \"0900000000\",\n  \"bio\": \"Giang vien day lap trinh\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/teachers/me/profile", "host": ["{{baseUrl}}"], "path": ["teachers", "me", "profile"] }
+          }
+        },
+        {
+          "name": "PUT /teachers/me/profile (multipart + avatar + KYC docs)",
+          "request": {
+            "method": "PUT",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "fullName", "value": "Lecturer Multipart", "type": "text" },
+                { "key": "phone", "value": "0911111111", "type": "text" },
+                { "key": "bio", "value": "Cap nhat profile + tai lieu KYC", "type": "text" },
+                { "key": "avatar", "type": "file", "src": "" },
+                { "key": "identityCard", "type": "file", "src": "" },
+                { "key": "degrees", "type": "file", "src": "" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/teachers/me/profile", "host": ["{{baseUrl}}"], "path": ["teachers", "me", "profile"] }
+          }
+        },
+        {
+          "name": "GET /teachers/me/revenue/summary",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teachers/me/revenue/summary", "host": ["{{baseUrl}}"], "path": ["teachers", "me", "revenue", "summary"] }
+          }
+        },
+        {
+          "name": "GET /teachers/me/revenue/monthly?year=2026",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/teachers/me/revenue/monthly?year=2026",
+              "host": ["{{baseUrl}}"],
+              "path": ["teachers", "me", "revenue", "monthly"],
+              "query": [{ "key": "year", "value": "2026" }]
+            }
+          }
+        },
+        {
+          "name": "GET /teachers/me/students",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/teachers/me/students?skip=0&take=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["teachers", "me", "students"],
+              "query": [{ "key": "skip", "value": "0" }, { "key": "take", "value": "20" }]
+            }
+          }
+        },
+        {
+          "name": "GET /teachers/me/students/search/query?q=abc",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/teachers/me/students/search/query?q=abc&skip=0&take=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["teachers", "me", "students", "search", "query"],
+              "query": [
+                { "key": "q", "value": "abc" },
+                { "key": "skip", "value": "0" },
+                { "key": "take", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /teachers/me/students/stats/overview",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teachers/me/students/stats/overview", "host": ["{{baseUrl}}"], "path": ["teachers", "me", "students", "stats", "overview"] }
+          }
+        },
+        {
+          "name": "GET /teachers/me/students/:studentId",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teachers/me/students/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["teachers", "me", "students", "{{studentId}}"] }
+          }
+        },
+        {
+          "name": "GET /teachers/me/students/export/all",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teachers/me/students/export/all", "host": ["{{baseUrl}}"], "path": ["teachers", "me", "students", "export", "all"] }
+          }
+        },
+        {
+          "name": "GET /teachers/me/students/export/course/:courseId",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/teachers/me/students/export/course/{{courseId}}", "host": ["{{baseUrl}}"], "path": ["teachers", "me", "students", "export", "course", "{{courseId}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}

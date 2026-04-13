@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/features/teacher/classes/get-admin-class-detail.query.ts"],"sourcesContent":["export class GetAdminClassDetailQuery {\n  constructor(public readonly classId: string) {}\n}\n"],"names":["GetAdminClassDetailQuery","classId"],"mappings":";;;;+BAAaA;;;eAAAA;;;AAAN,IAAA,AAAMA,2BAAN,MAAMA;IACX,YAAY,AAAgBC,OAAe,CAAE;aAAjBA,UAAAA;IAAkB;AAChD"}

@@ -1,0 +1,1542 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+profile/
+  teacher-profile.controller.ts
+  teacher-profile.service.ts
+  teacher.module.ts
+  update-teacher-profile.dto.ts
+revenue/
+  dto/
+    get-revenue-filter.dto.ts
+  revenue-cron.service.ts
+  revenue.controller.ts
+  revenue.module.ts
+  revenue.service.ts
+students/
+  teacher-student-export.service.ts
+  teacher-student.controller.ts
+  teacher-student.module.ts
+  teacher-student.service.ts
+teacher.module.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="profile/teacher-profile.controller.ts">
+import {
+  Body,
+  Controller,
+  Get,
+  Put,
+  Req,
+  UseInterceptors,
+  BadRequestException,
+  UploadedFiles,
+} from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import * as path from 'path';
+import type { Express } from 'express';
+import { TeacherProfileService } from './teacher-profile.service';
+import { UpdateTeacherProfileDto } from './update-teacher-profile.dto';
+
+const multer = require('multer');
+const { diskStorage } = multer;
+
+// ============================================
+// MULTER CONFIGURATION
+// ============================================
+const multerOptions = {
+  storage: diskStorage({
+    destination: (req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
+      cb(null, './uploads');
+    },
+    filename: (req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
+      // Tự động đổi tên file: timestamp + random + extension
+      const uniqueSuffix =
+        Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = path.extname(file.originalname);
+      const fileName = path.basename(
+        file.originalname,
+        fileExt,
+      );
+      cb(null, `${fileName}-${uniqueSuffix}${fileExt}`);
+    },
+  }),
+  fileFilter: (req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
+    // Chỉ chấp nhận ảnh (PNG, JPG, JPEG, GIF) và PDF
+    const allowedMimes = [
+      'image/png',
+      'image/jpeg',
+      'image/jpg',
+      'image/gif',
+      'application/pdf',
+    ];
+
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new BadRequestException(
+          `Loại file không được hỗ trợ: ${file.mimetype}. Chỉ chấp nhận: PNG, JPG, JPEG, GIF, PDF`,
+        ),
+        false,
+      );
+    }
+  },
+  limits: {
+    fileSize: 50 * 1024 * 1024,
+  },
+};
+
+// ============================================
+// CONTROLLER
+// ============================================
+@Controller('teachers/me/profile')
+export class TeacherProfileController {
+  constructor(private readonly profileService: TeacherProfileService) {}
+
+  @Get()
+  async getMyProfile(@Req() req: any) {
+    console.log('🔥 GET /api/v1/teachers/me/profile called!');
+
+    // TODO: Thay bằng real user ID từ JWT token
+    // const userId = req.user.id;
+    const userId = 'e350d7e6-ba21-4abf-ba8e-a36263f2434b'; // Teacher test user
+
+    const data = await this.profileService.getProfile(userId);
+    return {
+      status: 'success',
+      data: data,
+    };
+  }
+
+  @Put()
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'avatar', maxCount: 1 },
+        { name: 'identifyCardUrl', maxCount: 1 },
+        { name: 'degrees', maxCount: 5 },
+      ],
+      multerOptions,
+    ),
+  )
+  async updateProfile(
+    @Req() req: any,
+    @Body() updateDto:UpdateTeacherProfileDto,
+    @UploadedFiles() files: any,
+  ) {
+    console.log('🔥 PUT /api/v1/teachers/me/profile called!');
+    console.log('📦 Uploaded files:', files);
+
+    const userId = 'e350d7e6-ba21-4abf-ba8e-a36263f2434b'; // Teacher test user
+
+    // ==========================================
+    // XỬ LÝ FILE UPLOAD
+    // ==========================================
+
+    // Nếu có upload avatar, tạo link và gán vào DTO
+    if (files?.avatar?.[0]) {
+      const avatarFile = files.avatar[0];
+      updateDto.avatar = `http://localhost:3000/uploads/${avatarFile.filename}`;
+      console.log('✅ Avatar link:', updateDto.avatar);
+    }
+
+    // Nếu có upload identifyCardUrl, tạo link và gán vào DTO
+    if (files?.identifyCardUrl?.[0]) {
+      const idCardFile = files.identifyCardUrl[0];
+      updateDto.identifyCardUrl = `http://localhost:3000/uploads/${idCardFile.filename}`;
+      console.log('✅ Identity card link:', updateDto.identifyCardUrl);
+    }
+
+    // Nếu có upload degrees (bằng cấp), map thành mảng URL
+    if (files?.degrees && files.degrees.length > 0) {
+      updateDto.degreeUrls = files.degrees.map(
+        (file: Express.Multer.File) => `http://localhost:3000/uploads/${file.filename}`,
+      );
+      console.log('✅ Degree URLs:', updateDto.degreeUrls);
+    }
+
+    // Ép kiểu experienceYears thành Number (vì form-data gửi dưới dạng string)
+    if (updateDto.experienceYears) {
+      updateDto.experienceYears = Number(updateDto.experienceYears);
+    }
+
+    // Gọi service để cập nhật profile
+    const updated = await this.profileService.updateProfile(
+      userId,
+      updateDto,
+    );
+
+    return {
+      status: 'success',
+      message: 'Cập nhật hồ sơ giáo viên thành công',
+      data: updated,
+    };
+  }
+}
+</file>
+
+<file path="profile/teacher-profile.service.ts">
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../infrastructure/database/prisma/prisma.service'; // Điều chỉnh đường dẫn này nếu file prisma.service.ts của bạn nằm chỗ khác
+import { UpdateTeacherProfileDto } from './update-teacher-profile.dto';
+
+@Injectable()
+export class TeacherProfileService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async getProfile(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        status: true,
+        profile: true, // Lấy toàn bộ thông tin bảng profile
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy thông tin giáo viên');
+    }
+
+    return user;
+  }
+
+  async updateProfile(userId: string, data: UpdateTeacherProfileDto) {
+    // Dùng upsert: Cập nhật nếu đã có, tạo mới nếu chưa có
+    const updatedProfile = await this.prisma.profile.upsert({
+      where: { userId: userId },
+      update: {
+        fullName: data.fullName,
+        phone: data.phone,
+        avatar: data.avatar,
+        bio: data.bio,
+        identifyCardUrl: data.identifyCardUrl,
+        degreeUrls: data.degreeUrls,
+        experienceYears: data.experienceYears,
+      },
+      create: {
+        userId: userId,
+        fullName: data.fullName,
+        phone: data.phone,
+        avatar: data.avatar,
+        bio: data.bio,
+        identifyCardUrl: data.identifyCardUrl,
+        degreeUrls: data.degreeUrls || [],
+        experienceYears: data.experienceYears,
+      },
+    });
+
+    return updatedProfile;
+  }
+}
+</file>
+
+<file path="profile/teacher.module.ts">
+import { Module } from '@nestjs/common';
+import { TeacherProfileController } from './teacher-profile.controller';
+import { TeacherProfileService } from './teacher-profile.service';
+// 1. Import InfrastructureModule - nơi chứa PrismaService của bạn
+import { InfrastructureModule } from '../../infrastructure/infrastructure.module';
+
+@Module({
+  // 2. Thêm InfrastructureModule vào mảng imports
+  imports: [InfrastructureModule], 
+  controllers: [TeacherProfileController],
+  providers: [TeacherProfileService],
+})
+export class TeacherProfileModule {}
+</file>
+
+<file path="profile/update-teacher-profile.dto.ts">
+import { IsString, IsOptional, IsArray, IsInt, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class UpdateTeacherProfileDto {
+  @IsOptional()
+  @IsString()
+  fullName?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
+  @IsOptional()
+  @IsString()
+  identifyCardUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  degreeUrls?: string[];
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0, { message: 'Số năm kinh nghiệm không được âm' })
+  experienceYears?: number;
+}
+</file>
+
+<file path="revenue/dto/get-revenue-filter.dto.ts">
+import { IsOptional, IsString } from 'class-validator';
+
+export class GetRevenueFilterDto {
+  @IsOptional()
+  @IsString()
+  teacherId?: string;
+}
+
+export class GetMonthlyRevenueDto {
+  @IsOptional()
+  @IsString()
+  year?: string;
+
+  @IsOptional()
+  @IsString()
+  teacherId?: string;
+}
+</file>
+
+<file path="revenue/revenue-cron.service.ts">
+import { Injectable, Logger } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
+import { PrismaService } from '../../infrastructure/database/prisma/prisma.service';
+
+@Injectable()
+export class RevenueCronService {
+  private readonly logger = new Logger(RevenueCronService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  // Chạy vào 00:01 sáng của ngày mùng 1 mỗi tháng
+  @Cron('* * * * *')
+  async handleMonthlyRevenueSnapshot() {
+    this.logger.log('🤖 Bắt đầu chạy Bot chốt sổ doanh thu tháng...');
+    try {
+      // 1. Tính toán tháng cần chốt (Lùi 1 tháng so với hiện tại)
+      const now = new Date();
+      let targetMonth = now.getMonth(); // Hàm getMonth() trả từ 0-11 (tháng 1 là 0)
+      let targetYear = now.getFullYear();
+
+      if (targetMonth === 0) { // Nếu đang là tháng 1, thì chốt sổ cho tháng 12 năm ngoái
+        targetMonth = 12;
+        targetYear -= 1;
+      }
+
+      // 2. Lấy tất cả lớp đang hoạt động và đếm số HS đang ACTIVE
+      const classes = await this.prisma.class.findMany({
+        where: { status: 'active' }, // Điều chỉnh điều kiện status tùy logic của bạn
+        select: {
+          id: true,
+          teacherId: true,
+          price: true,
+          _count: {
+            select: { enrollments: { where: { status: 'ACTIVE' } } }
+          }
+        }
+      });
+
+      // 3. Ghi vào sổ cái (Upsert để lỡ chạy lại cũng không bị đúp dữ liệu)
+      for (const cls of classes) {
+        const studentCount = cls._count.enrollments;
+        const priceApplied = Number(cls.price || 0);
+        const totalRevenue = studentCount * priceApplied;
+
+        await this.prisma.monthlyRevenueSnapshot.upsert({
+          where: {
+            classId_month_year: {
+              classId: cls.id,
+              month: targetMonth,
+              year: targetYear
+            }
+          },
+          update: { studentCount, priceApplied, totalRevenue },
+          create: {
+            classId: cls.id,
+            teacherId: cls.teacherId,
+            month: targetMonth,
+            year: targetYear,
+            studentCount,
+            priceApplied,
+            totalRevenue
+          }
+        });
+      }
+      this.logger.log(`✅ Chốt sổ thành công ${classes.length} lớp cho Tháng ${targetMonth}/${targetYear}.`);
+    } catch (error) {
+      this.logger.error('❌ Lỗi khi chốt sổ doanh thu:', error);
+    }
+  }
+}
+</file>
+
+<file path="revenue/revenue.controller.ts">
+import { Controller, Get, Query, Version } from '@nestjs/common';
+import { RevenueService } from './revenue.service';
+import { GetMonthlyRevenueDto, GetRevenueFilterDto } from './dto/get-revenue-filter.dto';
+
+@Controller('revenue')
+export class RevenueController {
+  constructor(private readonly revenueService: RevenueService) {}
+
+  private readonly TEST_TEACHER_ID = 'e350d7e6-ba21-4abf-ba8e-a36263f2434b';
+
+  @Get('summary')
+  async getSummary() {
+    return this.revenueService.getRevenueSummary({ teacherId: this.TEST_TEACHER_ID });
+  }
+
+  @Get('monthly')
+  async getMonthly(@Query() queryDto: GetMonthlyRevenueDto) {
+    const year = queryDto.year ? parseInt(queryDto.year, 10) : new Date().getFullYear();
+    return this.revenueService.getMonthlyRevenue(year, this.TEST_TEACHER_ID);
+  }
+}
+</file>
+
+<file path="revenue/revenue.module.ts">
+import { Module } from '@nestjs/common';
+import { RevenueController } from './revenue.controller';
+import { RevenueService } from './revenue.service';
+import { RevenueCronService } from './revenue-cron.service'; // Import thêm dòng này
+import { InfrastructureModule } from '../../infrastructure/infrastructure.module';
+
+@Module({
+  imports: [InfrastructureModule],
+  controllers: [RevenueController],
+  providers: [RevenueService, RevenueCronService], // Khai báo Cron Bot ở đây
+})
+export class RevenueModule {}
+</file>
+
+<file path="revenue/revenue.service.ts">
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../infrastructure/database/prisma/prisma.service';
+
+@Injectable()
+export class RevenueService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  // 1. TỔNG QUAN HIỆN TẠI (Tính real-time cho giao diện Card)
+  async getRevenueSummary(filterDto: { teacherId?: string }) {
+    const { teacherId } = filterDto;
+    const classes = await this.prisma.class.findMany({
+      where: { ...(teacherId ? { teacherId } : {}), status: 'active' },
+      select: {
+        id: true, title: true, classCode: true, price: true,
+        _count: { select: { enrollments: { where: { status: 'ACTIVE' } } } },
+      },
+    });
+
+    let totalRevenue = 0;
+    let totalStudents = 0;
+
+    const revenueByClass = classes.map((cls) => {
+      const studentCount = cls._count.enrollments;
+      const classRevenue = studentCount * Number(cls.price || 0);
+      totalRevenue += classRevenue;
+      totalStudents += studentCount;
+      return { classId: cls.id, className: cls.title, studentCount, revenue: classRevenue };
+    }).sort((a, b) => b.revenue - a.revenue);
+
+    return { totalRevenue, totalClasses: classes.length, totalStudents, revenueByClass };
+  }
+
+  // 2. BIỂU ĐỒ THEO THÁNG (Truy vấn siêu tốc từ bảng Snapshot)
+  async getMonthlyRevenue(year: number, teacherId: string) {
+    // Tự động gom nhóm (GROUP BY) theo tháng từ sổ cái
+    const snapshots = await this.prisma.monthlyRevenueSnapshot.groupBy({
+      by: ['month'],
+      where: { year, teacherId },
+      _sum: { totalRevenue: true },
+      orderBy: { month: 'asc' }
+    });
+
+    // Tạo mảng 12 tháng mặc định
+    const monthlyData = Array.from({ length: 12 }, (_, i) => ({
+      month: i + 1,
+      total: 0,
+    }));
+
+    // Đắp dữ liệu có thật vào mảng
+    snapshots.forEach(snap => {
+      monthlyData[snap.month - 1].total = Number(snap._sum.totalRevenue || 0);
+    });
+
+    return monthlyData;
+  }
+}
+</file>
+
+<file path="students/teacher-student-export.service.ts">
+import { Injectable, BadRequestException } from '@nestjs/common';
+import * as ExcelJS from 'exceljs';
+import { PrismaService } from '../../infrastructure/database/prisma/prisma.service';
+
+@Injectable()
+export class TeacherStudentExportService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Xuất toàn bộ danh sách học sinh ra file Excel
+   */
+  async exportStudentsToExcel(teacherId: string): Promise<Buffer> {
+    try {
+      // Bước 1: Lấy toàn bộ học sinh (không pagination)
+      const students = await this.prisma.user.findMany({
+        where: {
+          role: 'STUDENT',
+          status: 'ACTIVE',
+          enrollments: {
+            some: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          isVerified: true,
+          createdAt: true,
+          profile: {
+            select: {
+              fullName: true,
+              phone: true,
+              bio: true,
+            },
+          },
+          enrollments: {
+            where: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+            select: {
+              classId: true,
+              status: true,
+              joinedAt: true,
+              class: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      // Bước 2: Tạo workbook và worksheet
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Danh sách học sinh', {
+        pageSetup: { paperSize: 9, orientation: 'landscape' },
+      });
+
+      // Bước 3: Set chiều rộng cột
+      worksheet.columns = [
+        { header: 'STT', key: 'index', width: 5 },
+        { header: 'Email', key: 'email', width: 25 },
+        { header: 'Họ tên', key: 'fullName', width: 25 },
+        { header: 'SĐT', key: 'phone', width: 15 },
+        { header: 'Số lớp', key: 'enrollmentsCount', width: 10 },
+        { header: 'Danh sách lớp', key: 'classes', width: 40 },
+        { header: 'Xác thực', key: 'isVerified', width: 12 },
+        { header: 'Ngày tham gia', key: 'createdAt', width: 18 },
+      ];
+
+      // Bước 4: Format header row
+      const headerRow = worksheet.getRow(1);
+      headerRow.font = {
+        bold: true,
+        color: { argb: 'FFFFFFFF' },
+        size: 12,
+      };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF366092' },
+      };
+      headerRow.alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+        wrapText: true,
+      };
+
+      // Bước 5: Thêm dữ liệu vào worksheet
+      students.forEach((student, idx) => {
+        const classNames = student.enrollments
+          .map((e) => e.class.title)
+          .join(', ');
+
+        const row = worksheet.addRow({
+          index: idx + 1,
+          email: student.email,
+          fullName: student.profile?.fullName || 'N/A',
+          phone: student.profile?.phone || 'N/A',
+          enrollmentsCount: student.enrollments.length,
+          classes: classNames,
+          isVerified: student.isVerified ? 'Có' : 'Không',
+          createdAt: new Date(student.createdAt).toLocaleDateString('vi-VN'),
+        });
+
+        // Format data row
+        row.alignment = {
+          horizontal: 'left',
+          vertical: 'middle',
+          wrapText: true,
+        };
+
+        // Alternate row colors
+        if (idx % 2 === 0) {
+          row.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' },
+          };
+        }
+
+        // Format số cột
+        row.getCell('index').alignment = { horizontal: 'center' };
+        row.getCell('enrollmentsCount').alignment = { horizontal: 'center' };
+        row.getCell('isVerified').alignment = { horizontal: 'center' };
+      });
+
+      // Bước 6: Cấu hình in ấn
+      worksheet.pageSetup.margins = {
+        left: 0.5,
+        right: 0.5,
+        top: 0.75,
+        bottom: 0.75,
+        header: 0.5,
+        footer: 0.5,
+      };
+
+      // Bước 7: Đóng cột để auto-wrap
+      worksheet.columns.forEach((column) => {
+        if (column.key !== 'classes') {
+          column.alignment = { horizontal: 'center', vertical: 'middle' };
+        }
+      });
+
+      // Bước 8: Tạo summary sheet
+      const summarySheet = workbook.addWorksheet('Thống kê');
+      summarySheet.addRow(['Thống kê danh sách học sinh']);
+      summarySheet.addRow(['Tổng số học sinh:', students.length]);
+      summarySheet.addRow(['Ngày xuất:', new Date().toLocaleString('vi-VN')]);
+
+      const summaryHeader = summarySheet.getRow(1);
+      summaryHeader.font = { bold: true, size: 14 };
+
+      // Bước 9: Convert workbook thành buffer
+      const buffer = await workbook.xlsx.writeBuffer();
+      return buffer as unknown as Buffer;
+    } catch (error: any) {
+      throw new BadRequestException(
+        'Lỗi khi xuất file Excel: ' + error.message,
+      );
+    }
+  }
+
+  /**
+   * Xuất danh sách học sinh của 1 lớp cụ thể
+   */
+  async exportClassStudentsToExcel(
+    teacherId: string,
+    classId: string,
+  ): Promise<Buffer> {
+    try {
+      // Kiểm tra lớp có thuộc về giáo viên không
+      const classItem = await this.prisma.class.findFirst({
+        where: {
+          id: classId,
+          teacherId: teacherId,
+          status: 'active',
+        },
+      });
+
+      if (!classItem) {
+        throw new BadRequestException(
+          'Không tìm thấy lớp hoặc lớp không thuộc về bạn',
+        );
+      }
+
+      // Lấy danh sách học sinh trong lớp
+      const enrollments = await this.prisma.enrollment.findMany({
+        where: {
+          classId: classId,
+          status: 'ACTIVE',
+        },
+        include: {
+          student: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+        orderBy: {
+          joinedAt: 'asc',
+        },
+      });
+
+      // Tạo workbook
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(`${classItem.title}`, {
+        pageSetup: { paperSize: 9, orientation: 'landscape' },
+      });
+
+      // Set chiều rộng cột
+      worksheet.columns = [
+        { header: 'STT', key: 'index', width: 5 },
+        { header: 'Email', key: 'email', width: 25 },
+        { header: 'Họ tên', key: 'fullName', width: 25 },
+        { header: 'SĐT', key: 'phone', width: 15 },
+        { header: 'Ngày tham gia', key: 'joinedAt', width: 18 },
+        { header: 'Trạng thái', key: 'status', width: 12 },
+      ];
+
+      // Format header row
+      const headerRow = worksheet.getRow(1);
+      headerRow.font = {
+        bold: true,
+        color: { argb: 'FFFFFFFF' },
+        size: 12,
+      };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF366092' },
+      };
+      headerRow.alignment = {
+        horizontal: 'center',
+        vertical: 'middle',
+      };
+
+      // Thêm dữ liệu
+      enrollments.forEach((enrollment, idx) => {
+        const row = worksheet.addRow({
+          index: idx + 1,
+          email: enrollment.student.email,
+          fullName: enrollment.student.profile?.fullName || 'N/A',
+          phone: enrollment.student.profile?.phone || 'N/A',
+          joinedAt: new Date(enrollment.joinedAt).toLocaleDateString('vi-VN'),
+          status: enrollment.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động',
+        });
+
+        // Alternate row colors
+        if (idx % 2 === 0) {
+          row.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' },
+          };
+        }
+
+        row.alignment = {
+          horizontal: 'left',
+          vertical: 'middle',
+        };
+      });
+
+      // Tạo summary sheet
+      const summarySheet = workbook.addWorksheet('Thông tin lớp');
+      summarySheet.addRow(['Tên lớp:', classItem.title]);
+      summarySheet.addRow(['Mô tả:', classItem.description || 'N/A']);
+      summarySheet.addRow(['Mã lớp:', classItem.classCode]);
+      summarySheet.addRow(['Giá:', classItem.price ? `${classItem.price} VND` : 'Miễn phí']);
+      summarySheet.addRow(['Tổng học sinh:', enrollments.length]);
+      summarySheet.addRow(['Ngày xuất:', new Date().toLocaleString('vi-VN')]);
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      return buffer as unknown as Buffer;
+    } catch (error: any) {
+      throw new BadRequestException(
+        'Lỗi khi xuất file Excel: ' + error.message,
+      );
+    }
+  }
+}
+</file>
+
+<file path="students/teacher-student.controller.ts">
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  BadRequestException,
+  Res,
+} from '@nestjs/common';
+import { Response } from 'express';
+import { TeacherStudentService } from './teacher-student.service';
+import { TeacherStudentExportService } from './teacher-student-export.service';
+
+@Controller('teachers/me/students')
+export class TeacherStudentController {
+  constructor(
+    private readonly teacherStudentService: TeacherStudentService,
+    private readonly exportService: TeacherStudentExportService,
+  ) {}
+
+  private readonly fakeTeacherId = 'e350d7e6-ba21-4abf-ba8e-a36263f2434b';
+
+  /**
+   * GET /teachers/me/students
+   * Lấy danh sách toàn bộ học sinh tham gia ít nhất 1 lớp của giáo viên
+   */
+  @Get()
+  async getAllStudents(
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ) {
+    console.log('🔥 GET /api/v1/teachers/me/students called!');
+
+    const skipNum = skip ? parseInt(skip, 10) : 0;
+    const takeNum = take ? parseInt(take, 10) : 20;
+
+    if (isNaN(skipNum) || isNaN(takeNum)) {
+      throw new BadRequestException('skip và take phải là số');
+    }
+
+    if (takeNum > 100) {
+      throw new BadRequestException('take không được vượt quá 100');
+    }
+
+    const result = await this.teacherStudentService.getAllStudents(
+      this.fakeTeacherId,
+      skipNum,
+      takeNum,
+    );
+
+    return {
+      status: 'success',
+      message: 'Lấy danh sách học sinh thành công',
+      data: result.data,
+      pagination: {
+        total: result.total,
+        skip: result.skip,
+        take: result.take,
+        hasMore: result.skip + result.take < result.total,
+      },
+    };
+  }
+
+  /**
+   * GET /teachers/me/students/search
+   * Tìm kiếm học sinh trong danh sách của giáo viên
+   * ⚠️ QUAN TRỌNG: Endpoint này phải nằm TRƯỚC @Get(':studentId')
+   */
+  @Get('search/query')
+  async searchStudents(
+    @Query('q') query?: string,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ) {
+    console.log('🔥 GET /api/v1/teachers/me/students/search/query called!');
+
+    if (!query) {
+      throw new BadRequestException('Tham số "q" không được để trống');
+    }
+
+    const skipNum = skip ? parseInt(skip, 10) : 0;
+    const takeNum = take ? parseInt(take, 10) : 20;
+
+    if (isNaN(skipNum) || isNaN(takeNum)) {
+      throw new BadRequestException('skip và take phải là số');
+    }
+
+    const result = await this.teacherStudentService.searchStudents(
+      this.fakeTeacherId,
+      query,
+      skipNum,
+      takeNum,
+    );
+
+    return {
+      status: 'success',
+      message: 'Tìm kiếm học sinh thành công',
+      data: result.data,
+      pagination: {
+        total: result.total,
+        skip: result.skip,
+        take: result.take,
+      },
+    };
+  }
+
+  /**
+   * GET /teachers/me/students/stats
+   * Lấy thống kê học sinh của giáo viên
+   * ⚠️ QUAN TRỌNG: Endpoint này phải nằm TRƯỚC @Get(':studentId')
+   */
+  @Get('stats/overview')
+  async getStudentStats() {
+    console.log('🔥 GET /api/v1/teachers/me/students/stats/overview called!');
+
+    const stats = await this.teacherStudentService.getStudentStats(
+      this.fakeTeacherId,
+    );
+
+    return {
+      status: 'success',
+      message: 'Lấy thống kê học sinh thành công',
+      data: stats,
+    };
+  }
+
+  /**
+   * GET /teachers/me/students/export/all
+   * Xuất toàn bộ danh sách học sinh ra file Excel
+   * ⚠️ QUAN TRỌNG: Endpoint này phải nằm TRƯỚC @Get(':studentId')
+   */
+  @Get('export/all')
+  async exportAllStudents(@Res() res: Response) {
+    console.log('🔥 GET /api/v1/teachers/me/students/export/all called!');
+
+    try {
+      const fileBuffer = await this.exportService.exportStudentsToExcel(
+        this.fakeTeacherId,
+      );
+
+      // Set headers để trả về file download
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="danh-sach-hoc-sinh-${new Date().getTime()}.xlsx"`,
+      );
+
+      res.send(fileBuffer);
+    } catch (error: any) {
+      console.error('Lỗi xuất Excel:', error);
+      res.status(400).json({
+        status: 'error',
+        message: error.message || 'Lỗi khi xuất file Excel',
+      });
+    }
+  }
+
+  /**
+   * GET /teachers/me/students/export/class/:classId
+   * Xuất danh sách học sinh của 1 lớp ra file Excel
+   * ⚠️ QUAN TRỌNG: Endpoint này phải nằm TRƯỚC @Get(':studentId')
+   */
+  @Get('export/class/:classId')
+  async exportClassStudents(
+    @Param('classId') classId: string,
+    @Res() res: Response,
+  ) {
+    console.log('🔥 GET /api/v1/teachers/me/students/export/class/:classId called!');
+    console.log('📦 classId:', classId);
+
+    try {
+      const fileBuffer = await this.exportService.exportClassStudentsToExcel(
+        this.fakeTeacherId,
+        classId,
+      );
+
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="danh-sach-lop-${new Date().getTime()}.xlsx"`,
+      );
+
+      res.send(fileBuffer);
+    } catch (error: any) {
+      console.error('Lỗi xuất Excel:', error);
+      res.status(400).json({
+        status: 'error',
+        message: error.message || 'Lỗi khi xuất file Excel',
+      });
+    }
+  }
+
+  /**
+   * GET /teachers/me/students/:studentId
+   * Lấy chi tiết 1 học sinh (bao gồm lịch sử học tập)
+   * Bảo mật: Chỉ trả về chi tiết nếu học sinh này tham gia lớp của giáo viên
+   */
+  @Get(':studentId')
+  async getStudentDetail(@Param('studentId') studentId: string) {
+    console.log('🔥 GET /api/v1/teachers/me/students/:studentId called!');
+    console.log('📦 studentId:', studentId);
+
+    const student = await this.teacherStudentService.getStudentDetail(
+      this.fakeTeacherId,
+      studentId,
+    );
+
+    return {
+      status: 'success',
+      message: 'Lấy chi tiết học sinh thành công',
+      data: student,
+    };
+  }
+}
+</file>
+
+<file path="students/teacher-student.module.ts">
+import { Module } from '@nestjs/common';
+import { TeacherStudentController } from './teacher-student.controller';
+import { TeacherStudentService } from './teacher-student.service';
+import { TeacherStudentExportService } from './teacher-student-export.service';
+import { InfrastructureModule } from '../../infrastructure/infrastructure.module';
+
+@Module({
+  imports: [InfrastructureModule],
+  controllers: [TeacherStudentController],
+  providers: [TeacherStudentService, TeacherStudentExportService],
+  exports: [TeacherStudentService, TeacherStudentExportService],
+})
+export class TeacherStudentModule {}
+</file>
+
+<file path="students/teacher-student.service.ts">
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { PrismaService } from '../../infrastructure/database/prisma/prisma.service';
+
+@Injectable()
+export class TeacherStudentService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Lấy danh sách tất cả học sinh đang tham gia ít nhất 1 lớp của giáo viên
+   * Tối ưu: Dùng findMany với include để tránh N+1 query
+   */
+  async getAllStudents(
+    teacherId: string,
+    skip: number = 0,
+    take: number = 20,
+  ) {
+    try {
+      // Bước 1: Lấy danh sách tất cả học sinh có enrollment trong các lớp của giáo viên
+      // Dùng groupBy hoặc findMany để lấy unique users
+      const students = await this.prisma.user.findMany({
+        where: {
+          role: 'STUDENT',
+          status: 'ACTIVE',
+          // Điều kiện: Học sinh này phải có ít nhất 1 enrollment trong lớp của giáo viên này
+          enrollments: {
+            some: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          isVerified: true,
+          createdAt: true,
+          profile: {
+            select: {
+              fullName: true,
+              avatar: true,
+              phone: true,
+              bio: true,
+            },
+          },
+          // Chỉ lấy enrollments của các lớp thuộc sở hữu của giáo viên này
+          enrollments: {
+            where: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+            select: {
+              id: true,
+              classId: true,
+              status: true,
+              joinedAt: true,
+              class: {
+                select: {
+                  id: true,
+                  title: true,
+                  description: true,
+                },
+              },
+            },
+          },
+        },
+        skip: skip,
+        take: take,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      // Bước 2: Đếm tổng số học sinh (không skip/take)
+      const total = await this.prisma.user.count({
+        where: {
+          role: 'STUDENT',
+          status: 'ACTIVE',
+          enrollments: {
+            some: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+          },
+        },
+      });
+
+      return {
+        data: students.map((student) => ({
+          id: student.id,
+          email: student.email,
+          isVerified: student.isVerified,
+          createdAt: student.createdAt,
+          profile: student.profile,
+          enrollmentsCount: student.enrollments.length,
+          enrollments: student.enrollments,
+        })),
+        total,
+        skip,
+        take,
+      };
+    } catch (error: any) {
+      throw new BadRequestException(
+        'Lỗi khi lấy danh sách học sinh: ' + error.message,
+      );
+    }
+  }
+
+  /**
+   * Lấy chi tiết 1 học sinh và lịch sử học tập của học sinh trong các lớp của giáo viên
+   * Bảo mật: Kiểm tra xem studentId có thực sự học lớp nào của teacherId không
+   */
+  async getStudentDetail(teacherId: string, studentId: string) {
+    try {
+      // Bước 1: Lấy thông tin chi tiết học sinh với các enrollment trong lớp của giáo viên
+      const student = await this.prisma.user.findFirst({
+        where: {
+          id: studentId,
+          role: 'STUDENT',
+          status: 'ACTIVE',
+          // Bảo mật: Kiểm tra học sinh có enrollment trong lớp của giáo viên không
+          enrollments: {
+            some: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+          },
+        },
+        include: {
+          profile: true,
+          // Lấy enrollments chỉ trong các lớp của giáo viên này
+          enrollments: {
+            where: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+            include: {
+              class: {
+                select: {
+                  id: true,
+                  title: true,
+                  description: true,
+                  price: true,
+                  coverImage: true,
+                  classCode: true,
+                  maxStudents: true,
+                  createdAt: true,
+                },
+              },
+            },
+            orderBy: {
+              joinedAt: 'desc',
+            },
+          },
+          // Lấy submissions của học sinh trong các lớp của giáo viên
+          submissions: {
+            where: {
+              exam: {
+                class: {
+                  teacherId: teacherId,
+                },
+              },
+            },
+            include: {
+              exam: {
+                select: {
+                  id: true,
+                  title: true,
+                  classId: true,
+                },
+              },
+            },
+          },
+          // Lấy reviews của học sinh cho các lớp của giáo viên
+          reviews: {
+            where: {
+              class: {
+                teacherId: teacherId,
+              },
+            },
+            include: {
+              class: {
+                select: {
+                  id: true,
+                  title: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Bước 2: Nếu không tìm thấy, trả về ForbiddenException
+      if (!student) {
+        throw new ForbiddenException(
+          'Học sinh này không tham gia lớp nào của bạn',
+        );
+      }
+
+      // Bước 3: Format kết quả trả về
+      return {
+        id: student.id,
+        email: student.email,
+        isVerified: student.isVerified,
+        createdAt: student.createdAt,
+        updatedAt: student.updatedAt,
+        profile: student.profile,
+        enrollments: student.enrollments.map((enrollment) => ({
+          id: enrollment.id,
+          classId: enrollment.classId,
+          status: enrollment.status,
+          joinedAt: enrollment.joinedAt,
+          class: enrollment.class,
+        })),
+        submissions: student.submissions.map((submission) => ({
+          id: submission.id,
+          score: submission.score,
+          submittedAt: submission.submittedAt,
+          exam: submission.exam,
+        })),
+        reviews: student.reviews.map((review) => ({
+          id: review.id,
+          rating: review.rating,
+          content: review.content,
+          createdAt: review.createdAt,
+          class: review.class,
+        })),
+      };
+    } catch (error: any) {
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        'Lỗi khi lấy chi tiết học sinh: ' + error.message,
+      );
+    }
+  }
+
+  /**
+   * Tìm kiếm học sinh trong danh sách học sinh của giáo viên
+   */
+  async searchStudents(
+    teacherId: string,
+    query: string,
+    skip: number = 0,
+    take: number = 20,
+  ) {
+    try {
+      const students = await this.prisma.user.findMany({
+        where: {
+          role: 'STUDENT',
+          status: 'ACTIVE',
+          enrollments: {
+            some: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+          },
+          OR: [
+            {
+              email: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+            {
+              profile: {
+                fullName: {
+                  contains: query,
+                  mode: 'insensitive',
+                },
+              },
+            },
+            {
+              profile: {
+                phone: {
+                  contains: query,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          ],
+        },
+        select: {
+          id: true,
+          email: true,
+          isVerified: true,
+          createdAt: true,
+          profile: {
+            select: {
+              fullName: true,
+              avatar: true,
+              phone: true,
+            },
+          },
+          enrollments: {
+            where: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+            select: {
+              classId: true,
+              class: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          },
+        },
+        skip: skip,
+        take: take,
+      });
+
+      const total = await this.prisma.user.count({
+        where: {
+          role: 'STUDENT',
+          status: 'ACTIVE',
+          enrollments: {
+            some: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+          },
+          OR: [
+            {
+              email: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+            {
+              profile: {
+                fullName: {
+                  contains: query,
+                  mode: 'insensitive',
+                },
+              },
+            },
+            {
+              profile: {
+                phone: {
+                  contains: query,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          ],
+        },
+      });
+
+      return {
+        data: students.map((student) => ({
+          id: student.id,
+          email: student.email,
+          isVerified: student.isVerified,
+          createdAt: student.createdAt,
+          profile: student.profile,
+          enrollmentsCount: student.enrollments.length,
+          enrollments: student.enrollments,
+        })),
+        total,
+        skip,
+        take,
+      };
+    } catch (error: any) {
+      throw new BadRequestException(
+        'Lỗi khi tìm kiếm học sinh: ' + error.message,
+      );
+    }
+  }
+
+  /**
+   * Lấy thống kê học sinh của giáo viên
+   */
+  async getStudentStats(teacherId: string) {
+    try {
+      // Tổng số học sinh
+      const totalStudents = await this.prisma.user.count({
+        where: {
+          role: 'STUDENT',
+          status: 'ACTIVE',
+          enrollments: {
+            some: {
+              class: {
+                teacherId: teacherId,
+                status: 'active',
+              },
+            },
+          },
+        },
+      });
+
+      // Số enrollment hoạt động
+      const totalEnrollments = await this.prisma.enrollment.count({
+        where: {
+          class: {
+            teacherId: teacherId,
+            status: 'active',
+          },
+        },
+      });
+
+      // Học sinh có bài nộp
+      const studentWithSubmissions = await this.prisma.user.count({
+        where: {
+          role: 'STUDENT',
+          status: 'ACTIVE',
+          submissions: {
+            some: {
+              exam: {
+                class: {
+                  teacherId: teacherId,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Học sinh có đánh giá
+      const studentWithReviews = await this.prisma.user.count({
+        where: {
+          role: 'STUDENT',
+          status: 'ACTIVE',
+          reviews: {
+            some: {
+              class: {
+                teacherId: teacherId,
+              },
+            },
+          },
+        },
+      });
+
+      return {
+        totalStudents,
+        totalEnrollments,
+        studentWithSubmissions,
+        studentWithReviews,
+      };
+    } catch (error: any) {
+      throw new BadRequestException(
+        'Lỗi khi lấy thống kê học sinh: ' + error.message,
+      );
+    }
+  }
+
+
+}
+</file>
+
+<file path="teacher.module.ts">
+import { Module } from '@nestjs/common';
+import { TeacherProfileModule } from './profile/teacher.module';
+import { TeacherStudentModule } from './students/teacher-student.module';
+
+@Module({
+  imports: [TeacherProfileModule, TeacherStudentModule],
+  exports: [TeacherProfileModule, TeacherStudentModule],
+})
+export class TeacherModule {}
+</file>
+
+</files>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e1e8ed;
+        }
+        .header {
+            background-color: #00a8ff;
+            background-image: linear-gradient(135deg, #00a8ff 0%, #007bff 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+        .content {
+            padding: 40px 30px;
+            line-height: 1.6;
+            text-align: center;
+        }
+        .content p {
+            font-size: 16px;
+            color: #555;
+        }
+        .button {
+            display: inline-block;
+            background-color: #ff9f43;
+            color: white !important;
+            padding: 16px 35px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 25px 0;
+            box-shadow: 0 4px 10px rgba(255, 159, 67, 0.3);
+            transition: transform 0.2s;
+        }
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            background-color: #fafafa;
+        }
+        .link-alt {
+            word-break: break-all;
+            color: #007bff;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sẵn sàng cất cánh cùng Flying Class! ✈️</h1>
+        </div>
+
+        <div class="content">
+            <h2>Chào {{name}},</h2>
+            <p>Tuyệt vời quá! Vậy là bạn đã chính thức ghi danh vào <strong>Flying Class</strong>. Chúng tôi đã chuẩn bị sẵn chỗ ngồi tốt nhất dành cho bạn. ✨</p>
+            
+            <p>Chỉ còn một bước cuối cùng để "vút bay" thôi, hãy xác nhận email của bạn nhé:</p>
+            
+            <a href="{{verificationUrl}}" class="button">Xác minh ngay 🚀</a>
+            
+            <p style="margin-top: 30px;">
+                Nếu nút trên không hoạt động, bạn có thể "đáp cánh" qua liên kết này:<br>
+                <a href="{{verificationUrl}}" class="link-alt">{{verificationUrl}}</a>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Liên kết này sẽ hết hạn sau 24 giờ để đảm bảo an toàn cho chuyến bay của bạn.</p>
+            <p>© 2026 Flying Class. Chúc bạn có những trải nghiệm học tập thật thú vị! 🌟</p>
+        </div>
+    </div>
+</body>
+</html>

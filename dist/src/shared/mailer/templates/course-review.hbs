@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: Arial, sans-serif; background:#f8fafc; margin:0; padding:0; color:#1f2937; }
+    .card { max-width: 620px; margin: 24px auto; background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; }
+    .header { background:#0ea5e9; color:#fff; padding:18px 22px; }
+    .content { padding:22px; line-height:1.6; }
+    .status { display:inline-block; padding:6px 10px; border-radius:999px; color:#fff; font-weight:700; font-size:12px; }
+    .approved { background:#16a34a; }
+    .rejected { background:#dc2626; }
+    .reason { margin-top:10px; border-left:4px solid #fecaca; background:#fef2f2; padding:10px 12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h2 style="margin:0;">Kết quả kiểm duyệt khóa học</h2>
+    </div>
+    <div class="content">
+      <p>Khóa học <strong>{{courseTitle}}</strong> đã được kiểm duyệt.</p>
+      {{#if isApproved}}
+        <p>Trạng thái: <span class="status approved">APPROVED</span></p>
+        <p>Chúc mừng! Khóa học của bạn đã được duyệt và có thể xuất bản.</p>
+      {{else}}
+        <p>Trạng thái: <span class="status rejected">REJECTED</span></p>
+        <p>Khóa học cần chỉnh sửa trước khi gửi duyệt lại.</p>
+        {{#if reason}}
+          <div class="reason"><strong>Lý do:</strong> {{reason}}</div>
+        {{/if}}
+      {{/if}}
+    </div>
+  </div>
+</body>
+</html>

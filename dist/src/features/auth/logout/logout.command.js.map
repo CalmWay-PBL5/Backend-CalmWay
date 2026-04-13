@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/features/auth/logout/logout.command.ts"],"sourcesContent":["export class LogoutCommand {\n  constructor(public readonly userId: string) {}\n}\n"],"names":["LogoutCommand","userId"],"mappings":";;;;+BAAaA;;;eAAAA;;;AAAN,IAAA,AAAMA,gBAAN,MAAMA;IACX,YAAY,AAAgBC,MAAc,CAAE;aAAhBA,SAAAA;IAAiB;AAC/C"}

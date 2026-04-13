@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/features/auth/login/login.command.ts"],"sourcesContent":["import { LoginDto } from \"./login.api\";\n\nexport class LoginCommand {\n  constructor(public readonly dto: LoginDto) {}\n}\n"],"names":["LoginCommand","dto"],"mappings":";;;;+BAEaA;;;eAAAA;;;AAAN,IAAA,AAAMA,eAAN,MAAMA;IACX,YAAY,AAAgBC,GAAa,CAAE;aAAfA,MAAAA;IAAgB;AAC9C"}

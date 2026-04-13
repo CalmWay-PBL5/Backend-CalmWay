@@ -1,0 +1,235 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+chat.controller.ts
+chat.gateway.ts
+chat.module.ts
+chat.service.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="chat.controller.ts">
+import { Controller, Get, Param } from '@nestjs/common';
+import { ChatService } from './chat.service';
+
+@Controller('classes') // Mình gắn luôn vào URL /classes để chuẩn RESTful
+export class ChatController {
+  constructor(private readonly chatService: ChatService) {}
+
+  // API: GET /api/v1/classes/:classId/chat-history
+  @Get(':classId/chat-history')
+  async getChatHistory(@Param('classId') classId: string) {
+    return this.chatService.getChatHistory(classId);
+  }
+}
+</file>
+
+<file path="chat.gateway.ts">
+import {
+  WebSocketGateway,
+  SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
+  WebSocketServer,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { ChatService } from './chat.service';
+
+@WebSocketGateway({ cors: { origin: '*' } }) // Cho phép Frontend gọi tự do
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+ @WebSocketServer()
+  server!: Server;
+
+  constructor(private readonly chatService: ChatService) {}
+
+  handleConnection(client: Socket) {
+    console.log(`🟢 Socket connected: ${client.id}`);
+  }
+
+  handleDisconnect(client: Socket) {
+    console.log(`🔴 Socket disconnected: ${client.id}`);
+  }
+
+  // Frontend báo: "Cho tôi vào Aphòng chat của lớp này"
+  @SubscribeMessage('joinClassRoom')
+  handleJoinRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { classId: string; userId: string },
+  ) {
+    client.join(payload.classId);
+    console.log(`User ${payload.userId} đã join phòng: ${payload.classId}`);
+  }
+
+  // Frontend báo: "Tôi gửi tin nhắn"
+  // Thêm Event này vào ChatGateway
+  @SubscribeMessage('deleteMessage')
+  async handleDeleteMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { classId: string; messageId: string; userId: string },
+  ) {
+    try {
+      // 1. Xóa trong Database
+      await this.chatService.deleteMessage(payload.messageId, payload.userId);
+
+      // 2. Phát thanh cho cả phòng biết tin nhắn này đã bị xóa để UI Frontend tự ẩn đi
+      this.server.to(payload.classId).emit('messageDeleted', payload.messageId);
+      
+    } catch (error: any) {
+      console.error('Lỗi khi xóa tin nhắn:', error.message);
+      client.emit('error', error.message || 'Không thể xóa tin nhắn lúc này');
+    }
+  }
+  @SubscribeMessage('sendMessage')
+  async handleMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { classId: string; senderId: string; content: string },
+  ) {
+    try {
+      // 1. Lưu vào DB
+      const savedMessage = await this.chatService.saveMessage(
+        payload.classId,
+        payload.senderId,
+        payload.content,
+      );
+
+      // 2. Phát thanh (Broadcast) cho TẤT CẢ mọi người trong phòng
+      this.server.to(payload.classId).emit('newMessage', savedMessage);
+    } catch (error) {
+      console.error('Lỗi khi lưu tin nhắn chat:', error);
+      client.emit('error', 'Không thể gửi tin nhắn lúc này');
+    }
+  }
+}
+</file>
+
+<file path="chat.module.ts">
+import { Module } from '@nestjs/common';
+import { ChatGateway } from './chat.gateway';
+import { ChatService } from './chat.service';
+import { ChatController } from './chat.controller';
+import { PrismaService } from '../infrastructure/database/prisma/prisma.service';
+
+@Module({
+  controllers: [ChatController], // Bắt buộc phải thêm dòng này
+  providers: [ChatGateway, ChatService, PrismaService], // Phải khai báo thêm ChatService
+})
+export class ChatModule {}
+</file>
+
+<file path="chat.service.ts">
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../infrastructure/database/prisma/prisma.service';
+
+@Injectable()
+export class ChatService {
+  constructor(private prisma: PrismaService) {}
+// Thêm hàm này vào ChatService
+  async deleteMessage(messageId: string, userId: string) {
+    // 1. Kiểm tra xem tin nhắn có tồn tại không
+    const message = await this.prisma.chatMessage.findUnique({
+      where: { id: messageId },
+    });
+
+    if (!message) {
+      throw new Error('Tin nhắn không tồn tại');
+    }
+
+    // 2. Chỉ cho phép người gửi mới được xóa tin nhắn của chính họ
+    if (message.senderId !== userId) {
+      throw new Error('Bạn không có quyền xóa tin nhắn này');
+    }
+
+    // 3. Tiến hành xóa
+    return this.prisma.chatMessage.delete({
+      where: { id: messageId },
+    });
+  }
+  // Lưu tin nhắn mới vào Database
+  async saveMessage(classId: string, senderId: string, content: string) {
+    return this.prisma.chatMessage.create({
+      data: {
+        classId,
+        senderId,
+        content,
+      },
+      // Lấy kèm thông tin người gửi để Frontend hiển thị tên & avatar
+      include: {
+        sender: {
+          select: {
+            id: true,
+            email: true,
+            profile: {
+              select: { fullName: true, avatar: true },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  // Lấy 50 tin nhắn cũ nhất của lớp học
+  async getChatHistory(classId: string) {
+    return this.prisma.chatMessage.findMany({
+      where: { classId },
+      orderBy: { createdAt: 'asc' }, // Xếp theo thời gian cũ -> mới
+      take: 50,
+      include: {
+        sender: {
+          select: {
+            id: true,
+            email: true,
+            profile: {
+              select: { fullName: true, avatar: true },
+            },
+          },
+        },
+      },
+    });
+  }
+}
+</file>
+
+</files>

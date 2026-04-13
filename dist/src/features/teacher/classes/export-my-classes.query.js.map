@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/features/teacher/classes/export-my-classes.query.ts"],"sourcesContent":["export class ExportMyClassesQuery {\n  constructor(public readonly teacherId: string) {}\n}\n"],"names":["ExportMyClassesQuery","teacherId"],"mappings":";;;;+BAAaA;;;eAAAA;;;AAAN,IAAA,AAAMA,uBAAN,MAAMA;IACX,YAAY,AAAgBC,SAAiB,CAAE;aAAnBA,YAAAA;IAAoB;AAClD"}

@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/features/auth/verify-email/verify-email.command.ts"],"sourcesContent":["export class VerifyEmailCommand {\n  constructor(public readonly token: string) {}\n}\n"],"names":["VerifyEmailCommand","token"],"mappings":";;;;+BAAaA;;;eAAAA;;;AAAN,IAAA,AAAMA,qBAAN,MAAMA;IACX,YAAY,AAAgBC,KAAa,CAAE;aAAfA,QAAAA;IAAgB;AAC9C"}

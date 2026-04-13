@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .status { font-weight: bold; padding: 5px 10px; border-radius: 4px; }
+        .approved { background-color: #d4edda; color: #155724; }
+        .rejected { background-color: #f8d7da; color: #721c24; }
+        .footer { margin-top: 20px; font-size: 0.8em; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Update on your Instructor Application</h2>
+        <p>Hello,</p>
+
+        <p>Your KYC verification request for <strong>Flying Class</strong> has been reviewed.</p>
+
+        {{#if isApproved}}
+            <div class="status approved">Status: APPROVED</div>
+            <p>Congratulations! Your account has been upgraded. You can now start creating courses and managing your students.</p>
+            <p><a href="http://localhost:3000/instructor/dashboard">Go to Instructor Dashboard</a></p>
+        {{else}}
+            <div class="status rejected">Status: REJECTED</div>
+            <p>Unfortunately, your application was not approved for the following reason:</p>
+            <blockquote style="border-left: 4px solid #f5c6cb; padding-left: 15px; font-style: italic;">
+                "{{reason}}"
+            </blockquote>
+            <p>You can re-submit your documents through the profile settings page after addressing the issue mentioned above.</p>
+        {{/if}}
+
+        <div class="footer">
+            <p>Best regards,<br>The Flying Class Team</p>
+        </div>
+    </div>
+</body>
+</html>

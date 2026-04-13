@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    //  Modern Resolution 
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "target": "ES2022",
+    
+    /* The SWC Compromise */
+    "baseUrl": "./", 
+    "ignoreDeprecations": "5.0", // Keeps the TS compiler quiet about baseUrl
+    
+    "paths": {
+      "@/*": ["./src/*"],
+      "@core/*": ["./src/core/*"],
+      "@infrastructure/*": ["./src/infrastructure/*"]
+    },
+
+    /* Decorator Support for NestJS & Class-Validator */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
+
+    /* Strictness */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
+
+    /* Reliability */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "sourceMap": true,
+    "incremental": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

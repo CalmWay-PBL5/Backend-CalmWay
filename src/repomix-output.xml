@@ -1,0 +1,4387 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+core/
+  config/
+    app-config.module.ts
+    app-config.service.ts
+    env.validation.ts
+  guards/
+    custom-throttler.guard.ts
+  health/
+    indicators/
+      database.health.ts
+      minio.health.ts
+      redis.health.ts
+    health.controller.ts
+    health.module.ts
+  setup/
+    fastify.setup.ts
+  core.module.ts
+features/
+  auth/
+    decorators/
+      roles.decorator.ts
+    forgot-password/
+      forgot-password.api.ts
+      forgot-password.command.ts
+      forgot-password.controller.ts
+      forgot-password.handler.ts
+    guards/
+      jwt-auth.guard.ts
+      jwt-refresh-auth.guard.ts
+      roles.guard.ts
+    login/
+      login.api.ts
+      login.command.ts
+      login.controller.ts
+      login.handler.ts
+    logout/
+      logout.command.ts
+      logout.controller.ts
+      logout.handler.ts
+    refresh/
+      refresh.command.ts
+      refresh.controller.ts
+      refresh.handler.ts
+    register/
+      register.api.ts
+      register.command.ts
+      register.controller.ts
+      register.handler.ts
+    reset-password/
+      reset-password.api.ts
+      reset-password.command.ts
+      reset-password.controller.ts
+      reset-password.handler.ts
+    strategies/
+      jwt-refresh.strategy.ts
+      jwt.strategy.ts
+    verify-email/
+      verify-email.api.ts
+      verify-email.command.ts
+      verify-email.controller.ts
+      verify-email.handler.ts
+    workers/
+      handlers/
+        send-password-reset-email.handler.ts
+        send-register-email.handler.ts
+      auth.processor.ts
+    auth.module.ts
+  courses/
+    moderation/
+      review-course.api.ts
+      review-course.command.ts
+      review-course.handler.ts
+    workers/
+      handlers/
+        send-course-review.handler.ts
+    courses-admin.controller.ts
+    courses.module.ts
+  finance/
+    dashboard/
+      get-revenue-dashboard.handler.ts
+      get-revenue-dashboard.query.ts
+    payouts/
+      review-payout.api.ts
+      review-payout.command.ts
+      review-payout.handler.ts
+    finance-admin.controller.ts
+    finance.module.ts
+  kyc/
+    queries/
+      get-kyc-list.handler.ts
+      get-kyc-list.query.ts
+      get-kyc-stats.handler.ts
+      get-kyc-stats.query.ts
+    review-kyc/
+      review-kyc.api.ts
+      review-kyc.command.ts
+      review-kyc.handler.ts
+    submit/
+      submit-kyc.handler.ts
+    workers/
+      handlers/
+        send-kyc-result-email.handler.ts
+    kyc-admin.controller.ts
+    kyc.controller.ts
+    kyc.module.ts
+  system/
+    settings/
+      update-setting.api.ts
+      update-setting.command.ts
+      update-setting.handler.ts
+    system-admin.controller.ts
+    system.module.ts
+  users/
+    toggle-status/
+      toggle-status.api.ts
+      toggle-status.command.ts
+      toggle-status.handler.ts
+    users-admin.controller.ts
+    users.module.ts
+infrastructure/
+  database/
+    prisma.service.ts
+  queue/
+    bull-config.service.ts
+  redis/
+    redis-connection.util.ts
+    redis.service.ts
+  storage/
+    minio.service.ts
+    s3-storage.service.ts
+  infrastructure.module.ts
+shared/
+  file-upload/
+    enterprise-file.pipe.ts
+    file-whitelist.constant.ts
+  mailer/
+    templates/
+      course-review.hbs
+      email-verification.hbs
+      kyc-result.hbs
+      reset-password.hbs
+    mail-builder.service.ts
+    mail-transport.service.ts
+    mailer.module.ts
+  settings/
+    system-setting.service.ts
+  shared.module.ts
+app.module.ts
+main.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="core/config/app-config.module.ts">
+import { Global, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { AppConfigService } from './app-config.service';
+import { validate } from './env.validation';
+
+@Global()
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      validate,
+      cache: true, 
+      isGlobal: true,
+    }),
+  ],
+  providers: [AppConfigService],
+  exports: [AppConfigService],
+})
+export class AppConfigModule {}
+</file>
+
+<file path="core/config/app-config.service.ts">
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EnvironmentVariables, Environment } from './env.validation';
+
+@Injectable()
+export class AppConfigService {
+  constructor(
+    private readonly configService: ConfigService<EnvironmentVariables, true>,
+  ) {}
+
+  get<T extends keyof EnvironmentVariables>(key: T): EnvironmentVariables[T] {
+    return this.configService.get(key, { infer: true });
+  }
+
+  get isProduction(): boolean {
+    return this.get('NODE_ENV') === Environment.Production;
+  }
+
+  get isDevelopment(): boolean {
+    return this.get('NODE_ENV') === Environment.Development;
+  }
+}
+</file>
+
+<file path="core/config/env.validation.ts">
+import { plainToInstance } from "class-transformer";
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  validateSync,
+  IsOptional,
+  IsNumber,
+  IsIn,
+} from "class-validator";
+
+export enum Environment {
+  Development = "development",
+  Production = "production",
+  Test = "test",
+}
+
+export class EnvironmentVariables {
+  @IsNumber()
+  @IsOptional()
+  PORT: number = 3000;
+
+  @IsEnum(Environment)
+  NODE_ENV: Environment = Environment.Development;
+
+  @IsString()
+  @IsNotEmpty()
+  POSTGRES_USER!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  POSTGRES_PASSWORD!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  POSTGRES_DB!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  DATABASE_URL!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  REDIS_URL!: string;
+
+  @IsString()
+  REDIS_PASSWORD?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_ACCESS_KEY!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_SECRET_KEY!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_BUCKET_NAME!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  S3_ENDPOINT!: string;
+
+  @IsString()
+  @IsOptional()
+  S3_REGION?: string;
+
+  @IsString()
+  @IsOptional()
+  S3_PUBLIC_ENDPOINT?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  FRONTEND_URL!: string;
+
+  // Mail Configurations
+  @IsString()
+  @IsNotEmpty()
+  MAIL_HOST!: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  MAIL_PORT!: number;
+
+  @IsString()
+  @IsIn(["true", "false"])
+  MAIL_SECURE!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  MAIL_USER!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  MAIL_PASS!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  MAIL_FROM!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_SECRET!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_EXPIRES_IN!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_REFRESH_SECRET!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_REFRESH_EXPIRES_IN!: string;
+}
+
+export function validate(config: Record<string, unknown>) {
+  const validatedConfig = plainToInstance(EnvironmentVariables, config, {
+    enableImplicitConversion: true,
+  });
+
+  const errors = validateSync(validatedConfig, {
+    skipMissingProperties: false, // Set to false to ensure all @IsNotEmpty fields are present
+  });
+
+  if (errors.length > 0) {
+    throw new Error(
+      `❌ Invalid Environment Configuration: \n${errors.toString()}`,
+    );
+  }
+
+  return validatedConfig;
+}
+</file>
+
+<file path="core/guards/custom-throttler.guard.ts">
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  ExecutionContext,
+} from "@nestjs/common";
+import { ThrottlerGuard } from "@nestjs/throttler";
+
+@Injectable()
+export class CustomThrottlerGuard extends ThrottlerGuard {
+  protected async throwThrottlingException(
+    _context: ExecutionContext,
+    _throttlerLimitDetail: any,
+  ): Promise<void> {
+    throw new HttpException(
+      "Too many requests from this IP. Please wait 60 seconds before trying again.",
+      HttpStatus.TOO_MANY_REQUESTS,
+    );
+  }
+}
+</file>
+
+<file path="core/health/indicators/database.health.ts">
+import { Injectable } from "@nestjs/common";
+import {
+  HealthCheckError,
+  HealthIndicator,
+  HealthIndicatorResult,
+} from "@nestjs/terminus";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+
+@Injectable()
+export class DatabaseHealthIndicator extends HealthIndicator {
+  constructor(private readonly prisma: PrismaService) {
+    super();
+  }
+
+  async isHealthy(key: string): Promise<HealthIndicatorResult> {
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+      return this.getStatus(key, true, { message: "Database is up" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Database check failed";
+      throw new HealthCheckError(
+        "Database Health Check failed",
+        this.getStatus(key, false, { message }),
+      );
+    }
+  }
+}
+</file>
+
+<file path="core/health/indicators/minio.health.ts">
+import { Injectable } from "@nestjs/common";
+import {
+  HealthCheckError,
+  HealthIndicator,
+  HealthIndicatorResult,
+} from "@nestjs/terminus";
+import { MinioService } from "@/infrastructure/storage/minio.service";
+
+@Injectable()
+export class MinioHealthIndicator extends HealthIndicator {
+  constructor(private readonly minioService: MinioService) {
+    super();
+  }
+
+  async isHealthy(key: string): Promise<HealthIndicatorResult> {
+    try {
+      const bucketName = this.minioService.getBucketName();
+      const exists = await this.minioService.getClient().bucketExists(bucketName);
+      if (!exists) {
+        throw new Error(`Bucket "${bucketName}" does not exist`);
+      }
+
+      return this.getStatus(key, true, { message: "MinIO is up and responding" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "MinIO check failed";
+      throw new HealthCheckError(
+        "MinIO Health Check failed",
+        this.getStatus(key, false, { message }),
+      );
+    }
+  }
+}
+</file>
+
+<file path="core/health/indicators/redis.health.ts">
+import { Injectable } from "@nestjs/common";
+import {
+  HealthCheckError,
+  HealthIndicator,
+  HealthIndicatorResult,
+} from "@nestjs/terminus";
+import { RedisService } from "@/infrastructure/redis/redis.service";
+
+@Injectable()
+export class RedisHealthIndicator extends HealthIndicator {
+  constructor(private readonly redisService: RedisService) {
+    super();
+  }
+
+  async isHealthy(key: string): Promise<HealthIndicatorResult> {
+    try {
+      const result = await this.redisService.getClient().ping();
+      if (result !== "PONG") {
+        throw new Error(`Unexpected redis ping response: ${result}`);
+      }
+
+      return this.getStatus(key, true, { message: "Redis is up" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Redis ping failed";
+      throw new HealthCheckError(
+        "Redis Health Check failed",
+        this.getStatus(key, false, { message }),
+      );
+    }
+  }
+}
+</file>
+
+<file path="core/health/health.controller.ts">
+import { Controller, Get, Logger } from "@nestjs/common";
+import {
+  HealthCheck,
+  HealthCheckService,
+  MemoryHealthIndicator,
+} from "@nestjs/terminus";
+import { DatabaseHealthIndicator } from "./indicators/database.health";
+import { RedisHealthIndicator } from "./indicators/redis.health";
+import { MinioHealthIndicator } from "./indicators/minio.health";
+
+@Controller("health")
+export class HealthController {
+  private readonly logger = new Logger(HealthController.name);
+
+  constructor(
+    private readonly health: HealthCheckService,
+    private readonly memory: MemoryHealthIndicator,
+    private readonly databaseHealth: DatabaseHealthIndicator,
+    private readonly redisHealth: RedisHealthIndicator,
+    private readonly minioHealth: MinioHealthIndicator,
+  ) {}
+
+  @Get("liveness")
+  @HealthCheck()
+  checkLiveness() {
+    return this.health.check([
+      () => this.memory.checkHeap("memory_heap", 300 * 1024 * 1024),
+      () => this.memory.checkRSS("memory_rss", 300 * 1024 * 1024),
+    ]);
+  }
+
+  @Get("readiness")
+  @HealthCheck()
+  checkReadiness() {
+    this.logger.debug("Running readiness health check");
+
+    return this.health.check([
+      () => this.databaseHealth.isHealthy("database"),
+      () => this.redisHealth.isHealthy("redis"),
+      () => this.minioHealth.isHealthy("minio"),
+    ]);
+  }
+}
+</file>
+
+<file path="core/health/health.module.ts">
+import { Module } from "@nestjs/common";
+import { TerminusModule } from "@nestjs/terminus";
+import { HealthController } from "./health.controller";
+import { DatabaseHealthIndicator } from "./indicators/database.health";
+import { RedisHealthIndicator } from "./indicators/redis.health";
+import { MinioHealthIndicator } from "./indicators/minio.health";
+
+@Module({
+  imports: [TerminusModule],
+  controllers: [HealthController],
+  providers: [
+    DatabaseHealthIndicator,
+    RedisHealthIndicator,
+    MinioHealthIndicator,
+  ],
+})
+export class HealthModule {}
+</file>
+
+<file path="core/setup/fastify.setup.ts">
+import { FastifyAdapter } from "@nestjs/platform-fastify";
+
+export function createFastifyAdapter(): FastifyAdapter {
+  const adapter = new FastifyAdapter({
+    logger: false,
+    routerOptions: {
+      ignoreTrailingSlash: true,
+    },
+    forceCloseConnections: true,
+    trustProxy: 1,
+  });
+
+  return adapter;
+}
+</file>
+
+<file path="core/core.module.ts">
+import { Module } from "@nestjs/common";
+import { AppConfigModule } from "./config/app-config.module";
+import { AppConfigService } from "./config/app-config.service";
+import { CqrsModule } from "@nestjs/cqrs";
+import { ThrottlerModule } from "@nestjs/throttler";
+import { ThrottlerStorageRedisService } from "@nest-lab/throttler-storage-redis";
+import { HealthModule } from "./health/health.module";
+import { RedisService } from "@/infrastructure/redis/redis.service";
+
+@Module({
+  imports: [
+    CqrsModule,
+    AppConfigModule,
+    HealthModule,
+    ThrottlerModule.forRootAsync({
+      // 🚀 BUG FIX: Tiêm RedisService vào để xài chung kết nối ổn định
+      inject: [AppConfigService, RedisService],
+      useFactory: (config: AppConfigService, redisService: RedisService) => ({
+        throttlers: [
+          { name: "default", ttl: 60000, limit: 100 },
+          { name: "auth", ttl: 60000, limit: 5 },
+        ],
+        // Thay vì tạo kết nối mới dễ bị treo, lấy client từ RedisService
+        storage: new ThrottlerStorageRedisService(redisService.getClient()),
+      }),
+    }),
+  ],
+  exports: [CqrsModule, AppConfigModule, ThrottlerModule],
+})
+export class CoreModule {}
+</file>
+
+<file path="features/auth/decorators/roles.decorator.ts">
+import { SetMetadata } from "@nestjs/common";
+import { Role } from "@prisma/client";
+
+export const ROLES_KEY = "roles";
+
+export const Roles = (...roles: Role[]) => SetMetadata(ROLES_KEY, roles);
+</file>
+
+<file path="features/auth/forgot-password/forgot-password.api.ts">
+import { IsEmail } from "class-validator";
+
+export class ForgotPasswordDto {
+  @IsEmail({}, { message: "Please provide a valid email address." })
+  email: string;
+}
+</file>
+
+<file path="features/auth/forgot-password/forgot-password.command.ts">
+export class ForgotPasswordCommand {
+  constructor(public readonly email: string) {}
+}
+</file>
+
+<file path="features/auth/forgot-password/forgot-password.controller.ts">
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from "@nestjs/common";
+import { ThrottlerGuard, Throttle } from "@nestjs/throttler";
+import { CommandBus } from "@nestjs/cqrs";
+import { ForgotPasswordDto } from "./forgot-password.api";
+import { ForgotPasswordCommand } from "./forgot-password.command";
+
+@Controller("auth")
+export class ForgotPasswordController {
+  constructor(private readonly commandBus: CommandBus) {}
+
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
+  @Post("forgot-password")
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.commandBus.execute(new ForgotPasswordCommand(dto.email));
+
+    return {
+      message:
+        "If an account with that email exists, we have sent a password reset link.",
+    };
+  }
+}
+</file>
+
+<file path="features/auth/forgot-password/forgot-password.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { ForgotPasswordCommand } from "./forgot-password.command";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
+import { randomBytes } from "crypto";
+import { Logger } from "@nestjs/common";
+
+@CommandHandler(ForgotPasswordCommand)
+export class ForgotPasswordHandler
+  implements ICommandHandler<ForgotPasswordCommand>
+{
+  private readonly logger = new Logger(ForgotPasswordHandler.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @InjectQueue("auth-queue") private readonly authQueue: Queue,
+  ) {}
+
+  async execute(command: ForgotPasswordCommand): Promise<void> {
+    const { email } = command;
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      this.logger.warn(
+        `Password reset requested for non-existent email: ${email}`,
+      );
+      return;
+    }
+
+    const token = randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await this.prisma.passwordReset.upsert({
+      where: { email },
+      update: { token, expiresAt },
+      create: { email, token, expiresAt },
+    });
+
+    await this.authQueue.add("send-password-reset-email", {
+      email: user.email,
+      name: user.email.split("@")[0],
+      token,
+    });
+  }
+}
+</file>
+
+<file path="features/auth/guards/jwt-auth.guard.ts">
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { AuthGuard } from "@nestjs/passport";
+
+@Injectable()
+export class JwtAuthGuard extends AuthGuard("jwt") {
+  canActivate(context: ExecutionContext) {
+    return super.canActivate(context);
+  }
+
+  handleRequest(err: any, user: any, info: any) {
+    if (err || !user) {
+      throw (
+        err ||
+        new UnauthorizedException(
+          "You must be logged in to access this endpoint.",
+        )
+      );
+    }
+
+    return user;
+  }
+}
+</file>
+
+<file path="features/auth/guards/jwt-refresh-auth.guard.ts">
+import { Injectable } from "@nestjs/common";
+import { AuthGuard } from "@nestjs/passport";
+
+@Injectable()
+export class JwtRefreshAuthGuard extends AuthGuard("jwt-refresh") {}
+</file>
+
+<file path="features/auth/guards/roles.guard.ts">
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { Role } from "@prisma/client";
+import { ROLES_KEY } from "../decorators/roles.decorator";
+
+@Injectable()
+export class RolesGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (!requiredRoles) return true;
+
+    const { user } = context.switchToHttp().getRequest();
+    return requiredRoles.some((role) => user.role === role);
+  }
+}
+</file>
+
+<file path="features/auth/login/login.api.ts">
+import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
+
+export class LoginDto {
+  @IsEmail({}, { message: "Invalid email format" })
+  email: string;
+
+  @IsNotEmpty()
+  @MinLength(8, { message: "Password must be at least 8 characters" })
+  password: string;
+}
+</file>
+
+<file path="features/auth/login/login.command.ts">
+import { LoginDto } from "./login.api";
+
+export class LoginCommand {
+  constructor(public readonly dto: LoginDto) {}
+}
+</file>
+
+<file path="features/auth/login/login.controller.ts">
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
+import { CommandBus } from "@nestjs/cqrs";
+import { LoginDto } from "./login.api";
+import { LoginCommand } from "./login.command";
+import { CustomThrottlerGuard } from "@/core/guards/custom-throttler.guard";
+
+@Controller("auth")
+export class LoginController {
+  constructor(private readonly commandBus: CommandBus) {}
+
+  @UseGuards(CustomThrottlerGuard) // 🚀 Đổi sang Custom Guard
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
+  @Post("login")
+  @HttpCode(HttpStatus.OK)
+  async login(@Body() dto: LoginDto) {
+    return await this.commandBus.execute(new LoginCommand(dto));
+  }
+}
+</file>
+
+<file path="features/auth/login/login.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { LoginCommand } from "./login.command";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { UnauthorizedException } from "@nestjs/common";
+import * as argon2 from "argon2";
+import { JwtService } from "@nestjs/jwt";
+import { AppConfigService } from "@/core/config/app-config.service";
+import { KycStatus, Role } from "@prisma/client";
+
+@CommandHandler(LoginCommand)
+export class LoginHandler implements ICommandHandler<LoginCommand> {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private readonly config: AppConfigService,
+  ) {}
+
+  async execute(command: LoginCommand) {
+    const { email, password } = command.dto;
+
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: {
+        kycApplication: {
+          select: { status: true },
+        },
+      },
+    });
+
+    if (!user || !user.password) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
+
+    const isPasswordValid = await argon2.verify(user.password, password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
+
+    if (!user.is_verified) {
+      throw new UnauthorizedException(
+        "Please verify your email before logging in.",
+      );
+    }
+
+    const payload = { sub: user.id, email: user.email };
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.config.get("JWT_SECRET"),
+        expiresIn: this.config.get("JWT_EXPIRES_IN") as any,
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.config.get("JWT_REFRESH_SECRET"),
+        expiresIn: this.config.get("JWT_REFRESH_EXPIRES_IN") as any,
+      }),
+    ]);
+
+    const hashedRefreshToken = await argon2.hash(refreshToken);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { hashedRefreshToken },
+    });
+
+    const kycStatus = user.kycApplication?.status ?? null;
+    const isLecturer = user.role === Role.LECTURER;
+    const canAccessDashboard =
+      !isLecturer || kycStatus === KycStatus.APPROVED;
+
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        kycStatus,
+        canAccessDashboard,
+        requiresKycSubmission:
+          isLecturer && (!kycStatus || kycStatus === KycStatus.REJECTED),
+        isKycPendingReview: isLecturer && kycStatus === KycStatus.PENDING,
+      },
+    };
+  }
+}
+</file>
+
+<file path="features/auth/logout/logout.command.ts">
+export class LogoutCommand {
+  constructor(public readonly userId: string) {}
+}
+</file>
+
+<file path="features/auth/logout/logout.controller.ts">
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+} from "@nestjs/common";
+import { CommandBus } from "@nestjs/cqrs";
+import { JwtAuthGuard } from "../guards/jwt-auth.guard";
+import { LogoutCommand } from "./logout.command";
+import { Request as ExpressRequest } from "express";
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    id: string;
+    email: string;
+    is_verified: boolean;
+  };
+}
+
+@Controller("auth")
+export class LogoutController {
+  constructor(private readonly commandBus: CommandBus) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Post("logout")
+  @HttpCode(HttpStatus.OK)
+  async logout(@Request() req: AuthenticatedRequest) {
+    await this.commandBus.execute(new LogoutCommand(req.user.id));
+
+    return {
+      message: "Successfully logged out.",
+    };
+  }
+}
+</file>
+
+<file path="features/auth/logout/logout.handler.ts">
+import { Logger } from "@nestjs/common";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { LogoutCommand } from "./logout.command";
+
+@CommandHandler(LogoutCommand)
+export class LogoutHandler implements ICommandHandler<LogoutCommand> {
+  private readonly logger = new Logger(LogoutHandler.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(command: LogoutCommand): Promise<void> {
+    const { userId } = command;
+
+    try {
+      await this.prisma.user.updateMany({
+        where: {
+          id: userId,
+          hashedRefreshToken: { not: null },
+        },
+        data: {
+          hashedRefreshToken: null,
+        },
+      });
+
+      this.logger.log(
+        `User ${userId} successfully logged out. Refresh token revoked.`,
+      );
+    } catch (error) {
+      this.logger.error(`Failed to logout user ${userId}`, error);
+    }
+  }
+}
+</file>
+
+<file path="features/auth/refresh/refresh.command.ts">
+export class RefreshCommand {
+  constructor(
+    public readonly userId: string,
+    public readonly refreshToken: string,
+  ) {}
+}
+</file>
+
+<file path="features/auth/refresh/refresh.controller.ts">
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+} from "@nestjs/common";
+import { CommandBus } from "@nestjs/cqrs";
+import { JwtRefreshAuthGuard } from "../guards/jwt-refresh-auth.guard";
+import { RefreshCommand } from "./refresh.command";
+import { Request as ExpressRequest } from "express"; // 🚀 Import kiểu Request gốc từ Express
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    sub: string;
+    email: string;
+    refreshToken: string;
+  };
+}
+
+@Controller("auth")
+export class RefreshController {
+  constructor(private readonly commandBus: CommandBus) {}
+
+  @UseGuards(JwtRefreshAuthGuard)
+  @Post("refresh")
+  @HttpCode(HttpStatus.OK)
+  async refreshTokens(@Request() req: AuthenticatedRequest) {
+    return await this.commandBus.execute(
+      new RefreshCommand(req.user.sub, req.user.refreshToken),
+    );
+  }
+}
+</file>
+
+<file path="features/auth/refresh/refresh.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { RefreshCommand } from "./refresh.command";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { ForbiddenException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { AppConfigService } from "@/core/config/app-config.service";
+import * as argon2 from "argon2";
+
+@CommandHandler(RefreshCommand)
+export class RefreshHandler implements ICommandHandler<RefreshCommand> {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private readonly config: AppConfigService,
+  ) {}
+
+  async execute(command: RefreshCommand) {
+    const { userId, refreshToken } = command;
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user || !user.hashedRefreshToken) {
+      throw new ForbiddenException("Access Denied");
+    }
+
+    const isRefreshTokenValid = await argon2.verify(
+      user.hashedRefreshToken,
+      refreshToken,
+    );
+    if (!isRefreshTokenValid) {
+      throw new ForbiddenException("Access Denied");
+    }
+
+    const payload = { sub: user.id, email: user.email };
+    const [newAccessToken, newRefreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.config.get("JWT_SECRET"),
+        expiresIn: this.config.get("JWT_EXPIRES_IN") as any,
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.config.get("JWT_REFRESH_SECRET"),
+        expiresIn: this.config.get("JWT_REFRESH_EXPIRES_IN") as any,
+      }),
+    ]);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { hashedRefreshToken: await argon2.hash(newRefreshToken) },
+    });
+
+    return {
+      access_token: newAccessToken,
+      refresh_token: newRefreshToken,
+    };
+  }
+}
+</file>
+
+<file path="features/auth/register/register.api.ts">
+import { Role } from "@prisma/client";
+import { Transform } from "class-transformer";
+import {
+  IsEmail,
+  IsIn,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from "class-validator";
+
+export class RegisterRequestDto {
+  @IsNotEmpty({ message: "Email là bắt buộc" })
+  @IsEmail({}, { message: "Email không hợp lệ" })
+  email!: string;
+
+  @IsString()
+  @IsNotEmpty({ message: "Họ và tên là bắt buộc" })
+  fullName!: string;
+
+  @IsString()
+  @MinLength(8, { message: "Mật khẩu phải có ít nhất 8 ký tự" })
+  password!: string;
+
+  @IsIn([Role.STUDENT, Role.LECTURER], {
+    message: "role chỉ được là STUDENT hoặc LECTURER",
+  })
+  @Transform(({ value }) =>
+    typeof value === "string" ? value.trim().toUpperCase() : value,
+  )
+  role!: Role;
+}
+
+export class RegisterResponseDto {
+  id!: string;
+  email!: string;
+  fullName!: string;
+  role!: Role;
+  message!: string;
+}
+</file>
+
+<file path="features/auth/register/register.command.ts">
+import { Role } from "@prisma/client";
+
+export class RegisterCommand {
+  constructor(
+    public readonly email: string,
+    public readonly fullName: string,
+    public readonly plainTextPassword: string,
+    public readonly role: Role,
+  ) {}
+}
+</file>
+
+<file path="features/auth/register/register.controller.ts">
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from "@nestjs/common";
+import { ThrottlerGuard, Throttle } from "@nestjs/throttler";
+import { CommandBus } from "@nestjs/cqrs";
+import { Role } from "@prisma/client";
+import { RegisterRequestDto, RegisterResponseDto } from "./register.api";
+import { RegisterCommand } from "./register.command";
+
+@Controller("auth")
+export class RegisterController {
+  constructor(private readonly commandBus: CommandBus) {}
+
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ auth: { limit: 5, ttl: 60000 } })
+  @Post("register")
+  @HttpCode(HttpStatus.CREATED)
+  async register(
+    @Body() request: RegisterRequestDto,
+  ): Promise<RegisterResponseDto> {
+    const userId = await this.commandBus.execute(
+      new RegisterCommand(
+        request.email,
+        request.fullName,
+        request.password,
+        request.role,
+      ),
+    );
+
+    return {
+      id: userId,
+      email: request.email,
+      fullName: request.fullName,
+      role: request.role,
+      message:
+        request.role === Role.LECTURER
+          ? "Đăng ký giảng viên thành công! Vui lòng xác thực email, đăng nhập và gửi hồ sơ KYC trước khi vào dashboard."
+          : "Đăng ký học viên thành công! Vui lòng kiểm tra email để xác nhận tài khoản.",
+    };
+  }
+}
+</file>
+
+<file path="features/auth/register/register.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
+import {
+  BadRequestException,
+  ConflictException,
+  InternalServerErrorException,
+  Logger,
+} from "@nestjs/common";
+import * as argon2 from "argon2";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { RegisterCommand } from "./register.command";
+import { randomBytes } from "crypto";
+import { Role } from "@prisma/client";
+
+@CommandHandler(RegisterCommand)
+export class RegisterHandler implements ICommandHandler<RegisterCommand, string> {
+  private readonly logger = new Logger(RegisterHandler.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @InjectQueue("auth-queue") private readonly authQueue: Queue,
+  ) {}
+
+  async execute(command: RegisterCommand): Promise<string> {
+    const { email, fullName, plainTextPassword, role } = command;
+    if (!email || !fullName || !plainTextPassword || !role) {
+      throw new BadRequestException("Thiếu thông tin đăng ký bắt buộc.");
+    }
+
+    if (role !== Role.STUDENT && role !== Role.LECTURER) {
+      throw new BadRequestException("role chỉ được là STUDENT hoặc LECTURER.");
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException("Email này đã được sử dụng.");
+    }
+
+    const passwordHash = await argon2.hash(plainTextPassword, {
+      type: argon2.argon2id,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    });
+
+    try {
+      const { user, verificationToken } = await this.prisma.$transaction(
+        async (tx) => {
+          const newUser = await tx.user.create({
+            data: {
+              email,
+              password: passwordHash,
+              role,
+              profile: {
+                create: {
+                  full_name: fullName,
+                },
+              },
+            },
+            include: {
+              profile: true,
+            },
+          });
+
+          const token = randomBytes(32).toString("hex");
+          const expiresAt = new Date();
+          expiresAt.setHours(expiresAt.getHours() + 24);
+
+          await tx.emailVerification.create({
+            data: {
+              email: newUser.email,
+              token,
+              expiresAt,
+            },
+          });
+
+          return { user: newUser, verificationToken: token };
+        },
+      );
+
+      this.logger.log(`User created successfully: ${user.id}`);
+
+      await this.authQueue.add("send-register-email", {
+        userId: user.id,
+        email: user.email,
+        name: user.profile?.full_name,
+        token: verificationToken,
+      });
+
+      return user.id;
+    } catch (error) {
+      this.logger.error(`Failed to register user ${email}`, error);
+
+      throw new InternalServerErrorException(
+        "Đăng ký thất bại. Vui lòng thử lại sau.",
+      );
+    }
+  }
+}
+</file>
+
+<file path="features/auth/reset-password/reset-password.api.ts">
+import { IsString, IsNotEmpty, MinLength } from "class-validator";
+
+export class ResetPasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+
+  @IsString()
+  @MinLength(8, { message: "Password must be at least 8 characters" })
+  newPassword: string;
+}
+</file>
+
+<file path="features/auth/reset-password/reset-password.command.ts">
+import { ResetPasswordDto } from "./reset-password.api";
+
+export class ResetPasswordCommand {
+  constructor(public readonly dto: ResetPasswordDto) {}
+}
+</file>
+
+<file path="features/auth/reset-password/reset-password.controller.ts">
+import { Controller, Post, Body, HttpCode, HttpStatus } from "@nestjs/common";
+import { CommandBus } from "@nestjs/cqrs";
+import { ResetPasswordDto } from "./reset-password.api";
+import { ResetPasswordCommand } from "./reset-password.command";
+
+@Controller("auth")
+export class ResetPasswordController {
+  constructor(private readonly commandBus: CommandBus) {}
+
+  @Post("reset-password")
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.commandBus.execute(new ResetPasswordCommand(dto));
+    return {
+      message: "Password has been successfully reset. You can now log in.",
+    };
+  }
+}
+</file>
+
+<file path="features/auth/reset-password/reset-password.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { ResetPasswordCommand } from "./reset-password.command";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { BadRequestException } from "@nestjs/common";
+import * as argon2 from "argon2";
+
+@CommandHandler(ResetPasswordCommand)
+export class ResetPasswordHandler
+  implements ICommandHandler<ResetPasswordCommand>
+{
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(command: ResetPasswordCommand): Promise<void> {
+    const { token, newPassword } = command.dto;
+
+    const resetRecord = await this.prisma.passwordReset.findUnique({
+      where: { token },
+    });
+
+    if (!resetRecord) {
+      throw new BadRequestException("Invalid or expired password reset token.");
+    }
+
+    if (resetRecord.expiresAt < new Date()) {
+      await this.prisma.passwordReset.delete({ where: { id: resetRecord.id } });
+      throw new BadRequestException(
+        "This password reset link has expired. Please request a new one.",
+      );
+    }
+
+    const hashedPassword = await argon2.hash(newPassword);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { email: resetRecord.email },
+        data: {
+          password: hashedPassword,
+          hashedRefreshToken: null,
+        },
+      });
+
+      await tx.passwordReset.delete({ where: { id: resetRecord.id } });
+    });
+  }
+}
+</file>
+
+<file path="features/auth/strategies/jwt-refresh.strategy.ts">
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { AppConfigService } from "@/core/config/app-config.service";
+
+@Injectable()
+export class JwtRefreshStrategy extends PassportStrategy(
+  Strategy,
+  "jwt-refresh",
+) {
+  constructor(private readonly config: AppConfigService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: config.get("JWT_REFRESH_SECRET"),
+      passReqToCallback: true, // 🚀 We need the raw request to get the raw token
+    });
+  }
+
+  async validate(req: { headers?: Record<string, string | string[] | undefined> }, payload: any) {
+    const rawAuthorization = req.headers?.authorization;
+    const authorization = Array.isArray(rawAuthorization)
+      ? rawAuthorization[0]
+      : rawAuthorization;
+    const refreshToken = authorization?.replace(/^Bearer\s+/i, "").trim();
+
+    if (!refreshToken)
+      throw new UnauthorizedException("Refresh token malformed");
+
+    return { ...payload, refreshToken };
+  }
+}
+</file>
+
+<file path="features/auth/strategies/jwt.strategy.ts">
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { AppConfigService } from "@/core/config/app-config.service";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(
+    config: AppConfigService,
+    private readonly prisma: PrismaService,
+  ) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: config.get("JWT_SECRET"),
+    });
+  }
+
+  async validate(payload: { sub: string; email: string }) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: {
+        id: true,
+        email: true,
+        is_verified: true,
+        isActive: true,
+        banReason: true,
+        role: true,
+        kycApplication: {
+          select: {
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException("Tài khoản không tồn tại.");
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException(
+        `Tài khoản của bạn đã bị khóa. Lý do: ${user.banReason}`,
+      );
+    }
+
+    if (!user.is_verified) {
+      throw new UnauthorizedException("Vui lòng xác thực email.");
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      kycStatus: user.kycApplication?.status ?? null,
+    };
+  }
+}
+</file>
+
+<file path="features/auth/verify-email/verify-email.api.ts">
+import { IsString, IsNotEmpty } from "class-validator";
+
+export class VerifyEmailQueryDto {
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+}
+</file>
+
+<file path="features/auth/verify-email/verify-email.command.ts">
+export class VerifyEmailCommand {
+  constructor(public readonly token: string) {}
+}
+</file>
+
+<file path="features/auth/verify-email/verify-email.controller.ts">
+import { Controller, Get, Query, Logger, Redirect } from "@nestjs/common";
+import { CommandBus } from "@nestjs/cqrs";
+import { AppConfigService } from "@/core/config/app-config.service";
+import { VerifyEmailQueryDto } from "./verify-email.api";
+import { VerifyEmailCommand } from "./verify-email.command";
+
+@Controller("auth")
+export class VerifyEmailController {
+  private readonly logger = new Logger(VerifyEmailController.name);
+
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly config: AppConfigService,
+  ) {}
+
+  @Get("verify")
+  @Redirect()
+  async verifyEmail(@Query() query: VerifyEmailQueryDto) {
+    const frontendUrl = this.config.get("FRONTEND_URL");
+
+    try {
+      await this.commandBus.execute(new VerifyEmailCommand(query.token));
+
+      return {
+        statusCode: 302,
+        url: `${frontendUrl}/login?verified=success`,
+      };
+    } catch (error) {
+      const tokenPreview = query.token ? query.token.substring(0, 8) : "missing";
+      this.logger.error(
+        `Verification failed for token: ${tokenPreview}...`,
+      );
+
+      return {
+        statusCode: 302,
+        url: `${frontendUrl}/login?verified=error&reason=invalid_or_expired`,
+      };
+    }
+  }
+}
+</file>
+
+<file path="features/auth/verify-email/verify-email.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { BadRequestException, Logger } from "@nestjs/common";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { VerifyEmailCommand } from "./verify-email.command";
+
+@CommandHandler(VerifyEmailCommand)
+export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
+  private readonly logger = new Logger(VerifyEmailHandler.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(command: VerifyEmailCommand): Promise<void> {
+    const { token } = command;
+
+    const verificationRecord = await this.prisma.emailVerification.findUnique({
+      where: { token },
+    });
+
+    if (!verificationRecord) {
+      throw new BadRequestException("Invalid verification token.");
+    }
+
+    if (verificationRecord.expiresAt < new Date()) {
+      await this.prisma.emailVerification.delete({
+        where: { id: verificationRecord.id },
+      });
+      throw new BadRequestException("Verification token has expired.");
+    }
+
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.user.update({
+          where: { email: verificationRecord.email },
+          data: { is_verified: true },
+        });
+
+        await tx.emailVerification.delete({
+          where: { id: verificationRecord.id },
+        });
+      });
+
+      this.logger.log(
+        `User ${verificationRecord.email} successfully verified.`,
+      );
+    } catch (error) {
+      this.logger.error(`Failed to complete verification transaction`, error);
+      throw new BadRequestException(
+        "Verification process failed. Please try again later.",
+      );
+    }
+  }
+}
+</file>
+
+<file path="features/auth/workers/handlers/send-password-reset-email.handler.ts">
+import { Injectable, Logger } from "@nestjs/common";
+import { MailBuilderService } from "@/shared/mailer/mail-builder.service";
+import { MailTransportService } from "@/shared/mailer/mail-transport.service";
+import { AppConfigService } from "@/core/config/app-config.service";
+
+export interface SendPasswordResetEmailJobPayload {
+  email: string;
+  name: string;
+  token: string;
+}
+
+@Injectable()
+export class SendPasswordResetEmailHandler {
+  private readonly logger = new Logger(SendPasswordResetEmailHandler.name);
+
+  constructor(
+    private readonly mailBuilder: MailBuilderService,
+    private readonly mailTransport: MailTransportService,
+    private readonly config: AppConfigService,
+  ) {}
+
+  async handle(data: SendPasswordResetEmailJobPayload): Promise<void> {
+    const { email, name, token } = data;
+
+    try {
+      const frontendUrl = this.config.get("FRONTEND_URL");
+      const resetUrl = `${frontendUrl}/auth/reset-password?token=${token}`;
+
+      const htmlContent = await this.mailBuilder.buildTemplate(
+        "reset-password",
+        {
+          name: name || "Thành viên",
+          resetUrl,
+        },
+      );
+
+      await this.mailTransport.send(
+        email,
+        "Đặt lại mật khẩu Flying Class",
+        htmlContent,
+      );
+      this.logger.log(`Successfully dispatched password reset email to ${email}`);
+    } catch (error) {
+      this.logger.error(`Failed to send password reset email to ${email}`, error);
+      throw error;
+    }
+  }
+}
+</file>
+
+<file path="features/auth/workers/handlers/send-register-email.handler.ts">
+import { Injectable, Logger } from "@nestjs/common";
+import { MailBuilderService } from "@/shared/mailer/mail-builder.service";
+import { MailTransportService } from "@/shared/mailer/mail-transport.service";
+import { AppConfigService } from "@/core/config/app-config.service";
+
+export interface SendRegisterEmailJobPayload {
+  userId: string;
+  email: string;
+  name: string;
+  token: string;
+}
+
+@Injectable()
+export class SendRegisterEmailHandler {
+  private readonly logger = new Logger(SendRegisterEmailHandler.name);
+
+  constructor(
+    private readonly mailBuilder: MailBuilderService,
+    private readonly mailTransport: MailTransportService,
+    private readonly config: AppConfigService,
+  ) {}
+
+  async handle(data: SendRegisterEmailJobPayload): Promise<void> {
+    const { email, name, token } = data;
+
+    try {
+      const frontendUrl = this.config.get("FRONTEND_URL");
+      const verificationUrl = `${frontendUrl}/auth/verify?token=${token}`;
+
+      const htmlContent = await this.mailBuilder.buildTemplate(
+        "email-verification",
+        {
+          name: name || "Thành viên mới",
+          verificationUrl,
+        },
+      );
+
+      await this.mailTransport.send(
+        email,
+        "Xác nhận tài khoản Flying Class",
+        htmlContent,
+      );
+      this.logger.log(`Successfully dispatched verification email to ${email}`);
+    } catch (error) {
+      this.logger.error(`Failed to send verification email to ${email}`, error);
+      throw error;
+    }
+  }
+}
+</file>
+
+<file path="features/auth/workers/auth.processor.ts">
+import { Processor, WorkerHost } from "@nestjs/bullmq";
+import { Logger } from "@nestjs/common";
+import { Job } from "bullmq";
+import { SendRegisterEmailHandler } from "./handlers/send-register-email.handler";
+import { SendPasswordResetEmailHandler } from "./handlers/send-password-reset-email.handler";
+import { SendKycResultEmailHandler } from "@/features/kyc/workers/handlers/send-kyc-result-email.handler";
+import { SendCourseReviewEmailHandler } from "@/features/courses/workers/handlers/send-course-review.handler";
+
+@Processor("auth-queue")
+export class AuthProcessor extends WorkerHost {
+  private readonly logger = new Logger(AuthProcessor.name);
+
+  constructor(
+    private readonly registerEmailHandler: SendRegisterEmailHandler,
+    private readonly resetEmailHandler: SendPasswordResetEmailHandler,
+    private readonly kycResultEmailHandler: SendKycResultEmailHandler,
+    private readonly courseReviewEmailHandler: SendCourseReviewEmailHandler,
+  ) {
+    super();
+  }
+
+  async process(job: Job<any, any, string>): Promise<void> {
+    this.logger.debug(`[Auth Queue] Handling job: ${job.name}`);
+
+    switch (job.name) {
+      case "send-register-email":
+        return await this.registerEmailHandler.handle(job.data);
+      case "send-password-reset-email":
+        return await this.resetEmailHandler.handle(job.data);
+      case "send-kyc-result-email":
+        return await this.kycResultEmailHandler.handle(job.data);
+      case "send-course-review-result":
+        return await this.courseReviewEmailHandler.handle(job.data);
+
+      default:
+        this.logger.warn(`Unknown job name: ${job.name}`);
+    }
+  }
+}
+</file>
+
+<file path="features/auth/auth.module.ts">
+import { Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
+import { BullModule } from "@nestjs/bullmq";
+import { JwtModule } from "@nestjs/jwt";
+import { PassportModule } from "@nestjs/passport";
+
+import { RegisterController } from "./register/register.controller";
+import { RegisterHandler } from "./register/register.handler";
+import { AuthProcessor } from "./workers/auth.processor";
+import { SendRegisterEmailHandler } from "./workers/handlers/send-register-email.handler";
+import { VerifyEmailController } from "./verify-email/verify-email.controller";
+import { VerifyEmailHandler } from "./verify-email/verify-email.handler";
+import { AppConfigService } from "@/core/config/app-config.service";
+import { LoginController } from "./login/login.controller";
+import { LoginHandler } from "./login/login.handler";
+import { JwtStrategy } from "./strategies/jwt.strategy";
+import { RefreshController } from "./refresh/refresh.controller";
+import { RefreshHandler } from "./refresh/refresh.handler";
+import { JwtRefreshStrategy } from "./strategies/jwt-refresh.strategy";
+import { LogoutController } from "./logout/logout.controller";
+import { LogoutHandler } from "./logout/logout.handler";
+import { ForgotPasswordController } from "./forgot-password/forgot-password.controller";
+import { ForgotPasswordHandler } from "./forgot-password/forgot-password.handler";
+import { ResetPasswordController } from "./reset-password/reset-password.controller";
+import { ResetPasswordHandler } from "./reset-password/reset-password.handler";
+import { SendPasswordResetEmailHandler } from "./workers/handlers/send-password-reset-email.handler";
+import { RolesGuard } from "./guards/roles.guard";
+import { SendKycResultEmailHandler } from "@/features/kyc/workers/handlers/send-kyc-result-email.handler";
+import { SendCourseReviewEmailHandler } from "@/features/courses/workers/handlers/send-course-review.handler";
+import { parseRedisConnection } from "@/infrastructure/redis/redis-connection.util";
+
+const CommandHandlers = [
+  RegisterHandler,
+  VerifyEmailHandler,
+  LoginHandler,
+  RefreshHandler,
+  LogoutHandler,
+  ForgotPasswordHandler,
+  ResetPasswordHandler,
+];
+const BackgroundWorkers = [
+  AuthProcessor,
+  SendRegisterEmailHandler,
+  SendPasswordResetEmailHandler,
+  SendKycResultEmailHandler,
+  SendCourseReviewEmailHandler,
+];
+const Strategies = [JwtStrategy, JwtRefreshStrategy];
+const Guards = [RolesGuard];
+
+@Module({
+  imports: [
+    CqrsModule,
+    PassportModule.register({ defaultStrategy: "jwt" }),
+    BullModule.registerQueueAsync({
+      name: "auth-queue",
+      inject: [AppConfigService],
+      useFactory: (config: AppConfigService) => {
+        return {
+          connection: parseRedisConnection(
+            config.get("REDIS_URL"),
+            config.get("REDIS_PASSWORD"),
+          ),
+        };
+      },
+    }),
+    JwtModule.registerAsync({
+      inject: [AppConfigService],
+      useFactory: (config: AppConfigService) => ({
+        secret: config.get("JWT_SECRET"),
+        signOptions: { expiresIn: "1d" },
+      }),
+    }),
+  ],
+  controllers: [
+    RegisterController,
+    VerifyEmailController,
+    LoginController,
+    RefreshController,
+    LogoutController,
+    ForgotPasswordController,
+    ResetPasswordController,
+  ],
+  providers: [...CommandHandlers, ...BackgroundWorkers, ...Strategies, ...Guards],
+})
+export class AuthModule {}
+</file>
+
+<file path="features/courses/moderation/review-course.api.ts">
+import { CourseStatus } from "@prisma/client";
+import { IsIn, IsString, ValidateIf } from "class-validator";
+
+export class ReviewCourseDto {
+  @IsIn([CourseStatus.APPROVED, CourseStatus.REJECTED], {
+    message: "Trạng thái duyệt chỉ được là APPROVED hoặc REJECTED",
+  })
+  status: CourseStatus;
+
+  @ValidateIf((o) => o.status === CourseStatus.REJECTED)
+  @IsString({ message: "Bắt buộc nhập lý do từ chối" })
+  reason?: string;
+}
+</file>
+
+<file path="features/courses/moderation/review-course.command.ts">
+import { ReviewCourseDto } from "./review-course.api";
+
+export class ReviewCourseCommand {
+  constructor(
+    public readonly courseId: string,
+    public readonly adminId: string,
+    public readonly dto: ReviewCourseDto,
+  ) {}
+}
+</file>
+
+<file path="features/courses/moderation/review-course.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
+import { BadRequestException, NotFoundException, Logger } from "@nestjs/common";
+import { CourseStatus } from "@prisma/client";
+import { ReviewCourseCommand } from "./review-course.command";
+
+@CommandHandler(ReviewCourseCommand)
+export class ReviewCourseHandler implements ICommandHandler<ReviewCourseCommand> {
+  private readonly logger = new Logger(ReviewCourseHandler.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @InjectQueue("auth-queue") private readonly mailQueue: Queue,
+  ) {}
+
+  async execute(command: ReviewCourseCommand) {
+    const { courseId, adminId, dto } = command;
+
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      include: { instructor: { select: { email: true, id: true } } },
+    });
+
+    if (!course) {
+      throw new NotFoundException("Không tìm thấy khóa học.");
+    }
+
+    if (course.status !== CourseStatus.PENDING_REVIEW) {
+      throw new BadRequestException(
+        `Không thể duyệt. Khóa học hiện đang ở trạng thái: ${course.status}`,
+      );
+    }
+
+    try {
+      await this.prisma.course.update({
+        where: { id: courseId },
+        data: {
+          status: dto.status,
+          rejectionReason:
+            dto.status === CourseStatus.REJECTED ? dto.reason : null,
+          reviewedBy: adminId,
+          reviewedAt: new Date(),
+        },
+      });
+
+      this.mailQueue.add("send-course-review-result", {
+        email: course.instructor.email,
+        courseTitle: course.title,
+        status: dto.status,
+        reason: dto.reason,
+      });
+
+      this.logger.log(`Admin [${adminId}] đã ${dto.status} khóa học [${courseId}]`);
+
+      return {
+        message: `Đã ${dto.status === "APPROVED" ? "duyệt" : "từ chối"} khóa học thành công.`,
+      };
+    } catch (error) {
+      this.logger.error(`Lỗi khi duyệt khóa học ${courseId}`, error);
+      throw new BadRequestException(
+        "Quá trình kiểm duyệt thất bại, vui lòng thử lại.",
+      );
+    }
+  }
+}
+</file>
+
+<file path="features/courses/workers/handlers/send-course-review.handler.ts">
+import { Injectable, Logger } from "@nestjs/common";
+import { MailBuilderService } from "@/shared/mailer/mail-builder.service";
+import { MailTransportService } from "@/shared/mailer/mail-transport.service";
+
+@Injectable()
+export class SendCourseReviewEmailHandler {
+  private readonly logger = new Logger(SendCourseReviewEmailHandler.name);
+
+  constructor(
+    private readonly mailBuilder: MailBuilderService,
+    private readonly mailTransport: MailTransportService,
+  ) {}
+
+  async handle(data: {
+    email: string;
+    courseTitle: string;
+    status: string;
+    reason?: string;
+  }) {
+    const subject =
+      data.status === "APPROVED"
+        ? `🎉 Khóa học "${data.courseTitle}" đã được duyệt!`
+        : `⚠️ Khóa học "${data.courseTitle}" cần chỉnh sửa`;
+
+    const htmlContent = await this.mailBuilder.buildTemplate("course-review", {
+      ...data,
+      isApproved: data.status === "APPROVED",
+    });
+
+    await this.mailTransport.send(data.email, subject, htmlContent);
+    this.logger.log(`Đã gửi email kết quả duyệt khóa học cho: ${data.email}`);
+  }
+}
+</file>
+
+<file path="features/courses/courses-admin.controller.ts">
+import { Controller, Patch, Param, Body, UseGuards, Req } from "@nestjs/common";
+import { CommandBus } from "@nestjs/cqrs";
+import { Role } from "@prisma/client";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { ReviewCourseDto } from "./moderation/review-course.api";
+import { ReviewCourseCommand } from "./moderation/review-course.command";
+
+@Controller("admin/courses")
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+export class CoursesAdminController {
+  constructor(private readonly commandBus: CommandBus) {}
+
+  @Patch(":id/review")
+  async reviewCourse(
+    @Param("id") courseId: string,
+    @Body() dto: ReviewCourseDto,
+    @Req() req: any,
+  ) {
+    return await this.commandBus.execute(
+      new ReviewCourseCommand(courseId, req.user.id, dto),
+    );
+  }
+}
+</file>
+
+<file path="features/courses/courses.module.ts">
+import { Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
+import { BullModule } from "@nestjs/bullmq";
+import { MailerModule } from "@/shared/mailer/mailer.module";
+import { CoursesAdminController } from "./courses-admin.controller";
+import { ReviewCourseHandler } from "./moderation/review-course.handler";
+import { SendCourseReviewEmailHandler } from "./workers/handlers/send-course-review.handler";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { AppConfigService } from "@/core/config/app-config.service";
+import { parseRedisConnection } from "@/infrastructure/redis/redis-connection.util";
+
+@Module({
+  imports: [
+    CqrsModule,
+    MailerModule,
+    BullModule.registerQueueAsync({
+      name: "auth-queue",
+      inject: [AppConfigService],
+      useFactory: (config: AppConfigService) => {
+        return {
+          connection: parseRedisConnection(
+            config.get("REDIS_URL"),
+            config.get("REDIS_PASSWORD"),
+          ),
+        };
+      },
+    }),
+  ],
+  controllers: [CoursesAdminController],
+  providers: [ReviewCourseHandler, SendCourseReviewEmailHandler, RolesGuard],
+  exports: [SendCourseReviewEmailHandler],
+})
+export class CoursesModule {}
+</file>
+
+<file path="features/finance/dashboard/get-revenue-dashboard.handler.ts">
+import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { PayoutStatus, TransactionStatus } from "@prisma/client";
+import { GetRevenueDashboardQuery } from "./get-revenue-dashboard.query";
+
+type DailyRevenueRow = {
+  createdAt: Date;
+  _sum: {
+    amount: number | null;
+    platformFee: number | null;
+  };
+};
+
+@QueryHandler(GetRevenueDashboardQuery)
+export class GetRevenueDashboardHandler
+  implements IQueryHandler<GetRevenueDashboardQuery>
+{
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(query: GetRevenueDashboardQuery) {
+    const { startDate, endDate } = query;
+
+    const dateAndSuccessFilter = {
+      status: TransactionStatus.SUCCESS,
+      createdAt: { gte: startDate, lte: endDate },
+    };
+
+    const [transactionStats, payoutStats, totalWallets] = await Promise.all([
+      this.prisma.courseTransaction.aggregate({
+        where: dateAndSuccessFilter,
+        _sum: {
+          amount: true,
+          platformFee: true,
+          instructorRevenue: true,
+        },
+        _count: { id: true },
+      }),
+      this.prisma.payoutRequest.aggregate({
+        where: {
+          status: PayoutStatus.COMPLETED,
+          updatedAt: { gte: startDate, lte: endDate },
+        },
+        _sum: { amount: true },
+      }),
+      this.prisma.wallet.aggregate({
+        _sum: { balance: true, lockedBalance: true },
+      }),
+    ]);
+
+    const chartRawData = await this.prisma.courseTransaction.groupBy({
+      by: ["createdAt"],
+      where: dateAndSuccessFilter,
+      _sum: { amount: true, platformFee: true },
+      orderBy: { createdAt: "asc" },
+    });
+
+    const chartData = this.aggregateByDay(chartRawData);
+
+    return {
+      kpis: {
+        totalGrossRevenue: transactionStats._sum.amount || 0,
+        netPlatformProfit: transactionStats._sum.platformFee || 0,
+        instructorEarnings: transactionStats._sum.instructorRevenue || 0,
+        totalOrders: transactionStats._count.id || 0,
+        totalPayoutsCompleted: payoutStats._sum.amount || 0,
+        platformLiability:
+          (totalWallets._sum.balance || 0) + (totalWallets._sum.lockedBalance || 0),
+      },
+      chartData,
+    };
+  }
+
+  private aggregateByDay(data: DailyRevenueRow[]) {
+    const result: Record<string, { date: string; revenue: number; profit: number }> = {};
+
+    for (const row of data) {
+      const dateStr = row.createdAt.toISOString().split("T")[0];
+
+      if (!result[dateStr]) {
+        result[dateStr] = { date: dateStr, revenue: 0, profit: 0 };
+      }
+
+      result[dateStr].revenue += row._sum.amount || 0;
+      result[dateStr].profit += row._sum.platformFee || 0;
+    }
+
+    return Object.values(result).sort((a, b) => a.date.localeCompare(b.date));
+  }
+}
+</file>
+
+<file path="features/finance/dashboard/get-revenue-dashboard.query.ts">
+export class GetRevenueDashboardQuery {
+  constructor(
+    public readonly startDate: Date,
+    public readonly endDate: Date,
+  ) {}
+}
+</file>
+
+<file path="features/finance/payouts/review-payout.api.ts">
+import { PayoutStatus } from "@prisma/client";
+import {
+  IsIn,
+  IsString,
+  ValidateIf,
+  IsNotEmpty,
+} from "class-validator";
+
+export class ReviewPayoutDto {
+  @IsIn([PayoutStatus.COMPLETED, PayoutStatus.REJECTED])
+  status: PayoutStatus;
+
+  @ValidateIf((o) => o.status === PayoutStatus.COMPLETED)
+  @IsString()
+  @IsNotEmpty({ message: "Bắt buộc nhập mã giao dịch ngân hàng (TxRef) để đối soát" })
+  transactionRef?: string;
+
+  @ValidateIf((o) => o.status === PayoutStatus.REJECTED)
+  @IsString()
+  @IsNotEmpty({ message: "Bắt buộc nhập lý do từ chối" })
+  reason?: string;
+}
+</file>
+
+<file path="features/finance/payouts/review-payout.command.ts">
+import { ReviewPayoutDto } from "./review-payout.api";
+
+export class ReviewPayoutCommand {
+  constructor(
+    public readonly payoutId: string,
+    public readonly adminId: string,
+    public readonly dto: ReviewPayoutDto,
+  ) {}
+}
+</file>
+
+<file path="features/finance/payouts/review-payout.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { BadRequestException, NotFoundException, Logger } from "@nestjs/common";
+import { PayoutStatus } from "@prisma/client";
+import { ReviewPayoutCommand } from "./review-payout.command";
+
+@CommandHandler(ReviewPayoutCommand)
+export class ReviewPayoutHandler implements ICommandHandler<ReviewPayoutCommand> {
+  private readonly logger = new Logger(ReviewPayoutHandler.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(command: ReviewPayoutCommand) {
+    const { payoutId, adminId, dto } = command;
+
+    const payout = await this.prisma.payoutRequest.findUnique({
+      where: { id: payoutId },
+    });
+
+    if (!payout) throw new NotFoundException("Không tìm thấy yêu cầu rút tiền.");
+    if (payout.status !== PayoutStatus.PENDING) {
+      throw new BadRequestException("Yêu cầu này đã được xử lý trước đó.");
+    }
+
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.payoutRequest.update({
+          where: { id: payoutId },
+          data: {
+            status: dto.status,
+            transactionRef:
+              dto.status === PayoutStatus.COMPLETED ? dto.transactionRef : null,
+            rejectionReason:
+              dto.status === PayoutStatus.REJECTED ? dto.reason : null,
+            reviewedBy: adminId,
+            reviewedAt: new Date(),
+          },
+        });
+
+        if (dto.status === PayoutStatus.COMPLETED) {
+          await tx.wallet.update({
+            where: { userId: payout.instructorId },
+            data: {
+              lockedBalance: { decrement: payout.amount },
+            },
+          });
+        } else if (dto.status === PayoutStatus.REJECTED) {
+          await tx.wallet.update({
+            where: { userId: payout.instructorId },
+            data: {
+              lockedBalance: { decrement: payout.amount },
+              balance: { increment: payout.amount },
+            },
+          });
+        }
+      });
+
+      this.logger.log(
+        `Admin [${adminId}] đã ${dto.status} yêu cầu rút tiền [${payoutId}] trị giá ${payout.amount}`,
+      );
+
+      return { message: "Đã xử lý yêu cầu rút tiền thành công." };
+    } catch (error) {
+      this.logger.error(`Lỗi nghiêm trọng khi xử lý rút tiền ${payoutId}`, error);
+      throw new BadRequestException(
+        "Xử lý tài chính thất bại. Hệ thống đã Rollback.",
+      );
+    }
+  }
+}
+</file>
+
+<file path="features/finance/finance-admin.controller.ts">
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  Req,
+} from "@nestjs/common";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { Role } from "@prisma/client";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { ReviewPayoutDto } from "./payouts/review-payout.api";
+import { ReviewPayoutCommand } from "./payouts/review-payout.command";
+import { GetRevenueDashboardQuery } from "./dashboard/get-revenue-dashboard.query";
+
+@Controller("admin/finance")
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+export class FinanceAdminController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  @Get("dashboard")
+  async getDashboard(
+    @Query("startDate") startDateStr?: string,
+    @Query("endDate") endDateStr?: string,
+  ) {
+    const endDate = endDateStr ? this.parseDateOrThrow(endDateStr, "endDate") : new Date();
+    const startDate = startDateStr
+      ? this.parseDateOrThrow(startDateStr, "startDate")
+      : this.getDefaultStartDate(endDate);
+
+    return await this.queryBus.execute(
+      new GetRevenueDashboardQuery(startDate, endDate),
+    );
+  }
+
+  @Patch("payouts/:id/review")
+  async reviewPayout(
+    @Param("id") payoutId: string,
+    @Body() dto: ReviewPayoutDto,
+    @Req() req: any,
+  ) {
+    return await this.commandBus.execute(
+      new ReviewPayoutCommand(payoutId, req.user.id, dto),
+    );
+  }
+
+  private getDefaultStartDate(endDate: Date) {
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 30);
+    return startDate;
+  }
+
+  private parseDateOrThrow(rawDate: string, field: "startDate" | "endDate") {
+    const parsedDate = new Date(rawDate);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      throw new BadRequestException(`Giá trị ${field} không hợp lệ.`);
+    }
+
+    return parsedDate;
+  }
+}
+</file>
+
+<file path="features/finance/finance.module.ts">
+import { Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
+import { FinanceAdminController } from "./finance-admin.controller";
+import { ReviewPayoutHandler } from "./payouts/review-payout.handler";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { GetRevenueDashboardHandler } from "./dashboard/get-revenue-dashboard.handler";
+
+@Module({
+  imports: [CqrsModule],
+  controllers: [FinanceAdminController],
+  providers: [ReviewPayoutHandler, GetRevenueDashboardHandler, RolesGuard],
+})
+export class FinanceModule {}
+</file>
+
+<file path="features/kyc/queries/get-kyc-list.handler.ts">
+import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { GetKycListQuery } from "./get-kyc-list.query";
+import { S3StorageService } from "@/infrastructure/storage/s3-storage.service";
+
+@QueryHandler(GetKycListQuery)
+export class GetKycListHandler implements IQueryHandler<GetKycListQuery> {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: S3StorageService,
+  ) {}
+
+  async execute(query: GetKycListQuery) {
+    const { page, limit, status } = query;
+    const skip = (page - 1) * limit;
+
+    const where = status ? { status: status as any } : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.kycApplication.findMany({
+        where,
+        skip,
+        take: limit,
+        include: { user: { select: { email: true, id: true } } },
+        orderBy: { createdAt: "desc" },
+      }),
+      this.prisma.kycApplication.count({ where }),
+    ]);
+
+    const dataWithSecureUrls = await Promise.all(
+      data.map(async (request) => {
+        const identityCardUrl = request.identityCardUrl ?? null;
+        const supportingDocumentUrls = this.toUrlList(
+          request.supportingDocumentUrls,
+        );
+
+        const [secureIdentityCardUrl, secureSupportingDocumentUrls] =
+          await Promise.all([
+            identityCardUrl
+              ? this.storage.getPresignedUrl(identityCardUrl)
+              : Promise.resolve(null),
+            Promise.all(
+              supportingDocumentUrls.map((url) =>
+                this.storage.getPresignedUrl(url),
+              ),
+            ),
+          ]);
+
+        return {
+          ...request,
+          documentUrl: identityCardUrl,
+          documentType: "IDENTITY_CARD",
+          identityCardPublicUrl: identityCardUrl
+            ? this.resolvePublicUrl(identityCardUrl)
+            : null,
+          secureIdentityCardUrl,
+          publicDocumentUrl: identityCardUrl
+            ? this.resolvePublicUrl(identityCardUrl)
+            : null,
+          secureImageUrl: secureIdentityCardUrl,
+          supportingDocumentPublicUrls: supportingDocumentUrls.map((url) =>
+            this.resolvePublicUrl(url),
+          ),
+          secureSupportingDocumentUrls,
+        };
+      }),
+    );
+
+    return {
+      data: dataWithSecureUrls,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  private toUrlList(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value.filter((item): item is string => typeof item === "string");
+  }
+
+  private resolvePublicUrl(url: string): string {
+    const storageWithPublicUrl = this.storage as S3StorageService & {
+      toPublicUrl?: (fullUrl: string) => string;
+    };
+
+    if (typeof storageWithPublicUrl.toPublicUrl === "function") {
+      return storageWithPublicUrl.toPublicUrl(url);
+    }
+
+    return url;
+  }
+}
+</file>
+
+<file path="features/kyc/queries/get-kyc-list.query.ts">
+export class GetKycListQuery {
+  constructor(
+    public readonly page: number = 1,
+    public readonly limit: number = 10,
+    public readonly status?: string,
+  ) {}
+}
+</file>
+
+<file path="features/kyc/queries/get-kyc-stats.handler.ts">
+import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { GetKycStatsQuery } from "./get-kyc-stats.query";
+import { KycStatus } from "@prisma/client";
+
+@QueryHandler(GetKycStatsQuery)
+export class GetKycStatsHandler implements IQueryHandler<GetKycStatsQuery> {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(query: GetKycStatsQuery) {
+    const { startDate, endDate } = query;
+
+    const dateFilter =
+      startDate || endDate
+        ? {
+            createdAt: {
+              ...(startDate && { gte: startDate }),
+              ...(endDate && { lte: endDate }),
+            },
+          }
+        : {};
+
+    const [total, pending, approved, rejected] = await Promise.all([
+      this.prisma.kycApplication.count({ where: dateFilter }),
+      this.prisma.kycApplication.count({
+        where: { ...dateFilter, status: KycStatus.PENDING },
+      }),
+      this.prisma.kycApplication.count({
+        where: { ...dateFilter, status: KycStatus.APPROVED },
+      }),
+      this.prisma.kycApplication.count({
+        where: { ...dateFilter, status: KycStatus.REJECTED },
+      }),
+    ]);
+
+    return {
+      summary: {
+        total,
+        pending,
+        approved,
+        rejected,
+        approvalRate: total > 0 ? (approved / total) * 100 : 0,
+      },
+      chartData: {
+        labels: ["Đang chờ", "Đã duyệt", "Từ chối"],
+        datasets: [pending, approved, rejected],
+      },
+    };
+  }
+}
+</file>
+
+<file path="features/kyc/queries/get-kyc-stats.query.ts">
+export class GetKycStatsQuery {
+  constructor(
+    public readonly startDate?: Date,
+    public readonly endDate?: Date,
+  ) {}
+}
+</file>
+
+<file path="features/kyc/review-kyc/review-kyc.api.ts">
+import { KycStatus } from "@prisma/client";
+import { IsEnum, IsOptional, IsString, ValidateIf } from "class-validator";
+
+export class ReviewKycDto {
+  @IsEnum(KycStatus)
+  status: KycStatus;
+
+  @ValidateIf((o) => o.status === KycStatus.REJECTED)
+  @IsString()
+  @IsOptional()
+  rejectionReason?: string;
+}
+</file>
+
+<file path="features/kyc/review-kyc/review-kyc.command.ts">
+import { ReviewKycDto } from "./review-kyc.api";
+
+export class ReviewKycCommand {
+  constructor(
+    public readonly applicationId: string,
+    public readonly adminId: string,
+    public readonly dto: ReviewKycDto,
+  ) {}
+}
+</file>
+
+<file path="features/kyc/review-kyc/review-kyc.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
+import { KycStatus } from "@prisma/client";
+import { BadRequestException, NotFoundException, Logger } from "@nestjs/common";
+import { ReviewKycCommand } from "./review-kyc.command";
+
+@CommandHandler(ReviewKycCommand)
+export class ReviewKycHandler implements ICommandHandler<ReviewKycCommand> {
+  private readonly logger = new Logger(ReviewKycHandler.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @InjectQueue("auth-queue") private readonly mailQueue: Queue,
+  ) {}
+
+  async execute(command: ReviewKycCommand) {
+    const { applicationId, adminId, dto } = command;
+
+    const application = await this.prisma.kycApplication.findUnique({
+      where: { id: applicationId },
+      include: { user: true },
+    });
+
+    if (!application) throw new NotFoundException("KYC Application not found.");
+    if (application.status !== KycStatus.PENDING) {
+      throw new BadRequestException("This application has already been reviewed.");
+    }
+
+    try {
+      await this.prisma.kycApplication.update({
+        where: { id: applicationId },
+        data: {
+          status: dto.status,
+          rejectionReason: dto.rejectionReason,
+          reviewedBy: adminId,
+          reviewedAt: new Date(),
+        },
+      });
+
+      await this.mailQueue.add("send-kyc-result-email", {
+        email: application.user.email,
+        status: dto.status,
+        reason: dto.rejectionReason,
+      });
+
+      this.logger.log(
+        `KYC ${dto.status} for User ${application.userId} by Admin ${adminId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to review KYC application ${applicationId}`,
+        error,
+      );
+      throw new BadRequestException("Review process failed.");
+    }
+  }
+}
+</file>
+
+<file path="features/kyc/submit/submit-kyc.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { S3StorageService } from "@/infrastructure/storage/s3-storage.service";
+import { BadRequestException } from "@nestjs/common";
+import { KycStatus } from "@prisma/client";
+
+export class SubmitKycCommand {
+  constructor(
+    public readonly userId: string,
+    public readonly identityCardFile: Express.Multer.File,
+    public readonly supportingDocumentFiles: Express.Multer.File[],
+  ) {}
+}
+
+@CommandHandler(SubmitKycCommand)
+export class SubmitKycHandler implements ICommandHandler<SubmitKycCommand> {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: S3StorageService,
+  ) {}
+
+  async execute(command: SubmitKycCommand) {
+    const { userId, identityCardFile, supportingDocumentFiles } = command;
+
+    if (!identityCardFile) {
+      throw new BadRequestException("Thiếu ảnh CCCD/CMND.");
+    }
+
+    if (!supportingDocumentFiles?.length) {
+      throw new BadRequestException(
+        "Cần tải lên ít nhất 1 ảnh chứng chỉ hoặc giấy tờ chứng nhận.",
+      );
+    }
+
+    const existing = await this.prisma.kycApplication.findUnique({
+      where: { userId },
+    });
+    if (existing && existing.status === KycStatus.PENDING) {
+      throw new BadRequestException("You already have a pending application.");
+    }
+
+    const [identityCardUrl, supportingDocumentUrls] = await Promise.all([
+      this.storage.uploadFile(identityCardFile, "kyc/identity-cards"),
+      Promise.all(
+        supportingDocumentFiles.map((file) =>
+          this.storage.uploadFile(file, "kyc/supporting-documents"),
+        ),
+      ),
+    ]);
+
+    return await this.prisma.kycApplication.upsert({
+      where: { userId },
+      update: {
+        identityCardUrl,
+        supportingDocumentUrls,
+        status: KycStatus.PENDING,
+        rejectionReason: null,
+        reviewedBy: null,
+        reviewedAt: null,
+      },
+      create: {
+        userId,
+        identityCardUrl,
+        supportingDocumentUrls,
+      },
+    });
+  }
+}
+</file>
+
+<file path="features/kyc/workers/handlers/send-kyc-result-email.handler.ts">
+import { Injectable, Logger } from "@nestjs/common";
+import { MailBuilderService } from "@/shared/mailer/mail-builder.service";
+import { MailTransportService } from "@/shared/mailer/mail-transport.service";
+
+export interface KycResultEmailData {
+  email: string;
+  status: "APPROVED" | "REJECTED";
+  reason?: string;
+}
+
+@Injectable()
+export class SendKycResultEmailHandler {
+  private readonly logger = new Logger(SendKycResultEmailHandler.name);
+
+  constructor(
+    private readonly mailBuilder: MailBuilderService,
+    private readonly mailTransport: MailTransportService,
+  ) {}
+
+  async handle(data: KycResultEmailData): Promise<void> {
+    const { email, status, reason } = data;
+
+    const subject =
+      status === "APPROVED"
+        ? "🚀 Welcome to the Flying Class Instructor Team!"
+        : "Update regarding your KYC verification";
+
+    const htmlContent = await this.mailBuilder.buildTemplate("kyc-result", {
+      status,
+      reason,
+      isApproved: status === "APPROVED",
+    });
+
+    this.logger.log(`📧 Dispatching KYC result email (${status}) to: ${email}`);
+
+    await this.mailTransport.send(email, subject, htmlContent);
+  }
+}
+</file>
+
+<file path="features/kyc/kyc-admin.controller.ts">
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  Req,
+} from "@nestjs/common";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { Role } from "@prisma/client";
+import { GetKycListQuery } from "./queries/get-kyc-list.query";
+import { GetKycStatsQuery } from "./queries/get-kyc-stats.query";
+import { ReviewKycCommand } from "./review-kyc/review-kyc.command";
+import { ReviewKycDto } from "./review-kyc/review-kyc.api";
+
+@Controller("admin/kyc")
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+export class KycAdminController {
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+  ) {}
+
+  @Get()
+  async getList(
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 10,
+    @Query("status") status?: string,
+  ) {
+    return await this.queryBus.execute(
+      new GetKycListQuery(Number(page), Number(limit), status),
+    );
+  }
+
+  @Get("stats")
+  async getDashboardStats(
+    @Query("start") start?: string,
+    @Query("end") end?: string,
+  ) {
+    return await this.queryBus.execute(
+      new GetKycStatsQuery(
+        start ? this.parseDateOrThrow(start, "start") : undefined,
+        end ? this.parseDateOrThrow(end, "end") : undefined,
+      ),
+    );
+  }
+
+  @Patch(":id/review")
+  async review(@Param("id") id: string, @Body() dto: ReviewKycDto, @Req() req: any) {
+    return await this.commandBus.execute(new ReviewKycCommand(id, req.user.id, dto));
+  }
+
+  private parseDateOrThrow(rawDate: string, field: "start" | "end") {
+    const parsedDate = new Date(rawDate);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      throw new BadRequestException(`Giá trị ${field} không hợp lệ.`);
+    }
+
+    return parsedDate;
+  }
+}
+</file>
+
+<file path="features/kyc/kyc.controller.ts">
+import {
+  BadRequestException,
+  Controller,
+  Body,
+  Patch,
+  Param,
+  Post,
+  UnsupportedMediaTypeException,
+  UseGuards,
+  Req,
+} from "@nestjs/common";
+import { CommandBus } from "@nestjs/cqrs";
+import { Role } from "@prisma/client";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { ReviewKycDto } from "./review-kyc/review-kyc.api";
+import { ReviewKycCommand } from "./review-kyc/review-kyc.command";
+import { SubmitKycCommand } from "./submit/submit-kyc.handler";
+import { EnterpriseFilePipe } from "@/shared/file-upload/enterprise-file.pipe";
+
+@Controller("kyc")
+export class KycController {
+  private readonly kycFilePipe = new EnterpriseFilePipe("KYC_DOCUMENT");
+  private static readonly MAX_SUPPORTING_FILES = 10;
+  private readonly identityFieldNames = new Set([
+    "identityCard",
+    "identity_card",
+    "cccd",
+    "identity",
+  ]);
+  private readonly supportingFieldNames = new Set([
+    "supportingDocuments",
+    "supporting_documents",
+    "credentials",
+    "certificates",
+    "documents",
+  ]);
+
+  constructor(private readonly commandBus: CommandBus) {}
+
+  @Post("submit")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.LECTURER)
+  async submitKyc(@Req() req: any) {
+    this.ensureMultipartRequest(req);
+    const { identityCardFile, supportingDocumentFiles } =
+      await this.extractMultipartPayload(req);
+
+    return await this.commandBus.execute(
+      new SubmitKycCommand(req.user.id, identityCardFile, supportingDocumentFiles),
+    );
+  }
+
+  @Patch(":id/review")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  async reviewKyc(
+    @Param("id") id: string,
+    @Body() dto: ReviewKycDto,
+    @Req() req: any,
+  ) {
+    return await this.commandBus.execute(
+      new ReviewKycCommand(id, req.user.id, dto),
+    );
+  }
+
+  private async extractMultipartPayload(req: any) {
+    const iterator = req.parts?.();
+    if (!iterator) {
+      throw new BadRequestException("Yêu cầu upload không hợp lệ.");
+    }
+
+    let identityCardFile: Express.Multer.File | undefined;
+    const supportingDocumentFiles: Express.Multer.File[] = [];
+
+    for await (const part of iterator) {
+      if (part.type !== "file") {
+        continue;
+      }
+
+      // Fastify multipart yêu cầu tiêu thụ stream; nếu không request có thể bị treo.
+      const fileBuffer = await part.toBuffer();
+      const file = this.kycFilePipe.transform(
+        this.toExpressFile(part, fileBuffer),
+      );
+      const fieldName = String(part.fieldname ?? "").trim();
+
+      if (this.identityFieldNames.has(fieldName)) {
+        if (identityCardFile) {
+          throw new BadRequestException("Chỉ được gửi 1 ảnh CCCD/CMND.");
+        }
+        identityCardFile = file;
+        continue;
+      }
+
+      if (this.supportingFieldNames.has(fieldName)) {
+        supportingDocumentFiles.push(file);
+        continue;
+      }
+
+      // Tương thích ngược: nếu frontend cũ gửi chung 1 field, file đầu là CCCD,
+      // các file sau là chứng chỉ/giấy tờ bổ sung.
+      if (!identityCardFile) {
+        identityCardFile = file;
+      } else {
+        supportingDocumentFiles.push(file);
+      }
+    }
+
+    if (!identityCardFile) {
+      throw new BadRequestException("Vui lòng tải lên 1 ảnh CCCD/CMND.");
+    }
+
+    if (!supportingDocumentFiles.length) {
+      throw new BadRequestException(
+        "Vui lòng tải lên ít nhất 1 ảnh chứng chỉ hoặc giấy tờ chứng nhận.",
+      );
+    }
+
+    if (supportingDocumentFiles.length > KycController.MAX_SUPPORTING_FILES) {
+      throw new BadRequestException(
+        `Số lượng ảnh chứng chỉ tối đa là ${KycController.MAX_SUPPORTING_FILES}.`,
+      );
+    }
+
+    return { identityCardFile, supportingDocumentFiles };
+  }
+
+  private ensureMultipartRequest(req: any) {
+    const isMultipart =
+      typeof req.isMultipart === "function" ? req.isMultipart() : false;
+    if (!isMultipart) {
+      throw new UnsupportedMediaTypeException(
+        "Yêu cầu phải dùng multipart/form-data.",
+      );
+    }
+  }
+
+  private toExpressFile(
+    multipartFile: any,
+    buffer: Buffer,
+  ): Express.Multer.File {
+    return {
+      fieldname: multipartFile.fieldname || "file",
+      originalname: multipartFile.filename || "upload.bin",
+      encoding: multipartFile.encoding || "7bit",
+      mimetype: multipartFile.mimetype || "application/octet-stream",
+      size: buffer.length,
+      buffer,
+      destination: "",
+      filename: multipartFile.filename || "upload.bin",
+      path: "",
+      stream: multipartFile.file,
+    };
+  }
+}
+</file>
+
+<file path="features/kyc/kyc.module.ts">
+import { Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
+import { BullModule } from "@nestjs/bullmq";
+import { MailerModule } from "@/shared/mailer/mailer.module";
+import { KycController } from "./kyc.controller";
+import { KycAdminController } from "./kyc-admin.controller";
+import { SubmitKycHandler } from "./submit/submit-kyc.handler";
+import { ReviewKycHandler } from "./review-kyc/review-kyc.handler";
+import { GetKycListHandler } from "./queries/get-kyc-list.handler";
+import { GetKycStatsHandler } from "./queries/get-kyc-stats.handler";
+import { S3StorageService } from "@/infrastructure/storage/s3-storage.service";
+import { SendKycResultEmailHandler } from "./workers/handlers/send-kyc-result-email.handler";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { AppConfigService } from "@/core/config/app-config.service";
+import { parseRedisConnection } from "@/infrastructure/redis/redis-connection.util";
+
+@Module({
+  imports: [
+    CqrsModule,
+    MailerModule,
+    BullModule.registerQueueAsync({
+      name: "auth-queue",
+      inject: [AppConfigService],
+      useFactory: (config: AppConfigService) => {
+        return {
+          connection: parseRedisConnection(
+            config.get("REDIS_URL"),
+            config.get("REDIS_PASSWORD"),
+          ),
+        };
+      },
+    }),
+  ],
+  controllers: [KycController, KycAdminController],
+  providers: [
+    SubmitKycHandler,
+    ReviewKycHandler,
+    GetKycListHandler,
+    GetKycStatsHandler,
+    SendKycResultEmailHandler,
+    S3StorageService,
+    RolesGuard,
+  ],
+  exports: [SendKycResultEmailHandler],
+})
+export class KycModule {}
+</file>
+
+<file path="features/system/settings/update-setting.api.ts">
+import { IsString, IsNotEmpty } from "class-validator";
+
+export class UpdateSettingDto {
+  @IsString()
+  @IsNotEmpty()
+  value: string;
+}
+</file>
+
+<file path="features/system/settings/update-setting.command.ts">
+import { UpdateSettingDto } from "./update-setting.api";
+
+export class UpdateSettingCommand {
+  constructor(
+    public readonly key: string,
+    public readonly adminId: string,
+    public readonly dto: UpdateSettingDto,
+  ) {}
+}
+</file>
+
+<file path="features/system/settings/update-setting.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { NotFoundException, Logger, Inject } from "@nestjs/common";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
+import { UpdateSettingCommand } from "./update-setting.command";
+
+@CommandHandler(UpdateSettingCommand)
+export class UpdateSettingHandler
+  implements ICommandHandler<UpdateSettingCommand>
+{
+  private readonly logger = new Logger(UpdateSettingHandler.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
+
+  async execute(command: UpdateSettingCommand) {
+    const { key, adminId, dto } = command;
+
+    const setting = await this.prisma.systemSetting.findUnique({ where: { key } });
+    if (!setting) {
+      throw new NotFoundException(`Không tìm thấy cấu hình với mã: ${key}`);
+    }
+
+    await this.prisma.systemSetting.update({
+      where: { key },
+      data: {
+        value: dto.value,
+        updatedBy: adminId,
+      },
+    });
+
+    await this.cacheManager.del(`SYSTEM_SETTING_${key}`);
+
+    this.logger.log(
+      `Admin [${adminId}] đã thay đổi cấu hình [${key}] thành [${dto.value}]`,
+    );
+
+    return { message: "Đã cập nhật cấu hình hệ thống thành công." };
+  }
+}
+</file>
+
+<file path="features/system/system-admin.controller.ts">
+import {
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Body,
+  UseGuards,
+  Req,
+} from "@nestjs/common";
+import { CommandBus } from "@nestjs/cqrs";
+import { Role } from "@prisma/client";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { UpdateSettingDto } from "./settings/update-setting.api";
+import { UpdateSettingCommand } from "./settings/update-setting.command";
+
+@Controller("admin/settings")
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+export class SystemAdminController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly prisma: PrismaService,
+  ) {}
+
+  @Get()
+  async getAllSettings() {
+    return await this.prisma.systemSetting.findMany({
+      orderBy: { key: "asc" },
+    });
+  }
+
+  @Patch(":key")
+  async updateSetting(
+    @Param("key") key: string,
+    @Body() dto: UpdateSettingDto,
+    @Req() req: any,
+  ) {
+    return await this.commandBus.execute(
+      new UpdateSettingCommand(key, req.user.id, dto),
+    );
+  }
+}
+</file>
+
+<file path="features/system/system.module.ts">
+import { Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
+import { SystemAdminController } from "./system-admin.controller";
+import { UpdateSettingHandler } from "./settings/update-setting.handler";
+import { RolesGuard } from "../auth/guards/roles.guard";
+
+@Module({
+  imports: [CqrsModule],
+  controllers: [SystemAdminController],
+  providers: [UpdateSettingHandler, RolesGuard],
+})
+export class SystemModule {}
+</file>
+
+<file path="features/users/toggle-status/toggle-status.api.ts">
+import { IsBoolean, IsOptional, IsString } from "class-validator";
+
+export class ToggleUserStatusDto {
+  @IsBoolean({ message: "Trạng thái hoạt động phải là boolean (true/false)" })
+  isActive: boolean;
+
+  @IsOptional()
+  @IsString()
+  reason?: string;
+}
+</file>
+
+<file path="features/users/toggle-status/toggle-status.command.ts">
+import { ToggleUserStatusDto } from "./toggle-status.api";
+
+export class ToggleUserStatusCommand {
+  constructor(
+    public readonly targetUserId: string,
+    public readonly adminId: string,
+    public readonly dto: ToggleUserStatusDto,
+  ) {}
+}
+</file>
+
+<file path="features/users/toggle-status/toggle-status.handler.ts">
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+import { ToggleUserStatusCommand } from "./toggle-status.command";
+import { BadRequestException, NotFoundException, Logger } from "@nestjs/common";
+
+@CommandHandler(ToggleUserStatusCommand)
+export class ToggleUserStatusHandler
+  implements ICommandHandler<ToggleUserStatusCommand>
+{
+  private readonly logger = new Logger(ToggleUserStatusHandler.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(command: ToggleUserStatusCommand) {
+    const { targetUserId, adminId, dto } = command;
+
+    if (targetUserId === adminId) {
+      throw new BadRequestException(
+        "Bạn không thể tự khóa tài khoản của chính mình!",
+      );
+    }
+
+    const targetUser = await this.prisma.user.findUnique({
+      where: { id: targetUserId },
+    });
+
+    if (!targetUser) {
+      throw new NotFoundException("Không tìm thấy người dùng này.");
+    }
+
+    const shouldRevokeAccess = dto.isActive === false;
+
+    await this.prisma.user.update({
+      where: { id: targetUserId },
+      data: {
+        isActive: dto.isActive,
+        banReason: dto.isActive ? null : dto.reason,
+        hashedRefreshToken: shouldRevokeAccess ? null : undefined,
+      },
+    });
+
+    this.logger.log(
+      `Admin [${adminId}] đã chuyển trạng thái User [${targetUserId}] thành ${dto.isActive ? "ACTIVE" : "BANNED"}`,
+    );
+
+    return {
+      message: dto.isActive
+        ? "Đã mở khóa tài khoản thành công."
+        : "Đã khóa tài khoản thành công.",
+    };
+  }
+}
+</file>
+
+<file path="features/users/users-admin.controller.ts">
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Patch,
+  Param,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
+import { CommandBus } from "@nestjs/cqrs";
+import { Role } from "@prisma/client";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { ToggleUserStatusDto } from "./toggle-status/toggle-status.api";
+import { ToggleUserStatusCommand } from "./toggle-status/toggle-status.command";
+
+@Controller("admin/users")
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+export class UsersAdminController {
+  constructor(private readonly commandBus: CommandBus) {}
+
+  @Patch(":id/status")
+  async toggleStatus(
+    @Param("id") targetUserId: string,
+    @Body() dto: ToggleUserStatusDto,
+    @Req() req: any,
+  ) {
+    if (!dto.isActive && !dto.reason) {
+      throw new BadRequestException("Vui lòng cung cấp lý do khóa tài khoản.");
+    }
+
+    return await this.commandBus.execute(
+      new ToggleUserStatusCommand(targetUserId, req.user.id, dto),
+    );
+  }
+}
+</file>
+
+<file path="features/users/users.module.ts">
+import { Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
+import { UsersAdminController } from "./users-admin.controller";
+import { ToggleUserStatusHandler } from "./toggle-status/toggle-status.handler";
+import { RolesGuard } from "../auth/guards/roles.guard";
+
+@Module({
+  imports: [CqrsModule],
+  controllers: [UsersAdminController],
+  providers: [ToggleUserStatusHandler, RolesGuard],
+})
+export class UsersModule {}
+</file>
+
+<file path="infrastructure/database/prisma.service.ts">
+import {
+  Injectable,
+  OnApplicationShutdown,
+  OnModuleInit,
+  Logger,
+} from "@nestjs/common";
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg"; // Required by @prisma/adapter-pg
+import { AppConfigService } from "@/core/config/app-config.service";
+
+@Injectable()
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnApplicationShutdown
+{
+  private readonly logger = new Logger(PrismaService.name);
+  private isDisconnected = false;
+
+  constructor(configService: AppConfigService) {
+    const databaseUrl = configService.get("DATABASE_URL");
+
+    const pool = new Pool({ connectionString: databaseUrl });
+    const adapter = new PrismaPg(pool);
+
+    super({
+      adapter,
+      log: ["error", "warn"],
+      errorFormat: "colorless",
+    });
+  }
+
+  async onModuleInit() {
+    try {
+      await this.$connect();
+      this.logger.log(
+        "📦 Successfully connected to PostgreSQL via Prisma v7 Adapter.",
+      );
+    } catch (error) {
+      this.logger.error("❌ Failed to connect to the database", error);
+      throw error;
+    }
+  }
+
+  async onApplicationShutdown(signal?: string) {
+    if (this.isDisconnected) {
+      return;
+    }
+
+    this.logger.log(
+      `🛑 Received shutdown signal${signal ? ` (${signal})` : ""}. Disconnecting Prisma...`,
+    );
+    await this.$disconnect();
+    this.isDisconnected = true;
+    this.logger.log("🛑 Disconnected from PostgreSQL.");
+  }
+}
+</file>
+
+<file path="infrastructure/queue/bull-config.service.ts">
+import { Injectable } from "@nestjs/common";
+import {
+  SharedBullConfigurationFactory,
+  BullRootModuleOptions,
+} from "@nestjs/bullmq";
+import { AppConfigService } from "@/core/config/app-config.service";
+import { parseRedisConnection } from "@/infrastructure/redis/redis-connection.util";
+
+@Injectable()
+export class BullConfigService implements SharedBullConfigurationFactory {
+  constructor(private readonly config: AppConfigService) {}
+
+  createSharedConfiguration(): BullRootModuleOptions {
+    const connection = parseRedisConnection(
+      this.config.get("REDIS_URL"),
+      this.config.get("REDIS_PASSWORD"),
+    );
+
+    return {
+      connection,
+      defaultJobOptions: {
+        removeOnComplete: true,
+        removeOnFail: false,
+        attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 1000,
+        },
+      },
+    };
+  }
+}
+</file>
+
+<file path="infrastructure/redis/redis-connection.util.ts">
+export type RedisConnectionConfig = {
+  host: string;
+  port: number;
+  password?: string;
+  maxRetriesPerRequest?: null; // 🚀 QUAN TRỌNG: Required bởi BullMQ
+};
+
+export function parseRedisConnection(
+  redisUrl: string,
+  redisPassword?: string,
+): RedisConnectionConfig {
+  const url = new URL(redisUrl);
+
+  return {
+    host: url.hostname,
+    port: url.port ? Number(url.port) : 6379,
+    password:
+      redisPassword ||
+      (url.password ? decodeURIComponent(url.password) : undefined),
+    maxRetriesPerRequest: null, // 🚀 BUG FIX: Ngăn BullMQ thử kết nối vô hạn làm treo API
+  };
+}
+</file>
+
+<file path="infrastructure/redis/redis.service.ts">
+import { Injectable, OnModuleDestroy, Logger } from "@nestjs/common";
+import { AppConfigService } from "@/core/config/app-config.service";
+import Redis from "ioredis";
+
+@Injectable()
+export class RedisService implements OnModuleDestroy {
+  private readonly logger = new Logger(RedisService.name);
+  private readonly redisClient: Redis;
+
+  constructor(private readonly config: AppConfigService) {
+    this.redisClient = new Redis(this.config.get("REDIS_URL"), {
+      password: this.config.get("REDIS_PASSWORD"),
+      retryStrategy: (times) => {
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+      },
+    });
+
+    this.redisClient.on("connect", () => {
+      this.logger.log("🟢 Successfully connected to Redis.");
+    });
+
+    this.redisClient.on("error", (err) => {
+      this.logger.error("❌ Redis connection error:", err.message);
+    });
+  }
+
+  getClient(): Redis {
+    return this.redisClient;
+  }
+
+  async onModuleDestroy() {
+    await this.redisClient.quit();
+    this.logger.log("🛑 Disconnected from Redis.");
+  }
+}
+</file>
+
+<file path="infrastructure/storage/minio.service.ts">
+import { Injectable, OnModuleInit, Logger } from "@nestjs/common";
+import { AppConfigService } from "@/core/config/app-config.service";
+import * as Minio from "minio";
+
+@Injectable()
+export class MinioService implements OnModuleInit {
+  private readonly logger = new Logger(MinioService.name);
+  private readonly minioClient: Minio.Client;
+  private readonly bucketName: string;
+
+  constructor(private readonly config: AppConfigService) {
+    const endpoint = this.config.get("S3_ENDPOINT");
+    const parsedEndpoint = this.parseEndpoint(endpoint);
+
+    this.minioClient = new Minio.Client({
+      endPoint: parsedEndpoint.endPoint,
+      port: parsedEndpoint.port,
+      useSSL: parsedEndpoint.useSSL,
+      accessKey: this.config.get("S3_ACCESS_KEY"),
+      secretKey: this.config.get("S3_SECRET_KEY"),
+    });
+
+    this.bucketName = this.config.get("S3_BUCKET_NAME");
+  }
+
+  async onModuleInit() {
+    try {
+      const exists = await this.minioClient.bucketExists(this.bucketName);
+      if (!exists) {
+        await this.minioClient.makeBucket(this.bucketName, "us-east-1");
+        this.logger.log(`🪣 Created MinIO bucket: ${this.bucketName}`);
+      } else {
+        this.logger.log(`🪣 MinIO bucket ready: ${this.bucketName}`);
+      }
+    } catch (error) {
+      this.logger.error("❌ Failed to initialize MinIO bucket", error);
+      throw error;
+    }
+  }
+
+  getClient(): Minio.Client {
+    return this.minioClient;
+  }
+
+  getBucketName(): string {
+    return this.bucketName;
+  }
+
+  private parseEndpoint(endpoint: string) {
+    const normalized = endpoint.includes("://") ? endpoint : `http://${endpoint}`;
+    const url = new URL(normalized);
+
+    return {
+      endPoint: url.hostname,
+      port: url.port ? Number(url.port) : url.protocol === "https:" ? 443 : 80,
+      useSSL: url.protocol === "https:",
+    };
+  }
+}
+</file>
+
+<file path="infrastructure/storage/s3-storage.service.ts">
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+  BadRequestException,
+  ServiceUnavailableException,
+} from "@nestjs/common";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"; // 🚀 Import thư viện mới
+import { AppConfigService } from "@/core/config/app-config.service";
+import { randomUUID } from "crypto";
+
+@Injectable()
+export class S3StorageService {
+  private static readonly UPLOAD_TIMEOUT_MS = 15000;
+  private readonly client: S3Client;
+  private readonly presignClient: S3Client;
+  private readonly logger = new Logger(S3StorageService.name);
+  private readonly bucket: string;
+
+  constructor(private readonly config: AppConfigService) {
+    this.bucket = this.config.get("S3_BUCKET_NAME");
+    const internalEndpoint = this.normalizeEndpoint(this.config.get("S3_ENDPOINT"));
+    const publicEndpoint = this.getPublicEndpoint();
+    this.client = this.createS3Client(internalEndpoint);
+    this.presignClient = this.createS3Client(publicEndpoint);
+  }
+
+  async uploadFile(file: Express.Multer.File, folder: string): Promise<string> {
+    if (!file || !file.buffer || file.size <= 0) {
+      throw new BadRequestException("Tệp tải lên không hợp lệ.");
+    }
+
+    const safeFolder = this.sanitizeFolder(folder);
+    const safeOriginalName = this.sanitizeFileName(file.originalname);
+    const fileName = `${safeFolder}/${Date.now()}-${randomUUID()}-${safeOriginalName}`;
+
+    try {
+      const command = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: fileName,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      });
+
+      await this.withTimeout(
+        this.client.send(command),
+        S3StorageService.UPLOAD_TIMEOUT_MS,
+      );
+
+      this.logger.log(`✅ File uploaded successfully: ${fileName}`);
+
+      const encodedKey = fileName.split("/").map(encodeURIComponent).join("/");
+      return `${this.getPublicEndpoint()}/${this.bucket}/${encodedKey}`;
+    } catch (error) {
+      this.logger.error(`❌ Failed to upload file to S3: ${fileName}`, error);
+
+      if (this.isUploadTimeoutError(error)) {
+        throw new ServiceUnavailableException(
+          "Storage service timeout. Please try again.",
+        );
+      }
+
+      throw new InternalServerErrorException(
+        "Could not save document. Please try again.",
+      );
+    }
+  }
+
+  private extractKeyFromUrl(fullUrl: string): string {
+    const withoutQuery = fullUrl.split("?")[0];
+
+    try {
+      const parsedUrl = new URL(withoutQuery);
+      const normalizedPath = decodeURIComponent(parsedUrl.pathname.replace(/^\/+/, ""));
+      const bucketPrefix = `${this.bucket}/`;
+      if (normalizedPath.startsWith(bucketPrefix)) {
+        return normalizedPath.slice(bucketPrefix.length);
+      }
+    } catch {
+      // Ignore parse errors and continue with string-based fallback.
+    }
+
+    const normalized = decodeURIComponent(withoutQuery.replace(/^\/+/, ""));
+    if (normalized.startsWith(`${this.bucket}/`)) {
+      return normalized.slice(this.bucket.length + 1);
+    }
+    return normalized;
+  }
+
+  async getPresignedUrl(
+    fullUrl: string,
+    expirySeconds: number = 900,
+  ): Promise<string> {
+    try {
+      const key = this.extractKeyFromUrl(fullUrl);
+
+      const command = new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+      });
+
+      return await getSignedUrl(this.presignClient, command, {
+        expiresIn: expirySeconds,
+      });
+    } catch (error) {
+      this.logger.error(
+        `❌ Failed to generate presigned URL for: ${fullUrl}`,
+        error,
+      );
+      return fullUrl;
+    }
+  }
+
+  toPublicUrl(fullUrl: string): string {
+    const key = this.extractKeyFromUrl(fullUrl);
+    const encodedKey = key.split("/").map(encodeURIComponent).join("/");
+    return `${this.getPublicEndpoint()}/${this.bucket}/${encodedKey}`;
+  }
+
+  private sanitizeFolder(folder: string) {
+    return (
+      folder
+        .replace(/^\/+|\/+$/g, "")
+        .replace(/[^a-zA-Z0-9/_-]/g, "-")
+        .replace(/\/+/g, "/") || "uploads"
+    );
+  }
+
+  private sanitizeFileName(originalName: string) {
+    return (
+      originalName
+        .replace(/[^a-zA-Z0-9._-]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "") || "file"
+    );
+  }
+
+  private createS3Client(endpoint: string) {
+    return new S3Client({
+      endpoint,
+      region: this.config.get("S3_REGION") || "us-east-1",
+      credentials: {
+        accessKeyId: this.config.get("S3_ACCESS_KEY"),
+        secretAccessKey: this.config.get("S3_SECRET_KEY"),
+      },
+      forcePathStyle: true,
+    });
+  }
+
+  private getPublicEndpoint() {
+    const explicitPublicEndpoint = this.config.get("S3_PUBLIC_ENDPOINT");
+    if (explicitPublicEndpoint) {
+      return this.normalizeEndpoint(explicitPublicEndpoint);
+    }
+
+    const internalEndpoint = this.normalizeEndpoint(this.config.get("S3_ENDPOINT"));
+    return this.mapMinioHostToLocalhost(internalEndpoint);
+  }
+
+  private normalizeEndpoint(endpoint: string) {
+    return endpoint.replace(/\/+$/, "");
+  }
+
+  private mapMinioHostToLocalhost(endpoint: string) {
+    try {
+      const withProtocol = endpoint.includes("://")
+        ? endpoint
+        : `http://${endpoint}`;
+      const parsedUrl = new URL(withProtocol);
+
+      if (parsedUrl.hostname !== "minio") {
+        return endpoint;
+      }
+
+      const port = parsedUrl.port ? `:${parsedUrl.port}` : "";
+      return `${parsedUrl.protocol}//localhost${port}`;
+    } catch {
+      return endpoint;
+    }
+  }
+
+  private async withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
+    let timeoutHandle: NodeJS.Timeout | undefined;
+    const timeoutPromise = new Promise<T>((_, reject) => {
+      timeoutHandle = setTimeout(() => {
+        reject(new Error("S3_UPLOAD_TIMEOUT"));
+      }, timeoutMs);
+    });
+
+    try {
+      return await Promise.race([promise, timeoutPromise]);
+    } finally {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle);
+      }
+    }
+  }
+
+  private isUploadTimeoutError(error: unknown) {
+    return error instanceof Error && error.message === "S3_UPLOAD_TIMEOUT";
+  }
+}
+</file>
+
+<file path="infrastructure/infrastructure.module.ts">
+import { Global, Module } from "@nestjs/common";
+import { BullModule } from "@nestjs/bullmq";
+import { PrismaService } from "./database/prisma.service";
+import { RedisService } from "./redis/redis.service";
+import { MinioService } from "./storage/minio.service";
+import { S3StorageService } from "./storage/s3-storage.service";
+import { BullConfigService } from "./queue/bull-config.service";
+
+@Global()
+@Module({
+  imports: [
+    BullModule.forRootAsync({
+      useClass: BullConfigService,
+    }),
+  ],
+  providers: [
+    PrismaService,
+    RedisService,
+    MinioService,
+    S3StorageService,
+    BullConfigService,
+  ],
+  exports: [PrismaService, RedisService, MinioService, S3StorageService, BullModule],
+})
+export class InfrastructureModule {}
+</file>
+
+<file path="shared/file-upload/enterprise-file.pipe.ts">
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  PipeTransform,
+} from "@nestjs/common";
+import { FILE_UPLOAD_RULES, UploadContext } from "./file-whitelist.constant";
+
+@Injectable()
+export class EnterpriseFilePipe implements PipeTransform {
+  private readonly logger = new Logger(EnterpriseFilePipe.name);
+
+  constructor(private readonly context: UploadContext) {}
+
+  transform(file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException("Vui lòng tải lên một tệp đính kèm.");
+    }
+
+    const rules = FILE_UPLOAD_RULES[this.context];
+    if (!rules) {
+      this.logger.error(`Upload context [${this.context}] chưa được định nghĩa.`);
+      throw new BadRequestException("Lỗi cấu hình hệ thống máy chủ.");
+    }
+
+    const maxSizeBytes = rules.maxSizeMB * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      throw new BadRequestException(
+        `Dung lượng file quá lớn. Tối đa cho phép: ${rules.maxSizeMB}MB. ${rules.description}`,
+      );
+    }
+
+    const allowedMimes = rules.allowedMimes as readonly string[];
+    if (!allowedMimes.includes(file.mimetype)) {
+      throw new BadRequestException(
+        `Định dạng file [${file.mimetype}] không được hỗ trợ. ${rules.description}`,
+      );
+    }
+
+    return file;
+  }
+}
+</file>
+
+<file path="shared/file-upload/file-whitelist.constant.ts">
+export const MIME_TYPES = {
+  IMAGE: ["image/jpeg", "image/png", "image/webp"] as const,
+  DOCUMENT: [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ] as const,
+  VIDEO: ["video/mp4", "video/webm"] as const,
+  AUDIO: ["audio/mpeg", "audio/wav"] as const,
+} as const;
+
+export const FILE_UPLOAD_RULES = {
+  KYC_DOCUMENT: {
+    allowedMimes: [...MIME_TYPES.IMAGE, "application/pdf"],
+    maxSizeMB: 5,
+    description:
+      "Chỉ chấp nhận file Ảnh (JPG, PNG, WEBP) hoặc PDF, dung lượng tối đa 5MB.",
+  },
+  USER_AVATAR: {
+    allowedMimes: [...MIME_TYPES.IMAGE],
+    maxSizeMB: 2,
+    description:
+      "Chỉ chấp nhận file Ảnh (JPG, PNG, WEBP), dung lượng tối đa 2MB.",
+  },
+  COURSE_VIDEO: {
+    allowedMimes: [...MIME_TYPES.VIDEO],
+    maxSizeMB: 2048,
+    description: "Chỉ chấp nhận file Video (MP4, WEBM), dung lượng tối đa 2GB.",
+  },
+} as const;
+
+export type UploadContext = keyof typeof FILE_UPLOAD_RULES;
+</file>
+
+<file path="shared/mailer/templates/course-review.hbs">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: Arial, sans-serif; background:#f8fafc; margin:0; padding:0; color:#1f2937; }
+    .card { max-width: 620px; margin: 24px auto; background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; }
+    .header { background:#0ea5e9; color:#fff; padding:18px 22px; }
+    .content { padding:22px; line-height:1.6; }
+    .status { display:inline-block; padding:6px 10px; border-radius:999px; color:#fff; font-weight:700; font-size:12px; }
+    .approved { background:#16a34a; }
+    .rejected { background:#dc2626; }
+    .reason { margin-top:10px; border-left:4px solid #fecaca; background:#fef2f2; padding:10px 12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h2 style="margin:0;">Kết quả kiểm duyệt khóa học</h2>
+    </div>
+    <div class="content">
+      <p>Khóa học <strong>{{courseTitle}}</strong> đã được kiểm duyệt.</p>
+      {{#if isApproved}}
+        <p>Trạng thái: <span class="status approved">APPROVED</span></p>
+        <p>Chúc mừng! Khóa học của bạn đã được duyệt và có thể xuất bản.</p>
+      {{else}}
+        <p>Trạng thái: <span class="status rejected">REJECTED</span></p>
+        <p>Khóa học cần chỉnh sửa trước khi gửi duyệt lại.</p>
+        {{#if reason}}
+          <div class="reason"><strong>Lý do:</strong> {{reason}}</div>
+        {{/if}}
+      {{/if}}
+    </div>
+  </div>
+</body>
+</html>
+</file>
+
+<file path="shared/mailer/templates/email-verification.hbs">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e1e8ed;
+        }
+        .header {
+            background-color: #00a8ff;
+            background-image: linear-gradient(135deg, #00a8ff 0%, #007bff 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+        .content {
+            padding: 40px 30px;
+            line-height: 1.6;
+            text-align: center;
+        }
+        .content p {
+            font-size: 16px;
+            color: #555;
+        }
+        .button {
+            display: inline-block;
+            background-color: #ff9f43;
+            color: white !important;
+            padding: 16px 35px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 25px 0;
+            box-shadow: 0 4px 10px rgba(255, 159, 67, 0.3);
+            transition: transform 0.2s;
+        }
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            background-color: #fafafa;
+        }
+        .link-alt {
+            word-break: break-all;
+            color: #007bff;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sẵn sàng cất cánh cùng Flying Class! ✈️</h1>
+        </div>
+
+        <div class="content">
+            <h2>Chào {{name}},</h2>
+            <p>Tuyệt vời quá! Vậy là bạn đã chính thức ghi danh vào <strong>Flying Class</strong>. Chúng tôi đã chuẩn bị sẵn chỗ ngồi tốt nhất dành cho bạn. ✨</p>
+            
+            <p>Chỉ còn một bước cuối cùng để "vút bay" thôi, hãy xác nhận email của bạn nhé:</p>
+            
+            <a href="{{verificationUrl}}" class="button">Xác minh ngay 🚀</a>
+            
+            <p style="margin-top: 30px;">
+                Nếu nút trên không hoạt động, bạn có thể "đáp cánh" qua liên kết này:<br>
+                <a href="{{verificationUrl}}" class="link-alt">{{verificationUrl}}</a>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Liên kết này sẽ hết hạn sau 24 giờ để đảm bảo an toàn cho chuyến bay của bạn.</p>
+            <p>© 2026 Flying Class. Chúc bạn có những trải nghiệm học tập thật thú vị! 🌟</p>
+        </div>
+    </div>
+</body>
+</html>
+</file>
+
+<file path="shared/mailer/templates/kyc-result.hbs">
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .status { font-weight: bold; padding: 5px 10px; border-radius: 4px; }
+        .approved { background-color: #d4edda; color: #155724; }
+        .rejected { background-color: #f8d7da; color: #721c24; }
+        .footer { margin-top: 20px; font-size: 0.8em; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Update on your Instructor Application</h2>
+        <p>Hello,</p>
+
+        <p>Your KYC verification request for <strong>Flying Class</strong> has been reviewed.</p>
+
+        {{#if isApproved}}
+            <div class="status approved">Status: APPROVED</div>
+            <p>Congratulations! Your account has been upgraded. You can now start creating courses and managing your students.</p>
+            <p><a href="http://localhost:3000/instructor/dashboard">Go to Instructor Dashboard</a></p>
+        {{else}}
+            <div class="status rejected">Status: REJECTED</div>
+            <p>Unfortunately, your application was not approved for the following reason:</p>
+            <blockquote style="border-left: 4px solid #f5c6cb; padding-left: 15px; font-style: italic;">
+                "{{reason}}"
+            </blockquote>
+            <p>You can re-submit your documents through the profile settings page after addressing the issue mentioned above.</p>
+        {{/if}}
+
+        <div class="footer">
+            <p>Best regards,<br>The Flying Class Team</p>
+        </div>
+    </div>
+</body>
+</html>
+</file>
+
+<file path="shared/mailer/templates/reset-password.hbs">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e1e8ed;
+        }
+        .header {
+            background-color: #00a8ff;
+            background-image: linear-gradient(135deg, #00a8ff 0%, #007bff 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+        .content {
+            padding: 40px 30px;
+            line-height: 1.6;
+            text-align: center;
+        }
+        .content p {
+            font-size: 16px;
+            color: #555;
+        }
+        .button {
+            display: inline-block;
+            background-color: #ff9f43;
+            color: white !important;
+            padding: 16px 35px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 25px 0;
+            box-shadow: 0 4px 10px rgba(255, 159, 67, 0.3);
+            transition: transform 0.2s;
+        }
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            background-color: #fafafa;
+        }
+        .link-alt {
+            word-break: break-all;
+            color: #007bff;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Đặt lại mật khẩu của bạn 🔐</h1>
+        </div>
+
+        <div class="content">
+            <h2>Chào {{name}},</h2>
+            <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản Flying Class của bạn.</p>
+
+            <p>Nhấn nút bên dưới để tạo mật khẩu mới:</p>
+
+            <a href="{{resetUrl}}" class="button">Đặt lại mật khẩu</a>
+
+            <p style="margin-top: 30px;">
+                Nếu nút trên không hoạt động, vui lòng sử dụng liên kết sau:<br>
+                <a href="{{resetUrl}}" class="link-alt">{{resetUrl}}</a>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Liên kết này sẽ hết hạn sau 15 phút vì lý do bảo mật.</p>
+            <p>Nếu bạn không yêu cầu đặt lại mật khẩu, có thể bỏ qua email này.</p>
+        </div>
+    </div>
+</body>
+</html>
+</file>
+
+<file path="shared/mailer/mail-builder.service.ts">
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from "@nestjs/common";
+import * as hbs from "handlebars";
+import * as fs from "fs/promises";
+import * as path from "path";
+
+@Injectable()
+export class MailBuilderService {
+  private readonly logger = new Logger(MailBuilderService.name);
+  private readonly templateCache = new Map<string, hbs.TemplateDelegate>();
+
+  async buildTemplate(
+    templateName: string,
+    context: Record<string, any>,
+  ): Promise<string> {
+    try {
+      let compiledTemplate = this.templateCache.get(templateName);
+
+      if (!compiledTemplate) {
+        this.logger.debug(
+          `Template cache miss. Loading from disk: ${templateName}`,
+        );
+        compiledTemplate = await this.loadAndCompile(templateName);
+        this.templateCache.set(templateName, compiledTemplate);
+      }
+
+      return compiledTemplate(context);
+    } catch (error: unknown) {
+      const stack =
+        error instanceof Error ? error.stack : "No stack trace available";
+
+      this.logger.error(`Failed to build template: ${templateName}`, stack);
+      throw new InternalServerErrorException(
+        "Email template compilation failed.",
+      );
+    }
+  }
+
+  private async loadAndCompile(
+    templateName: string,
+  ): Promise<hbs.TemplateDelegate> {
+    const templatePaths = [
+      path.join(__dirname, "templates", `${templateName}.hbs`),
+      path.join(
+        process.cwd(),
+        "dist",
+        "src",
+        "shared",
+        "mailer",
+        "templates",
+        `${templateName}.hbs`,
+      ),
+      path.join(
+        process.cwd(),
+        "src",
+        "shared",
+        "mailer",
+        "templates",
+        `${templateName}.hbs`,
+      ),
+    ];
+
+    for (const templatePath of templatePaths) {
+      try {
+        const templateSource = await fs.readFile(templatePath, "utf-8");
+        return hbs.compile(templateSource);
+      } catch (error: unknown) {
+        if (this.isNodeError(error) && error.code === "ENOENT") {
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    throw new Error(
+      `Template file not found. Checked paths: ${templatePaths.join(", ")}`,
+    );
+  }
+
+  private isNodeError(error: unknown): error is NodeJS.ErrnoException {
+    return error instanceof Error;
+  }
+}
+</file>
+
+<file path="shared/mailer/mail-transport.service.ts">
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from "@nestjs/common";
+import * as nodemailer from "nodemailer";
+import { AppConfigService } from "@/core/config/app-config.service";
+
+@Injectable()
+export class MailTransportService {
+  private readonly transporter: nodemailer.Transporter;
+  private readonly logger = new Logger(MailTransportService.name);
+
+  constructor(private readonly config: AppConfigService) {
+    this.transporter = nodemailer.createTransport({
+      host: this.config.get("MAIL_HOST"),
+      port: Number(this.config.get("MAIL_PORT")),
+      secure: this.config.get("MAIL_SECURE") === "true",
+      auth: {
+        user: this.config.get("MAIL_USER"),
+        pass: this.config.get("MAIL_PASS"),
+      },
+    });
+  }
+
+  async send(to: string, subject: string, html: string): Promise<void> {
+    const fromName = "Flying Class";
+    const fromEmail = this.config.get("MAIL_FROM");
+
+    try {
+      const info = await this.transporter.sendMail({
+        from: `"${fromName}" <${fromEmail}>`,
+        to,
+        subject,
+        html,
+      });
+
+      this.logger.log(
+        `📧 Email delivered successfully. Message ID: ${info.messageId}`,
+      );
+    } catch (error: unknown) {
+      this.logger.error(
+        `❌ SMTP Transport Error: Failed to send to ${to}`,
+        error instanceof Error ? error.stack : error,
+      );
+
+      throw new InternalServerErrorException("Failed to send email via SMTP.");
+    }
+  }
+}
+</file>
+
+<file path="shared/mailer/mailer.module.ts">
+import { MailBuilderService } from "./mail-builder.service";
+import { MailTransportService } from "./mail-transport.service";
+import { Module } from "@nestjs/common";
+
+@Module({
+  providers: [MailBuilderService, MailTransportService],
+  exports: [MailBuilderService, MailTransportService],
+})
+export class MailerModule {}
+</file>
+
+<file path="shared/settings/system-setting.service.ts">
+import { Injectable, Inject } from "@nestjs/common";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
+
+@Injectable()
+export class SystemSettingService {
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
+
+  async getAsNumber(key: string): Promise<number> {
+    const cacheKey = `SYSTEM_SETTING_${key}`;
+
+    let value = await this.cacheManager.get<string>(cacheKey);
+
+    if (!value) {
+      const setting = await this.prisma.systemSetting.findUnique({ where: { key } });
+      value = setting?.value || "0";
+
+      await this.cacheManager.set(cacheKey, value, 3600);
+    }
+
+    return Number(value);
+  }
+
+  async getAsBoolean(key: string): Promise<boolean> {
+    const cacheKey = `SYSTEM_SETTING_${key}`;
+    let value = await this.cacheManager.get<string>(cacheKey);
+
+    if (!value) {
+      const setting = await this.prisma.systemSetting.findUnique({ where: { key } });
+      value = setting?.value || "false";
+      await this.cacheManager.set(cacheKey, value, 3600);
+    }
+
+    return value === "true";
+  }
+}
+</file>
+
+<file path="shared/shared.module.ts">
+import { Global, Module } from "@nestjs/common";
+import { CacheModule } from "@nestjs/cache-manager";
+import { MailerModule } from "./mailer/mailer.module";
+import { SystemSettingService } from "./settings/system-setting.service";
+
+@Global()
+@Module({
+  imports: [MailerModule, CacheModule.register()],
+  providers: [SystemSettingService],
+  exports: [MailerModule, CacheModule, SystemSettingService],
+})
+export class SharedModule {}
+</file>
+
+<file path="app.module.ts">
+import { Module } from "@nestjs/common";
+import { CoreModule } from "./core/core.module";
+import { InfrastructureModule } from "./infrastructure/infrastructure.module";
+import { AuthModule } from "./features/auth/auth.module";
+import { SharedModule } from "./shared/shared.module";
+import { KycModule } from "./features/kyc/kyc.module";
+import { UsersModule } from "./features/users/users.module";
+import { CoursesModule } from "./features/courses/courses.module";
+import { FinanceModule } from "./features/finance/finance.module";
+import { SystemModule } from "./features/system/system.module";
+
+@Module({
+  imports: [
+    CoreModule,
+    InfrastructureModule,
+    AuthModule,
+    SharedModule,
+    KycModule,
+    UsersModule,
+    CoursesModule,
+    FinanceModule,
+    SystemModule,
+  ],
+})
+export class AppModule {}
+</file>
+
+<file path="main.ts">
+import "reflect-metadata";
+import { NestFactory } from "@nestjs/core";
+import { NestFastifyApplication } from "@nestjs/platform-fastify";
+import { AppModule } from "./app.module";
+import { Logger, ValidationPipe } from "@nestjs/common";
+import { AppConfigService } from "./core/config/app-config.service";
+import { createFastifyAdapter } from "./core/setup/fastify.setup";
+import multipart from "@fastify/multipart";
+
+async function bootstrap() {
+  process.stdout.write("\n");
+  const logger = new Logger("Bootstrap");
+
+  try {
+    const app = await NestFactory.create<NestFastifyApplication>(
+      AppModule,
+      createFastifyAdapter(),
+    );
+    await app.register(multipart, {
+      limits: { fileSize: 2 * 1024 * 1024 * 1024 }, // 2GB global hard cap
+    });
+
+    app.enableCors();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        stopAtFirstError: true,
+      }),
+    );
+
+    app.setGlobalPrefix("api/v1");
+    app.enableShutdownHooks();
+
+    const config = app.get(AppConfigService);
+    const port = Number(config.get("PORT")) || 3001;
+
+    // CRITICAL for rate limiting behind reverse proxies.
+    // For Fastify, trustProxy is enabled in createFastifyAdapter().
+    (app.getHttpAdapter().getInstance() as { setTrustProxy?: (value: number) => void }).setTrustProxy?.(1);
+
+    await app.listen(port, "0.0.0.0");
+
+    logger.log(
+      `🚀 Application is successfully running on: ${await app.getUrl()}`,
+    );
+  } catch (error) {
+    logger.error("Failed to start the application", error);
+    process.exit(1);
+  }
+}
+
+bootstrap();
+</file>
+
+</files>

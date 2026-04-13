@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/features/kyc/queries/get-my-kyc.query.ts"],"sourcesContent":["export class GetMyKycQuery {\n  constructor(public readonly userId: string) {}\n}\n"],"names":["GetMyKycQuery","userId"],"mappings":";;;;+BAAaA;;;eAAAA;;;AAAN,IAAA,AAAMA,gBAAN,MAAMA;IACX,YAAY,AAAgBC,MAAc,CAAE;aAAhBA,SAAAA;IAAiB;AAC/C"}

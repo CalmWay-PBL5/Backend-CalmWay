@@ -1,0 +1,259 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+dto/
+  chat.dto.ts
+ai-assistant.controller.ts
+ai-assistant.module.ts
+ai-assistant.service.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="dto/chat.dto.ts">
+import { IsString, IsNotEmpty, MinLength } from 'class-validator';
+
+/**
+ * DTO cho endpoint chat
+ */
+export class ChatDto {
+  /**
+   * Tin nhắn từ người dùng
+   * @example "Làm sao tôi có thể ..?"
+   */
+  @IsString({ message: 'Message phải là string' })
+  @IsNotEmpty({ message: 'Message không được để trống' })
+  @MinLength(1, { message: 'Message phải có ít nhất 1 ký tự' })
+  message!: string;
+}
+</file>
+
+<file path="ai-assistant.controller.ts">
+import { Controller, Post, Get, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { AiAssistantService } from './ai-assistant.service';
+
+/**
+ * Controller xử lý các request liên quan đến AI Assistant
+ */
+@Controller('ai-assistant')
+export class AiAssistantController {
+  constructor(private readonly aiAssistantService: AiAssistantService) {}
+
+  /**
+   * Endpoint GET /api/v1/ai-assistant/models
+   * List tất cả models khả dụng (dùng để debug)
+   * @returns Danh sách models
+   */
+  @Get('models')
+  async listModels() {
+    const models = await this.aiAssistantService.listAvailableModels();
+    return {
+      status: 'success',
+      data: {
+        models,
+      },
+    };
+  }
+
+  /**
+   * Endpoint POST /api/v1/ai-assistant/chat
+   * Nhận multipart/form-data: message (text) + file (optional)
+   * Trả về response từ Gemini AI
+   *
+   * @param message - Tin nhắn từ người dùng (required)
+   * @param file - File ảnh, PDF, v.v (optional)
+   * @returns Đối tượng chứa status và data (reply)
+   *
+   * @example
+   * POST /api/v1/ai-assistant/chat
+   * Content-Type: multipart/form-data
+   * Form Data:
+   *   - message: "Phân tích ảnh này cho tôi"
+   *   - file: [binary image data]
+   *
+   * Response: {
+   *   "status": "success",
+   *   "data": {
+   *     "reply": "Ảnh này cho thấy..."
+   *   }
+   * }
+   */
+  @Post('chat')
+  @UseInterceptors(FileInterceptor('file'))
+  async chat(
+    @Body('message') message: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    // Gọi service để xử lý message và file (nếu có)
+    const reply = await this.aiAssistantService.generateChatResponse(message, file);
+
+    // Trả về format chuẩn
+    return {
+      status: 'success',
+      data: {
+        reply,
+      },
+    };
+  }
+}
+</file>
+
+<file path="ai-assistant.module.ts">
+import { Module } from '@nestjs/common';
+import { AiAssistantService } from './ai-assistant.service';
+import { AiAssistantController } from './ai-assistant.controller';
+
+/**
+ * Module AI Assistant - đóng gói Service và Controller
+ */
+@Module({
+  controllers: [AiAssistantController],
+  providers: [AiAssistantService],
+  exports: [AiAssistantService],
+})
+export class AiAssistantModule {}
+</file>
+
+<file path="ai-assistant.service.ts">
+import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { ConfigService } from '@nestjs/config';
+
+/**
+ * Service xử lý chat với Google Gemini API
+ */
+@Injectable()
+export class AiAssistantService {
+  private genAI: GoogleGenerativeAI;
+  private apiKey: string;
+
+  constructor(private readonly configService: ConfigService) {
+    // 1. Lấy API key từ file .env thông qua ConfigService
+    const key = this.configService.get<string>('GEMINI_API_KEY');
+    
+    // 2. Bắt lỗi ngay lúc khởi động server nếu lỡ quên không điền key
+    if (!key) {
+      throw new Error('CRITICAL ERROR: Thiếu biến môi trường GEMINI_API_KEY trong file .env');
+    }
+
+    this.apiKey = key;
+    // 3. Khởi tạo Google Generative AI client
+    this.genAI = new GoogleGenerativeAI(this.apiKey);
+  }
+
+  /**
+   * Gửi message + file (optional) lên Gemini API và nhận response
+   * @param message - Tin nhắn từ người dùng
+   * @param file - File (ảnh, PDF, v.v) - tùy chọn
+   * @returns Text response từ Gemini AI
+   */
+  async generateChatResponse(message: string, file?: Express.Multer.File): Promise<string> {
+    try {
+      if (!message || message.trim().length === 0) {
+        throw new BadRequestException('Message không được để trống');
+      }
+
+      // 1. Khởi tạo model chuẩn (sử dụng gemini-2.5-flash theo danh sách hỗ trợ)
+      const model = this.genAI.getGenerativeModel({
+        model: '	gemini-3.1-flash-lite-preview', 
+        systemInstruction: 'Bạn là trợ lý ảo của Flying Class. Trả lời ngắn gọn, thân thiện.',
+      });
+
+      // 2. Chuẩn bị nội dung
+      const parts: any[] = [{ text: message }];
+
+      if (file) {
+        parts.push({
+          inlineData: {
+            mimeType: file.mimetype,
+            data: file.buffer.toString('base64'),
+          },
+        });
+      }
+
+      console.log(`[AiAssistantService] Đang gọi Gemini...`);
+      const result = await model.generateContent({ contents: [{ role: 'user', parts }] });
+      
+      const response = await result.response;
+      return response.text();
+
+    } catch (error: any) {
+      // IN RA LỖI GỐC ĐỂ DEBUG
+      console.error('[AiAssistantService] FULL ERROR TỪ GOOGLE:', error); 
+      
+      throw new InternalServerErrorException(error.message || 'Lỗi Gemini API');
+    }
+  }
+
+  /**
+   * Liệt kê tất cả các models khả dụng từ Gemini API
+   * Dùng để debug xem models nào thực sự supported
+   * @returns Danh sách tên models khả dụng
+   */
+  async listAvailableModels(): Promise<string[]> {
+    try {
+      // Gọi trực tiếp REST API bằng fetch thay vì dùng hàm không tồn tại của SDK
+      const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Google API trả về mã lỗi: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Lấy ra danh sách tên model
+      const modelNames = data.models.map((model: any) => model.name);
+      console.log(`[AiAssistantService] Đã lấy được ${modelNames.length} models.`);
+      
+      return modelNames;
+    } catch (error: any) {
+      console.error('[AiAssistantService] Lỗi lấy danh sách models:', error.message);
+      throw new InternalServerErrorException(`Không thể lấy danh sách models: ${error.message}`);
+    }
+  }
+}
+</file>
+
+</files>

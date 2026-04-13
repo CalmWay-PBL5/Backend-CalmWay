@@ -1,0 +1,89 @@
+# API Handoff - Class Members (Frontend)
+
+## 1) Base Info
+- Base URL: `/api/v1`
+- Auth: `Authorization: Bearer <access_token>`
+- Role required: `LECTURER`
+- Content-Type: `application/json`
+
+---
+
+## 2) Add Student To Class
+- **Method**: `POST`
+- **URL**: `/teachers/me/class-members`
+- **Body**:
+```json
+{
+  "classId": "cls_123",
+  "studentId": "usr_456"
+}
+```
+
+- **Success (200)**:
+```json
+{
+  "id": "enr_001",
+  "classId": "cls_123",
+  "studentId": "usr_456",
+  "status": "ACTIVE"
+}
+```
+
+- **Common errors**:
+  - `400`: thiếu `classId` hoặc `studentId`
+  - `400`: học viên đã ở trong lớp
+  - `401`: chưa đăng nhập / token sai
+  - `403`: không đúng role lecturer
+
+---
+
+## 3) Get Members By Class
+- **Method**: `GET`
+- **URL**: `/teachers/me/class-members/class/:classId`
+- **Query (optional)**:
+  - `status`: `ACTIVE | INACTIVE | DROPPED`
+
+- **Example**:
+`GET /teachers/me/class-members/class/cls_123?status=ACTIVE`
+
+- **Success (200)**:
+```json
+[
+  {
+    "id": "enr_001",
+    "classId": "cls_123",
+    "studentId": "usr_456",
+    "status": "ACTIVE"
+  }
+]
+```
+
+- **Common errors**:
+  - `400`: `status` không thuộc enum hợp lệ
+  - `401`: chưa đăng nhập / token sai
+  - `403`: không đúng role lecturer
+
+---
+
+## 4) Remove Student From Class
+- **Method**: `DELETE`
+- **URL**: `/teachers/me/class-members/class/:classId/student/:studentId`
+
+- **Success (200)**:
+```json
+{
+  "success": true
+}
+```
+
+- **Common errors**:
+  - `404`: không tìm thấy học viên trong lớp
+  - `401`: chưa đăng nhập / token sai
+  - `403`: không đúng role lecturer
+
+---
+
+## 5) Notes For Frontend
+- Có alias route cũ: `/class-members/...`, nhưng frontend mới nên dùng `/teachers/me/class-members/...`.
+- Nếu gọi bằng `axios/fetch`, nhớ đính kèm `Bearer token` ở mọi endpoint trên.
+- Enum `status` nên map UI filter cố định, tránh nhập text tự do.

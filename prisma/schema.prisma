@@ -1,0 +1,470 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =======================
+// ENUMS
+// =======================
+enum Role {
+  STUDENT
+  ADMIN
+  LECTURER
+}
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+}
+
+enum ClassType {
+  PUBLIC
+  PRIVATE
+}
+
+enum ClassStatus {
+  ACTIVE
+  PAUSED
+  PENDING_DELETE
+}
+
+enum ClassMemberStatus {
+  ACTIVE
+  DROPPED
+}
+
+enum ContentType {
+  VIDEO
+  DOCUMENT
+  TEXT
+  CLOUD_DOC
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  ESSAY
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum NotificationType {
+  SYSTEM
+  COURSE_UPDATE
+  PAYMENT
+  EXAM
+}
+
+enum AIFeatureType {
+  QUIZ_GEN
+  SUMMARY
+  CHAT_BUDDY
+  MODERATION
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CourseStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum PayoutStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
+enum DataType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+}
+
+// =======================
+// MODELS
+// =======================
+
+model User {
+  id          String     @id @default(uuid())
+  email       String     @unique
+  password    String?    // Optional for Google OAuth users
+  google_id   String?    @unique
+  role        Role       @default(STUDENT)
+  is_verified Boolean    @default(false)
+  isActive    Boolean    @default(true)
+  banReason   String?
+  status      UserStatus @default(ACTIVE)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  hashedRefreshToken String?
+
+  // Relations
+  profile         Profile?
+  classesTaught   Class[]          @relation("TeacherClasses")
+  submissions     Submission[]
+  transactions    Transaction[]
+  classMembers    ClassMember[]
+  chatMessages    ChatMessage[]
+  notifications   Notification[]
+  ai_usage_logs   AI_Usage_Log[]
+  classReviews    ClassReview[]
+  kycApplication  KycApplication?
+  courses         Course[]
+  courseTransactions CourseTransaction[]
+  wallet          Wallet?
+  payoutRequests  PayoutRequest[] @relation("InstructorPayoutRequests")
+  
+  @@map("users")
+}
+
+model Wallet {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  balance       Float    @default(0)
+  lockedBalance Float    @default(0)
+  updatedAt     DateTime @updatedAt
+
+  @@map("wallets")
+}
+
+model PayoutRequest {
+  id                String       @id @default(uuid())
+  instructorId      String
+  instructor        User         @relation("InstructorPayoutRequests", fields: [instructorId], references: [id])
+  amount            Float
+  status            PayoutStatus @default(PENDING)
+  bankCode          String
+  bankAccountNumber String
+  bankAccountName   String
+  transactionRef    String?
+  rejectionReason   String?
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@map("payout_requests")
+}
+
+model SystemSetting {
+  key         String   @id
+  value       String
+  dataType    DataType @default(STRING)
+  name        String
+  description String?
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("email_verifications")
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_resets")
+}
+
+model KycApplication {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  identityCardUrl String?
+  supportingDocumentUrls Json?
+  status          KycStatus @default(PENDING)
+  rejectionReason String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("kyc_applications")
+}
+
+model Course {
+  id              String       @id @default(uuid())
+  title           String
+  description     String?
+  thumbnailUrl    String?
+  instructorId    String
+  instructor      User         @relation(fields: [instructorId], references: [id])
+  transactions    CourseTransaction[]
+  status          CourseStatus @default(DRAFT)
+  rejectionReason String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("courses")
+}
+
+model CourseTransaction {
+  id                String            @id @default(uuid())
+  courseId          String
+  course            Course            @relation(fields: [courseId], references: [id])
+  studentId         String
+  student           User              @relation(fields: [studentId], references: [id])
+  amount            Float
+  platformFee       Float
+  instructorRevenue Float
+  status            TransactionStatus @default(PENDING)
+  paymentMethod     String?
+  transactionRef    String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([createdAt, status])
+  @@map("course_transactions")
+}
+
+model Profile {
+  id                String   @id @default(uuid())
+  user_id           String   @unique
+  full_name         String
+  phone             String?
+  avatar            String?
+  bio               String?  @db.Text
+  parent_email      String?
+  identify_card_url String?
+  updated_at        DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  created_at  DateTime @default(now())
+  
+  classes     Class[]
+
+  @@map("subjects")
+}
+
+model Class {
+  id               String      @id @default(uuid())
+  teacher_id       String
+  subject_id       String
+  title            String
+  description      String?     @db.Text
+  price            Decimal     @default(0.00) @db.Decimal(10, 2)
+  cover_image      String?
+  class_code       String      @unique
+  invitation_token String?     @unique
+  max_students     Int         @default(50)
+  type             ClassType   @default(PUBLIC)
+  status           ClassStatus @default(ACTIVE)
+  created_at       DateTime    @default(now())
+  deleted_at       DateTime?
+
+  // Relations
+  teacher      User          @relation("TeacherClasses", fields: [teacher_id], references: [id])
+  subject      Subject       @relation(fields: [subject_id], references: [id])
+  lessons      Lesson[]
+  exams        Exam[]
+  transactions Transaction[]
+  classMembers ClassMember[]
+  chatMessages ChatMessage[]
+  reviews      ClassReview[]
+
+  @@map("classes")
+}
+
+model ClassMember {
+  id         String            @id @default(uuid())
+  class_id   String
+  student_id String
+  status     ClassMemberStatus @default(ACTIVE)
+  joined_at  DateTime          @default(now())
+  dropped_at DateTime?
+  updated_at DateTime          @updatedAt
+
+  class   Class @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  student User  @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@unique([class_id, student_id])
+  @@index([class_id, status, joined_at])
+  @@index([student_id, status])
+  @@map("class_members")
+}
+
+model ClassReview {
+  id         String   @id @default(uuid())
+  class_id   String
+  student_id String
+  rating     Int
+  content    String?  @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  class   Class @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  student User  @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@unique([class_id, student_id])
+  @@index([class_id, created_at])
+  @@index([student_id])
+  @@map("class_reviews")
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  class_id   String
+  sender_id  String
+  content    String   @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  class  Class @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  sender User  @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+
+  @@index([class_id, created_at])
+  @@index([sender_id, created_at])
+  @@map("chat_messages")
+}
+
+model Lesson {
+  id              String      @id @default(uuid())
+  class_id        String
+  title           String
+  content_type    ContentType
+  url             String?
+  body_text       String?     @db.Text
+  order_index     Int
+  
+  // AI Support Fields
+  ai_summary_text String?     @db.Text
+  ai_keywords     Json?       // Stores array of keywords
+
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  class Class @relation(fields: [class_id], references: [id], onDelete: Cascade)
+
+  @@map("lessons")
+}
+
+model Exam {
+  id               String   @id @default(uuid())
+  class_id         String
+  title            String
+  duration_minutes Int
+  start_date       DateTime?
+  end_date         DateTime?
+  max_attempts     Int      @default(1)
+  created_at       DateTime @default(now())
+
+  class       Class        @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  questions   Question[]
+  submissions Submission[]
+
+  @@map("exams")
+}
+
+model Question {
+  id             String       @id @default(uuid())
+  exam_id        String
+  question_text  String       @db.Text
+  type           QuestionType
+  options        Json?        // Stores options e.g., ["A", "B", "C", "D"]
+  correct_answer String?
+  created_at     DateTime     @default(now())
+
+  exam Exam @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+
+  @@map("questions")
+}
+
+model Submission {
+  id              String   @id @default(uuid())
+  exam_id         String
+  student_id      String
+  answers         Json     // Stores student's answers map
+  score           Float?
+  teacher_comment String?  @db.Text
+  submitted_at    DateTime @default(now())
+
+  exam    Exam @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  student User @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@map("submissions")
+}
+
+model Transaction {
+  id            String            @id @default(uuid())
+  user_id       String
+  class_id      String
+  amount        Decimal           @db.Decimal(10, 2)
+  momo_order_id String?           @unique
+  status        TransactionStatus @default(PENDING)
+  created_at    DateTime          @default(now())
+
+  user  User  @relation(fields: [user_id], references: [id])
+  class Class @relation(fields: [class_id], references: [id])
+
+  @@map("transactions")
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  user_id    String
+  content    String           @db.Text
+  is_read    Boolean          @default(false)
+  type       NotificationType
+  created_at DateTime         @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model AI_Usage_Log {
+  id            String        @id @default(uuid())
+  user_id       String
+  feature_type  AIFeatureType
+  input_tokens  Int           @default(0)
+  output_tokens Int           @default(0)
+  model_used    String        // e.g., "gpt-4o-mini" or "gemini-flash"
+  created_at    DateTime      @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("ai_usage_logs")
+}

@@ -1,0 +1,35 @@
+{
+  "name": "Flying Class Backend Dev",
+  "dockerComposeFile": ["docker-compose.devcontainer.yml"],
+  "service": "backend",
+  "workspaceFolder": "/app",
+
+  "runServices": ["postgres", "redis", "backend", "minio", "minio-setup"],
+  "shutdownAction": "stopCompose",
+
+  "remoteUser": "node",
+  "updateRemoteUserUID": true,
+
+  "containerEnv": {
+    "NODE_ENV": "development"
+  },
+
+  // "postCreateCommand": "npm ci && npx prisma migrate dev && npx prisma db seed",
+  "postCreateCommand": "git config --global --add safe.directory /app && npm ci && npx prisma migrate dev && npx prisma generate && npx prisma db seed",
+  "forwardPorts": [3000],
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "js/ts.tsdk.path": "node_modules/typescript/lib"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "Prisma.prisma",
+        "openai.chatgpt"
+      ]
+    }
+  }
+  
+}

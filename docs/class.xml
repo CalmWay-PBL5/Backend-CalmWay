@@ -1,0 +1,976 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+dto/
+  create-class.dto.ts
+  update-class.dto.ts
+class-export.service.ts
+class.controller.ts
+class.module.ts
+class.service.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="dto/create-class.dto.ts">
+import { IsString, IsOptional, IsNumber, Min, IsEnum, IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export enum ClassType {
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
+}
+
+export class CreateClassDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Tên lớp học không được để trống' })
+  title!: string; // <-- ĐÃ SỬA: Thêm dấu chấm than "!"
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0, { message: 'Giá tiền không được nhỏ hơn 0' })
+  price!: number; // <-- ĐÃ SỬA: Thêm dấu chấm than "!"
+
+  @IsString()
+  @IsOptional()
+  coverImage?: string;
+
+  @IsEnum(ClassType, { message: 'Chế độ lớp học chỉ được là PUBLIC hoặc PRIVATE' })
+  @IsOptional()
+  type?: ClassType;
+}
+</file>
+
+<file path="dto/update-class.dto.ts">
+import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { CreateClassDto } from './create-class.dto';
+import { IsOptional, IsString, IsDateString } from 'class-validator';
+
+export class UpdateClassDto extends PartialType(CreateClassDto) {
+  @IsString()
+  @IsOptional()
+  status?: string; // ACTIVE / PENDING_DELETE
+
+  @IsDateString()
+  @IsOptional()
+  deletedAt?: Date;
+}
+</file>
+
+<file path="class-export.service.ts">
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../infrastructure/database/prisma/prisma.service';
+import * as ExcelJS from 'exceljs';
+import * as fs from 'fs';
+import * as path from 'path';
+
+@Injectable()
+export class ClassExportService {
+  constructor(private prisma: PrismaService) {}
+
+  async exportClassesToExcel(teacherId: string): Promise<string> {
+    // Lấy danh sách lớp của teacher
+    const classes = await this.prisma.class.findMany({
+      where: {
+        teacherId: teacherId,
+        status: 'active',
+      },
+      include: {
+        enrollments: {
+          where: { status: 'ACTIVE' },
+          select: { id: true },
+        },
+        subject: {
+          select: { name: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Tạo workbook
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Danh sách lớp học');
+
+    // ==========================================
+    // CẤU HÌNH TIÊU ĐỀ
+    // ==========================================
+    worksheet.columns = [
+      { header: 'STT', key: 'stt', width: 8 },
+      { header: 'Tên lớp học', key: 'title', width: 25 },
+      { header: 'Mã lớp', key: 'classCode', width: 15 },
+      { header: 'Môn học', key: 'subject', width: 15 },
+      { header: 'Mô tả', key: 'description', width: 30 },
+      { header: 'Giá tiền (VND)', key: 'price', width: 15 },
+      { header: 'Số học sinh', key: 'studentCount', width: 12 },
+      { header: 'Sĩ số tối đa', key: 'maxStudents', width: 12 },
+      { header: 'Loại lớp', key: 'type', width: 12 },
+      { header: 'Ngày tạo', key: 'createdAt', width: 18 },
+    ];
+
+    // ==========================================
+    // ĐỊNH DẠNG TIÊU ĐỀ
+    // ==========================================
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF4472C4' }, // Xanh đậm
+    };
+    headerRow.alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+      wrapText: true,
+    };
+
+    // ==========================================
+    // THÊM DỮ LIỆU VÀO SHEET
+    // ==========================================
+    classes.forEach((classItem: any, index: number) => {
+      worksheet.addRow({
+        stt: index + 1,
+        title: classItem.title || '',
+        classCode: classItem.classCode || '',
+        subject: classItem.subject?.name || 'N/A',
+        description: classItem.description || '',
+        price: Number(classItem.price),
+        studentCount: classItem.enrollments.length,
+        maxStudents: classItem.maxStudents,
+        type: classItem.type || 'PUBLIC',
+        createdAt: new Date(classItem.createdAt).toLocaleDateString('vi-VN'),
+      });
+    });
+
+    // ==========================================
+    // ĐỊNH DẠNG DỮ LIỆU
+    // ==========================================
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return; // Bỏ qua header
+
+      row.alignment = {
+        horizontal: 'left',
+        vertical: 'middle',
+        wrapText: true,
+      };
+
+      // Định dạng tiền tệ
+      const priceCell = row.getCell('price');
+      if (priceCell.value) {
+        priceCell.numFmt = '#,##0';
+      }
+
+      // Thay đổi màu nền cho các hàng chẵn
+      if (rowNumber % 2 === 0) {
+        row.eachCell((cell) => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' }, // Xám nhạt
+          };
+        });
+      }
+    });
+
+    // ==========================================
+    // TẠO FILE VÀ LƯU VÀO THƯ MỤC UPLOADS
+    // ==========================================
+    const uploadsDir = path.join(process.cwd(), 'uploads');
+
+    // Tạo thư mục nếu chưa tồn tại
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    const timestamp = Date.now();
+    const fileName = `danh-sach-lop-${timestamp}.xlsx`;
+    const filePath = path.join(uploadsDir, fileName);
+
+    await workbook.xlsx.writeFile(filePath);
+
+    return fileName;
+  }
+
+  async exportClassMembersToExcel(
+    classId: string,
+    teacherId: string,
+  ): Promise<string> {
+    // Kiểm tra xem lớp có thuộc về teacher không
+    const classItem = await this.prisma.class.findFirst({
+      where: { id: classId, teacherId },
+    });
+
+    if (!classItem) {
+      throw new Error('Lớp học không tồn tại hoặc không phải của bạn');
+    }
+
+    // Lấy danh sách học sinh của lớp
+    const members = await this.prisma.enrollment.findMany({
+      where: {
+        classId: classId,
+        status: 'ACTIVE',
+      },
+      include: {
+        student: {
+          select: {
+            id: true,
+            email: true,
+            profile: {
+              select: {
+                fullName: true,
+                phone: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { joinedAt: 'asc' },
+    });
+
+    // Tạo workbook
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(`Danh sách - ${classItem.title}`);
+
+    // ==========================================
+    // CẤU HÌNH TIÊU ĐỀ
+    // ==========================================
+    worksheet.columns = [
+      { header: 'STT', key: 'stt', width: 8 },
+      { header: 'Họ & Tên', key: 'fullName', width: 25 },
+      { header: 'Email', key: 'email', width: 25 },
+      { header: 'Số điện thoại', key: 'phone', width: 15 },
+      { header: 'Ngày tham gia', key: 'joinedAt', width: 18 },
+    ];
+
+    // ==========================================
+    // ĐỊNH DẠNG TIÊU ĐỀ
+    // ==========================================
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF70AD47' }, // Xanh lá
+    };
+    headerRow.alignment = {
+      horizontal: 'center',
+      vertical: 'middle',
+      wrapText: true,
+    };
+
+    // ==========================================
+    // THÊM DỮ LIỆU VÀO SHEET
+    // ==========================================
+    members.forEach((member: any, index: number) => {
+      worksheet.addRow({
+        stt: index + 1,
+        fullName: member.student.profile?.fullName || 'N/A',
+        email: member.student.email || '',
+        phone: member.student.profile?.phone || 'N/A',
+        joinedAt: new Date(member.joinedAt).toLocaleDateString('vi-VN'),
+      });
+    });
+
+    // ==========================================
+    // ĐỊNH DẠNG DỮ LIỆU
+    // ==========================================
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return; // Bỏ qua header
+
+      row.alignment = {
+        horizontal: 'left',
+        vertical: 'middle',
+        wrapText: true,
+      };
+
+      // Thay đổi màu nền cho các hàng chẵn
+      if (rowNumber % 2 === 0) {
+        row.eachCell((cell) => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF2F2F2' }, // Xám nhạt
+          };
+        });
+      }
+    });
+
+    // ==========================================
+    // TẠO FILE VÀ LƯU VÀO THƯ MỤC UPLOADS
+    // ==========================================
+    const uploadsDir = path.join(process.cwd(), 'uploads');
+
+    // Tạo thư mục nếu chưa tồn tại
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    const timestamp = Date.now();
+    const sanitizedClassName = classItem.title
+      .replace(/[^a-z0-9-]/gi, '-')
+      .toLowerCase();
+    const fileName = `danh-sach-hoc-sinh-${sanitizedClassName}-${timestamp}.xlsx`;
+    const filePath = path.join(uploadsDir, fileName);
+
+    await workbook.xlsx.writeFile(filePath);
+
+    return fileName;
+  }
+}
+</file>
+
+<file path="class.controller.ts">
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Put,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+  Res,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as path from 'path';
+import type { Express } from 'express';
+import { } from 'multer';
+import { Response } from 'express';
+import { ClassService } from './class.service';
+import { ClassExportService } from './class-export.service';
+import { CreateClassDto } from './dto/create-class.dto';
+import { UpdateClassDto } from './dto/update-class.dto';
+
+const multer = require('multer');
+const { diskStorage } = multer;
+
+// ============================================
+// MULTER CONFIGURATION
+// ============================================
+const multerOptions = {
+  storage: diskStorage({
+    destination: (req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
+      cb(null, './uploads');
+    },
+    filename: (req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
+      // Tự động đổi tên file: timestamp + random + extension
+      const uniqueSuffix =
+        Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = path.extname(file.originalname);
+      const fileName = path.basename(
+        file.originalname,
+        fileExt,
+      );
+      cb(null, `${fileName}-${uniqueSuffix}${fileExt}`);
+    },
+  }),
+  fileFilter: (req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
+    // Chỉ chấp nhận ảnh (PNG, JPG, JPEG, GIF)
+    const allowedMimes = [
+      'image/png',
+      'image/jpeg',
+      'image/jpg',
+      'image/gif',
+    ];
+
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new BadRequestException(
+          `Loại file không được hỗ trợ: ${file.mimetype}. Chỉ chấp nhận: PNG, JPG, JPEG, GIF`,
+        ),
+        false,
+      );
+    }
+  },
+  limits: {
+  fileSize: 20 * 1024 * 1024, // Nâng lên 20MB (20 * 1MB)
+  },
+};
+
+// ============================================
+// CONTROLLER
+// ============================================
+@Controller('classes')
+export class ClassController {
+  constructor(
+    private readonly classService: ClassService,
+    private readonly exportService: ClassExportService,
+  ) {}
+
+  // Gom cái ID giả này ra ngoài để dùng chung cho tiện
+  private readonly fakeTeacherId = 'e350d7e6-ba21-4abf-ba8e-a36263f2434b';
+
+  // ==========================================
+  // POST: TẠO LỚP MỚI (với upload ảnh bìa)
+  // ==========================================
+  // Nhớ đặt endpoint này ở TRÊN @Get(':id') nhé
+  @Get('reviews/detailed')
+  async getDetailedReviews() {
+    const result = await this.classService.getDetailedReviews(this.fakeTeacherId);
+    return { status: 'success', data: result };
+  }
+  @Post()
+  @UseInterceptors(FileInterceptor('coverImage', multerOptions))
+  async create(
+    @Body() createClassDto: CreateClassDto,
+    @UploadedFile() file?: Express.Multer.File | undefined,
+  ) {
+    console.log('🔥 POST /api/v1/classes called!');
+    console.log('📦 Uploaded file:', file);
+
+    // ==========================================
+    // XỬ LÝ FILE UPLOAD
+    // ==========================================
+
+    // Nếu có upload ảnh bìa, tạo link và gán vào DTO
+    if (file) {
+      createClassDto.coverImage = `http://localhost:3000/uploads/${file.filename}`;
+      console.log('✅ Cover image link:', createClassDto.coverImage);
+    }
+
+    // Ép kiểu price thành Number (vì form-data gửi dưới dạng string)
+    createClassDto.price = Number(createClassDto.price);
+
+    // Gọi service để tạo lớp mới
+    const newClass = await this.classService.create(
+      this.fakeTeacherId,
+      createClassDto,
+    );
+
+    return {
+      status: 'success',
+      message: 'Tạo lớp học mới thành công',
+      data: newClass,
+    };
+  }
+
+  @Get()
+  async findAll() {
+    const result = await this.classService.findAll(this.fakeTeacherId);
+    return { status: 'success', data: result };
+  }
+
+  // 🔥 QUAN TRỌNG: API lấy thống kê Dashboard BẮT BUỘC phải nằm trước @Get(':id')
+  @Get('teacher/dashboard/stats')
+  async getTeacherDashboardStats() {
+    const result = await this.classService.getTeacherDashboardStats(
+      this.fakeTeacherId,
+    );
+    return { status: 'success', data: result };
+  }
+
+  // 🔥 QUAN TRỌNG: API lấy thùng rác BẮT BUỘC phải nằm trước @Get(':id')
+  @Get('trash')
+  async findTrash() {
+    const result = await this.classService.findTrash(this.fakeTeacherId);
+    return { status: 'success', data: result };
+  }
+
+  // 🔥 QUAN TRỌNG: API xuất Excel danh sách lớp BẮT BUỘC phải nằm trước @Get(':id')
+  @Get('export/all')
+  async exportAllClasses(@Res() res: Response) {
+    try {
+      const fileName = await this.exportService.exportClassesToExcel(
+        this.fakeTeacherId,
+      );
+      
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="danh-sach-lop.xlsx"`,
+      );
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+      
+      const filePath = `${process.cwd()}/uploads/${fileName}`;
+      res.download(filePath, 'danh-sach-lop.xlsx', (err) => {
+        if (err) {
+          console.error('❌ Lỗi khi download file:', err);
+        } else {
+          // Xóa file sau khi download (optional)
+          const fs = require('fs');
+          setTimeout(() => {
+            fs.unlinkSync(filePath);
+          }, 5000);
+        }
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Lỗi khi xuất file Excel',
+        error: error.message,
+      });
+    }
+  }
+
+  // 🔥 QUAN TRỌNG: API xuất Excel danh sách học sinh BẮT BUỘC phải nằm trước @Get(':id')
+  @Get('export/:id/members')
+  async exportClassMembers(
+    @Param('id') classId: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const fileName = await this.exportService.exportClassMembersToExcel(
+        classId,
+        this.fakeTeacherId,
+      );
+
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="danh-sach-hoc-sinh.xlsx"`,
+      );
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+
+      const filePath = `${process.cwd()}/uploads/${fileName}`;
+      res.download(filePath, 'danh-sach-hoc-sinh.xlsx', (err) => {
+        if (err) {
+          console.error('❌ Lỗi khi download file:', err);
+        } else {
+          // Xóa file sau khi download (optional)
+          const fs = require('fs');
+          setTimeout(() => {
+            fs.unlinkSync(filePath);
+          }, 5000);
+        }
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Lỗi khi xuất file Excel',
+        error: error.message,
+      });
+    }
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const result = await this.classService.findOne(id, this.fakeTeacherId);
+    return { status: 'success', data: result };
+  }
+
+  // ==========================================
+  // PATCH: CẬP NHẬT LỚP (với upload ảnh bìa)
+  // ==========================================
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('coverImage', multerOptions))
+  async update(
+    @Param('id') id: string,
+    @Body() updateClassDto: UpdateClassDto,
+    @UploadedFile() file?: Express.Multer.File | undefined,
+  ) {
+    console.log('🔥 PATCH /api/v1/classes/:id called!');
+    console.log('📦 Uploaded file:', file);
+
+    // ==========================================
+    // XỬ LÝ FILE UPLOAD
+    // ==========================================
+
+    // Nếu có upload ảnh bìa, tạo link và gán vào DTO
+    if (file) {
+      updateClassDto.coverImage = `http://localhost:3000/uploads/${file.filename}`;
+      console.log('✅ Cover image link:', updateClassDto.coverImage);
+    }
+
+    // Ép kiểu price thành Number (vì form-data gửi dưới dạng string)
+    if (updateClassDto.price) {
+      updateClassDto.price = Number(updateClassDto.price);
+    }
+
+    // Gọi service để cập nhật lớp
+    const result = await this.classService.update(
+      id,
+      this.fakeTeacherId,
+      updateClassDto,
+    );
+
+    return {
+      status: 'success',
+      message: 'Cập nhật lớp học thành công',
+      data: result,
+    };
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    await this.classService.remove(id, this.fakeTeacherId);
+    return {
+      status: 'success',
+      message: 'Đã đưa lớp học vào thùng rác (Soft Delete)',
+    };
+  }
+
+  // 🔥 QUAN TRỌNG: API khôi phục lớp học
+  @Patch(':id/restore')
+  async restore(@Param('id') id: string) {
+    const result = await this.classService.restore(id, this.fakeTeacherId);
+    return {
+      status: 'success',
+      message: 'Khôi phục lớp học thành công',
+      data: result,
+    };
+  }
+
+  @Put(':id')
+  async replace(@Param('id') id: string, @Body() updateClassDto: UpdateClassDto) {
+    const result = await this.classService.update(
+      id,
+      this.fakeTeacherId,
+      updateClassDto,
+    );
+    return {
+      status: 'success',
+      message: 'Thay thế lớp học thành công',
+      data: result,
+    };
+  }
+}
+</file>
+
+<file path="class.module.ts">
+import { Module } from '@nestjs/common';
+import { ClassService } from './class.service';
+import { ClassController } from './class.controller';
+import { ClassExportService } from './class-export.service';
+// Lưu ý: Sửa lại đường dẫn import PrismaModule cho đúng với cấu trúc thư mục của bạn
+import { PrismaModule } from '../infrastructure/database/prisma/prisma.module'; 
+
+@Module({
+  imports: [PrismaModule], // <-- Bắt buộc phải thêm dòng này để gọi được Prisma
+  controllers: [ClassController],
+  providers: [ClassService, ClassExportService],
+})
+export class ClassModule {}
+</file>
+
+<file path="class.service.ts">
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { CreateClassDto } from './dto/create-class.dto';
+import { UpdateClassDto } from './dto/update-class.dto';
+import { PrismaService } from '../infrastructure/database/prisma/prisma.service'; 
+
+@Injectable()
+export class ClassService {
+  constructor(private prisma: PrismaService) {}
+// 🔥 THÊM MỚI: Lấy danh sách chi tiết các đánh giá của giáo viên
+  async getDetailedReviews(teacherId: string) {
+    return this.prisma.review.findMany({
+      where: {
+        class: {
+          teacherId: teacherId, // Chỉ lấy đánh giá thuộc các lớp của thầy cô này
+        },
+      },
+      include: {
+        // Lấy kèm thông tin lớp học để biết đánh giá này dành cho lớp nào
+        class: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        // Lấy kèm thông tin học sinh đã đánh giá
+        student: {
+          select: {
+            id: true,
+            email: true,
+            // Nếu bảng User của bạn có fullName hay avatar thì thêm vào đây:
+            // profile: { select: { fullName: true, avatar: true } }
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' }, // Đánh giá mới nhất xếp lên đầu
+    });
+  }
+  async create(teacherId: string, data: CreateClassDto) {
+    const randomString = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    const classCode = `CLASS-${randomString}`;
+
+    try {
+      const newClass = await this.prisma.class.create({
+        data: {
+          teacherId: teacherId,
+          title: data.title,
+          description: data.description,
+          price: data.price,
+          coverImage: data.coverImage,
+          type: data.type || 'PUBLIC',
+          classCode: classCode, 
+        },
+      });
+      return newClass;
+    } catch (error: any) {
+      throw new BadRequestException('Lỗi khi lưu lớp học vào hệ thống: ' + error.message);
+    }
+  }
+
+  async findAll(teacherId: string) {
+    // Tìm tất cả các lớp của giáo viên này, nhưng CHỈ lấy lớp đang ACTIVE
+    return this.prisma.class.findMany({
+      where: {
+        teacherId: teacherId,
+        status: 'active', // Bỏ qua những lớp đã bị xóa mềm
+      },
+      orderBy: { createdAt: 'desc' }, // Lớp mới tạo xếp lên đầu
+    });
+  }
+
+  async findOne(id: string, teacherId: string) {
+    const classItem = await this.prisma.class.findFirst({
+      where: { 
+        id: id, 
+        teacherId: teacherId, 
+        status: 'active' 
+      },
+    });
+
+    if (!classItem) {
+      throw new NotFoundException('Không tìm thấy lớp học hoặc lớp đã bị xóa');
+    }
+    return classItem;
+  }
+
+  async update(id: string, teacherId: string, updateClassDto: UpdateClassDto) {
+    await this.findOne(id, teacherId); 
+
+    return this.prisma.class.update({
+      where: { id: id },
+      data: updateClassDto,
+    });
+  }
+
+  async remove(id: string, teacherId: string) {
+    await this.findOne(id, teacherId); // Đảm bảo lớp này tồn tại và thuộc về giáo viên này
+
+    return this.prisma.class.update({
+      where: { id: id },
+      data: {
+        status: 'deleted', // <-- Đánh dấu là đã vào thùng rác
+        deletedAt: new Date(), // <-- Lưu lại thời điểm bắt đầu vào thùng rác
+      },
+    });
+  }
+
+  // 🔥 THÊM MỚI: Lấy danh sách lớp học ĐANG TRONG THÙNG RÁC
+  async findTrash(teacherId: string) {
+    return this.prisma.class.findMany({
+      where: {
+        teacherId: teacherId,
+        status: 'deleted', // Chỉ lấy những lớp đã bị xóa mềm
+      },
+      orderBy: { deletedAt: 'desc' }, // Lớp mới xóa xếp lên đầu
+    });
+  }
+
+  // 🔥 THÊM MỚI: Khôi phục lớp học từ thùng rác
+  async restore(id: string, teacherId: string) {
+    // 1. Kiểm tra xem lớp này có đúng là đang trong thùng rác không
+    const classItem = await this.prisma.class.findFirst({
+      where: { 
+        id: id, 
+        teacherId: teacherId, 
+        status: 'deleted' 
+      },
+    });
+
+    if (!classItem) {
+      throw new NotFoundException('Không tìm thấy lớp học trong thùng rác');
+    }
+
+    // 2. Cập nhật lại trạng thái thành active và xóa thời gian deletedAt
+    return this.prisma.class.update({
+      where: { id: id },
+      data: {
+        status: 'active',
+        deletedAt: null, // Hủy bỏ đánh dấu thời gian xóa
+      },
+    });
+  }
+
+  // 🔥 THÊM MỚI: Lấy thống kê Dashboard cho Giáo viên (cập nhật với dữ liệu thực)
+  async getTeacherDashboardStats(teacherId: string) {
+    // Chạy 4 query song song để tối ưu hiệu năng
+    const [
+      classCount,
+      studentCount,
+      classesWithDetails,
+      reviewsData,
+    ] = await Promise.all([
+      // Query 1: Đếm số lớp ACTIVE
+      this.prisma.class.count({
+        where: {
+          teacherId: teacherId,
+          status: 'active',
+        },
+      }),
+      
+      // Query 2: Đếm số học sinh ACTIVE
+      this.prisma.enrollment.count({
+        where: {
+          class: {
+            teacherId: teacherId,
+            status: 'active',
+          },
+          status: 'ACTIVE',
+        },
+      }),
+      
+      // Query 3: Lấy chi tiết lớp kèm số lượng enrollment ACTIVE để tính doanh thu
+      this.prisma.class.findMany({
+        where: {
+          teacherId: teacherId,
+          status: 'active',
+        },
+        include: {
+          enrollments: {
+            where: { status: 'ACTIVE' },
+            select: { id: true },
+          },
+        },
+      }),
+
+      // Query 4: Lấy tất cả reviews của các lớp của teacher này (để tính trung bình)
+      this.prisma.review.findMany({
+        where: {
+          class: {
+            teacherId: teacherId,
+            status: 'active',
+          },
+        },
+        select: {
+          rating: true,
+        },
+      }),
+    ]);
+
+    // Tính toán các chỉ số
+    const totalClasses = classCount;
+    const totalStudents = studentCount;
+
+    // ==========================================
+    // Tính Doanh thu: Giá × Số học sinh ACTIVE
+    // ==========================================
+    // Công thức: Doanh thu = Tổng của (Giá mỗi lớp × Số lượng học viên ACTIVE của lớp đó)
+    const totalRevenue = classesWithDetails.reduce((acc: number, classItem: any) => {
+      const classPrice = Number(classItem.price); // Ép kiểu Decimal → Number
+      const activeStudentCount = classItem.enrollments.length;
+      return acc + (classPrice * activeStudentCount);
+    }, 0);
+
+    // ==========================================
+    // Tính Đánh giá trung bình
+    // ==========================================
+    // Nếu chưa có review (null), mặc định là 5.0
+    let averageRating = 5.0;
+    if (reviewsData && reviewsData.length > 0) {
+      const sumRating = reviewsData.reduce((acc: number, review: any) => acc + review.rating, 0);
+      averageRating = parseFloat((sumRating / reviewsData.length).toFixed(1));
+    }
+
+    // ==========================================
+    // Tìm lớp đông nhất (Popular Class)
+    // ==========================================
+    let popularClass = null;
+    if (classesWithDetails.length > 0) {
+      const classSortedByEnrollment = [...classesWithDetails].sort(
+        (a: any, b: any) => b.enrollments.length - a.enrollments.length
+      );
+      const mostPopular = classSortedByEnrollment[0];
+      popularClass = {
+        id: mostPopular.id,
+        title: mostPopular.title,
+        studentCount: mostPopular.enrollments.length,
+      };
+    }
+
+    return {
+      totalClasses,
+      totalStudents,
+      totalRevenue: Number(totalRevenue.toFixed(2)), // Ép kiểu → Number, fixed 2 decimal
+      averageRating,
+      popularClass,
+    };
+  }
+
+  // 🔥 Tác vụ chạy ngầm lúc 00:00 mỗi ngày để dọn rác
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleCronDeleteTrash() {
+    console.log('🧹 Bắt đầu quét và dọn dẹp thùng rác...');
+
+    // Tính toán mốc thời gian: 30 ngày trước so với hiện tại
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    try {
+      // Hard Delete: Xóa vĩnh viễn khỏi Database những lớp đã ở trong thùng rác quá 30 ngày
+      const result = await this.prisma.class.deleteMany({
+        where: {
+          status: 'deleted', 
+          deletedAt: {
+            lte: thirtyDaysAgo, 
+          },
+        },
+      });
+
+      if (result.count > 0) {
+        console.log(`✅ Đã xóa vĩnh viễn ${result.count} lớp học quá hạn 30 ngày.`);
+      }
+    } catch (error) {
+      console.error('❌ Lỗi khi dọn dẹp thùng rác:', error);
+    }
+  }
+}
+</file>
+
+</files>

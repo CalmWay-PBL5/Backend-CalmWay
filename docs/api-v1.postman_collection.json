@@ -1,0 +1,1170 @@
+{
+  "info": {
+    "_postman_id": "a76bdf9d-4bdf-4e77-a993-0455d83776b6",
+    "name": "api/v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53582467"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "student",
+          "item": [
+            {
+              "name": "auth-additional",
+              "item": [
+                {
+                  "name": "get-me",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseURL}}/auth/me",
+                      "host": [
+                        "{{baseURL}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "me"
+                      ]
+                    },
+                    "description": "Lấy thông tin User hiện tại dựa trên Access Token. Cần truyền Bearer Token."
+                  },
+                  "response": []
+                },
+                {
+                  "name": "refresh-token",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "const response = pm.response.json();",
+                          "if(response.accessToken) {",
+                          "    pm.environment.set(\"student_access_token\", response.accessToken);",
+                          "    console.log(\"Đã cập nhật access_token mới\");",
+                          "}",
+                          "if(response.refreshToken) {",
+                          "    pm.environment.set(\"student_refresh_token\", response.refreshToken);",
+                          "    console.log(\"Đã cập nhật refresh_token mới\");",
+                          "}"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {},
+                        "requests": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "auth": {
+                      "type": "noauth"
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"refreshToken\": \"{{student_access_token}}\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseURL}}/auth/refresh",
+                      "host": [
+                        "{{baseURL}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "refresh"
+                      ]
+                    },
+                    "description": "Tạo lại access_token mới khi token cũ hết hạn. Cần truyền refresh_token vào body."
+                  },
+                  "response": []
+                },
+                {
+                  "name": "forgot-password",
+                  "request": {
+                    "auth": {
+                      "type": "noauth"
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"email\": \"{{student_test_email}}\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseURL}}/auth/forgot-password",
+                      "host": [
+                        "{{baseURL}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "forgot-password"
+                      ]
+                    },
+                    "description": "Yêu cầu đặt lại mật khẩu. Sẽ tạo passwordResetToken trong DB."
+                  },
+                  "response": []
+                },
+                {
+                  "name": "reset-password",
+                  "event": [
+                    {
+                      "listen": "prerequest",
+                      "script": {
+                        "exec": [
+                          "const requestBody = JSON.parse(pm.request.body.raw);\r",
+                          "pm.environment.set(\"student_test_password\", requestBody.newPassword);"
+                        ],
+                        "type": "text/javascript",
+                        "packages": {},
+                        "requests": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "auth": {
+                      "type": "noauth"
+                    },
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"token\": \"{{student_reset_password_token}}\",\n    \"newPassword\": \"NewStr0ngP@ss!\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseURL}}/auth/reset-password",
+                      "host": [
+                        "{{baseURL}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "reset-password"
+                      ]
+                    },
+                    "description": "Cập nhật mật khẩu mới. Sử dụng token nhận được từ DB hoặc Email."
+                  },
+                  "response": []
+                }
+              ]
+            },
+            {
+              "name": "register.student",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"{{student_test_email}}\",\r\n    \"password\": \"{{student_test_password}}\",\r\n    \"fullName\": \"Phuc Long, Le Duc\",\r\n    \"role\": \"STUDENT\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/auth/register",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ]
+                },
+                "description": "**Sau bước đăng ký thì màn hình hiện:**\n\nHãy vào check mail [abc@gmail.com](https://mailto:abc@gmail.com) để xác thực email\n\n**Flow Đăng ký & Tự động Đăng nhập:**\n\n1. **Đăng ký:** Người dùng điền Form (chọn role) ➔ Backend tạo user (`isVerified: false`) ➔ Gửi email kèm `verify_token` trong link.\n    \n2. **Mở link:** Người dùng click link trong email ➔ Mở trang Frontend (ví dụ: `/verify?token=abc...`).\n    \n3. **Xác thực ngầm:** Frontend tự động lấy token từ URL ➔ Gọi API xác minh xuống Backend.\n    \n4. **Login ngầm (Backend xử lý):** Backend check token hợp lệ ➔ Đổi thành `isVerified: true` ➔ **Tạo & trả về Access Token** (giống hệt như khi login thành công).\n    \n5. **Điều hướng:** Frontend nhận Access Token ➔ Lưu vào Local Storage/Cookie ➔ Check `role` ➔ Chuyển thẳng vào Dashboard (Học sinh/Giáo viên).\n    \n\n**Điểm \"ăn tiền\" (Key takeaway):** Ở bước 4, thay vì API xác nhận email chỉ trả về chữ \"Thành công\", nó phải **trả về luôn Token đăng nhập**. Nhờ đó bước 5 Frontend mới có cớ để cho user vào thẳng hệ thống.\n\nEndFragment"
+              },
+              "response": []
+            },
+            {
+              "name": "verify-email.student",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"token\": \"{{verification_token}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/auth/verify-email",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "verify-email"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "login.student",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const response = pm.response.json();\r",
+                      "pm.environment.set(\"student_access_token\", response.accessToken);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"{{student_test_email}}\",\r\n    \"password\": \"{{student_test_password}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/auth/login",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "auth": {
+            "type": "bearer",
+            "bearer": [
+              {
+                "key": "token",
+                "value": "{{student_access_token}}",
+                "type": "string"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "teacher",
+          "item": [
+            {
+              "name": "register.teacher",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"{{teacher_test_email}}\",\r\n    \"password\": \"{{teacher_test_password}}\",\r\n    \"fullName\": \"Dr John Doe\",\r\n    \"role\": \"TEACHER\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/auth/register",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ]
+                },
+                "description": "**Sau bước đăng ký thì màn hình hiện:**\n\nHãy vào check mail [abc@gmail.com](https://mailto:abc@gmail.com) để xác thực email\n\n**Flow Đăng ký & Tự động Đăng nhập:**\n\n1. **Đăng ký:** Người dùng điền Form (chọn role) ➔ Backend tạo user (`isVerified: false`) ➔ Gửi email kèm `verify_token` trong link.\n    \n2. **Mở link:** Người dùng click link trong email ➔ Mở trang Frontend (ví dụ: `/verify?token=abc...`).\n    \n3. **Xác thực ngầm:** Frontend tự động lấy token từ URL ➔ Gọi API xác minh xuống Backend.\n    \n4. **Login ngầm (Backend xử lý):** Backend check token hợp lệ ➔ Đổi thành `isVerified: true` ➔ **Tạo & trả về Access Token** (giống hệt như khi login thành công).\n    \n5. **Điều hướng:** Frontend nhận Access Token ➔ Lưu vào Local Storage/Cookie ➔ Check `role` ➔ Chuyển thẳng vào Dashboard (Học sinh/Giáo viên).\n    \n\n**Điểm \"ăn tiền\" (Key takeaway):** Ở bước 4, thay vì API xác nhận email chỉ trả về chữ \"Thành công\", nó phải **trả về luôn Token đăng nhập**. Nhờ đó bước 5 Frontend mới có cớ để cho user vào thẳng hệ thống.\n\nEndFragment"
+              },
+              "response": []
+            },
+            {
+              "name": "verify-email.teacher",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"token\": \"{{verification_token}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/auth/verify-email",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "verify-email"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "login.teacher",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const response = pm.response.json();\r",
+                      "pm.environment.set(\"access_token\", response.access_token);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"email\": \"{{teacher_test_email}}\",\r\n    \"password\": \"{{teacher_test_password}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/auth/login",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "login.admin",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "pm.environment.set(\"admin_access_token\", response.access_token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"{{admin_test_email}}\",\r\n    \"password\": \"{{admin_test_password}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/auth/login",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "kyc",
+      "item": [
+        {
+          "name": "teacher",
+          "item": [
+            {
+              "name": "upload-url-request",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const jsonData = pm.response.json();\r",
+                      "pm.environment.set(\"uploadUrl\", jsonData.uploadUrl);\r",
+                      "console.log(\"Saved uploadUrl:\", jsonData.uploadUrl);\r",
+                      "\r",
+                      "pm.environment.set(\"objectKey\", jsonData.objectKey);\r",
+                      "console.log(\"Saved objectKey:\", jsonData.objectKey);\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"filename\": \"test_vacation_photo.jpg\",\r\n  \"contentType\": \"image/jpeg\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/kyc/upload-url",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "kyc",
+                    "upload-url"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "upload-image(front-end)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "image/jpeg",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "file",
+                  "file": {
+                    "src": "postman-cloud:///1f12be1b-8111-4800-8f41-a7e6aefbe0d2"
+                  }
+                },
+                "url": {
+                  "raw": "{{uploadUrl}}",
+                  "host": [
+                    "{{uploadUrl}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "submit-kyc",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "uuid": "dde87c00-5034-44bc-8712-7892e6d16207",
+                      "src": "postman-cloud:///1f12be1b-8111-4800-8f41-a7e6aefbe0d2"
+                    },
+                    {
+                      "key": "certificates",
+                      "type": "file",
+                      "uuid": "843f4aae-a330-49d6-a4db-908f670e1075",
+                      "src": [
+                        "postman-cloud:///1f13b1a6-e6cd-4250-a0df-46907eab328c",
+                        "postman-cloud:///1f13b1a6-e6e5-48f0-b93e-f6abc1b81dcc"
+                      ]
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseURL}}/kyc/submit",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "kyc",
+                    "submit"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "status",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/kyc/status",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "kyc",
+                    "status"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "admin",
+          "item": [
+            {
+              "name": "list-pending-kyc",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const response = pm.response.json();\r",
+                      "pm.environment.set(\"kyc_requestId\", response.data[0].id);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/admin/kyc/requests",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "kyc",
+                    "requests"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "reviewRequest",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"status\": \"APPROVED\",\r\n  \"rejectionReason\": null\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/admin/kyc/requests/{{kyc_requestId}}/review",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "kyc",
+                    "requests",
+                    "{{kyc_requestId}}",
+                    "review"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "auth": {
+            "type": "bearer",
+            "bearer": [
+              {
+                "key": "token",
+                "value": "{{admin_access_token}}",
+                "type": "string"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "admin-portal",
+      "item": [
+        {
+          "name": "Users (Admin)",
+          "item": [
+            {
+              "name": "list-users",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const response = pm.response.json();",
+                      "if (response.data && response.data.length > 0) {",
+                      "    pm.environment.set(\"target_user_id\", response.data[0].id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/admin/users?page=1&limit=20&role=STUDENT",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "role",
+                      "value": "STUDENT"
+                    },
+                    {
+                      "key": "search",
+                      "value": "phuc",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "ACTIVE",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "change-user-status",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"BANNED\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/admin/users/{{target_user_id}}/status",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users",
+                    "{{target_user_id}}",
+                    "status"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Dashboard (Admin)",
+          "item": [
+            {
+              "name": "get-dashboard-stats",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/admin/dashboard/stats",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "dashboard",
+                    "stats"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Finance (Admin)",
+          "item": [
+            {
+              "name": "list-transactions",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const response = pm.response.json();",
+                      "if (response.data && response.data.length > 0) {",
+                      "    // Ưu tiên lưu orderId hoặc momoTransId để test API lookup",
+                      "    const targetId = response.data[0].momoTransId || response.data[0].orderId;",
+                      "    pm.environment.set(\"target_transaction_id\", targetId);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseURL}}/admin/finance/transactions?page=1&limit=20",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "finance",
+                    "transactions"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    },
+                    {
+                      "key": "status",
+                      "value": "SUCCESS",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": "ORDER123",
+                      "disabled": true
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "lookup-momo-transaction",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_access_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"transactionId\": \"{{target_transaction_id}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/admin/finance/momo/lookup",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "finance",
+                    "momo",
+                    "lookup"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}

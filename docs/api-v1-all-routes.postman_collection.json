@@ -1,0 +1,3336 @@
+{
+  "info": {
+    "_postman_id": "f0f009ab-2d7f-4b58-a174-optimized-api-v1",
+    "name": "FlyingClass API v1 - Optimized Test Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "## Mục tiêu\nCollection này tối ưu cho test nhanh toàn bộ API `api/v1` theo flow thực tế.\n\n## Cách dùng nhanh\n1. Import collection này vào Postman.\n2. Chạy folder `00 - Setup & Health` trước để khởi tạo biến.\n3. Chạy các request login trong `01 - Auth` để tự lưu token/ids.\n4. Chạy lần lượt các folder còn lại.\n\n## Quy ước biến\n- `*_access_token`, `*_refresh_token`: token theo role.\n- `*_user_id`: user id theo role, tự set từ login.\n- `class_id`, `cloud_doc_id`, `chat_message_id`, `kyc_application_id`: tự cập nhật từ API tạo/list.\n- `course_id`, `payout_id`: cần set tay nếu bạn muốn test route review cụ thể phía admin.\n\n## Seed khuyến nghị\nDùng dữ liệu seed full để test ổn định (các account seed và token verify/reset đã có sẵn)."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "run_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@flyingclass.com",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "password123",
+      "type": "string"
+    },
+    {
+      "key": "lecturer_approved_email",
+      "value": "lecturer.approved@flyingclass.com",
+      "type": "string"
+    },
+    {
+      "key": "lecturer_pending_email",
+      "value": "lecturer.pending@flyingclass.com",
+      "type": "string"
+    },
+    {
+      "key": "lecturer_rejected_email",
+      "value": "lecturer.rejected@flyingclass.com",
+      "type": "string"
+    },
+    {
+      "key": "lecturer_password",
+      "value": "password123",
+      "type": "string"
+    },
+    {
+      "key": "student_a_email",
+      "value": "student.a@flyingclass.com",
+      "type": "string"
+    },
+    {
+      "key": "student_b_email",
+      "value": "student.b@flyingclass.com",
+      "type": "string"
+    },
+    {
+      "key": "student_unverified_email",
+      "value": "student.unverified@flyingclass.com",
+      "type": "string"
+    },
+    {
+      "key": "student_password",
+      "value": "password123",
+      "type": "string"
+    },
+    {
+      "key": "verify_email_token",
+      "value": "seed-verify-email-token-student-unverified",
+      "type": "string"
+    },
+    {
+      "key": "reset_password_token",
+      "value": "seed-reset-password-token-student-a",
+      "type": "string"
+    },
+    {
+      "key": "admin_access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lecturer_access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lecturer_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lecturer_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "student_access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "student_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "student_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "current_role",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "current_access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "current_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "class_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "active_class_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "trash_class_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cloud_doc_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "chat_message_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "kyc_application_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "my_kyc_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "course_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "payout_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "target_user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "setting_key",
+      "value": "PLATFORM_COMMISSION_RATE",
+      "type": "string"
+    },
+    {
+      "key": "sample_image_path",
+      "value": "/absolute/path/to/image.jpg",
+      "type": "string"
+    },
+    {
+      "key": "sample_doc_path",
+      "value": "/absolute/path/to/document.pdf",
+      "type": "string"
+    },
+    {
+      "key": "revenue_year",
+      "value": "2026",
+      "type": "string"
+    },
+    {
+      "key": "last_status_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "last_response_time_ms",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "last_request_name",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "last_entity_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "last_list_first_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const now = Date.now();",
+          "if (!pm.collectionVariables.get('run_id')) pm.collectionVariables.set('run_id', String(now));",
+          "if (!pm.collectionVariables.get('target_user_id') && pm.collectionVariables.get('student_user_id')) {",
+          "  pm.collectionVariables.set('target_user_id', pm.collectionVariables.get('student_user_id'));",
+          "}",
+          "if (!pm.collectionVariables.get('base_url')) pm.collectionVariables.set('base_url', 'http://localhost:3001/api/v1');"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Status code is valid HTTP', function () {",
+          "  pm.expect(pm.response.code).to.be.within(100, 599);",
+          "});",
+          "pm.collectionVariables.set('last_status_code', String(pm.response.code));",
+          "pm.collectionVariables.set('last_response_time_ms', String(pm.response.responseTime));",
+          "pm.collectionVariables.set('last_request_name', pm.info.requestName);",
+          "let body = null;",
+          "try { body = pm.response.json(); } catch (_) {}",
+          "if (body && typeof body === 'object') {",
+          "  if (body.id) pm.collectionVariables.set('last_entity_id', String(body.id));",
+          "  if (body.data && Array.isArray(body.data) && body.data.length && body.data[0]?.id) {",
+          "    pm.collectionVariables.set('last_list_first_id', String(body.data[0].id));",
+          "  }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Setup & Health",
+      "item": [
+        {
+          "name": "Initialize dynamic variables",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Health liveness ok', function () { pm.response.to.have.status(200); });",
+                  "if (!pm.collectionVariables.get('run_id')) pm.collectionVariables.set('run_id', String(Date.now()));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/liveness",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "liveness"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nKhởi tạo biến runtime để test mượt hơn.\n\nScript sẽ:\n- set `run_id`\n- map `target_user_id` từ `student_user_id` nếu có\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/health/liveness`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Không cần thêm biến đầu vào ngoài `base_url`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `run_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /health/liveness",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/liveness",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "liveness"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nKiểm tra app còn sống (memory checks).\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/health/liveness`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Không cần thêm biến đầu vào ngoài `base_url`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /health/readiness",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/readiness",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "readiness"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nKiểm tra app sẵn sàng phục vụ (database, redis, minio).\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/health/readiness`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Không cần thêm biến đầu vào ngoài `base_url`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Folder khởi động để đảm bảo môi trường test ổn trước khi chạy flow chính."
+    },
+    {
+      "name": "01 - Auth",
+      "item": [
+        {
+          "name": "POST /auth/register (student)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const email = `student.register.${pm.collectionVariables.get('run_id')}@example.com`;",
+                  "pm.collectionVariables.set('student_register_email', email);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{student_register_email}}\",\n  \"password\": \"{{student_password}}\",\n  \"fullName\": \"Student Register API\",\n  \"role\": \"STUDENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nĐăng ký tài khoản học viên mới.\n\nKhi chạy collection thường xuyên, email sẽ tự unique theo `run_id`.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/register`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Kiểm tra các biến đầu vào: `student_register_email`, `student_password`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `student_register_email`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/register (lecturer)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const email = `lecturer.register.${pm.collectionVariables.get('run_id')}@example.com`;",
+                  "pm.collectionVariables.set('lecturer_register_email', email);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{lecturer_register_email}}\",\n  \"password\": \"{{lecturer_password}}\",\n  \"fullName\": \"Lecturer Register API\",\n  \"role\": \"LECTURER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nĐăng ký tài khoản giảng viên mới để test flow verify + KYC.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/register`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Kiểm tra các biến đầu vào: `lecturer_register_email`, `lecturer_password`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `lecturer_register_email`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /auth/verify",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/verify?token=%7B%7Bverify_email_token%7D%7D",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "verify"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{verify_email_token}}"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nXác thực email theo token. Với seed hiện tại có token mặc định trong biến `verify_email_token`.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/auth/verify`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n- Query mẫu: `{\"token\":\"{{verify_email_token}}\"}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Kiểm tra các biến đầu vào: `verify_email_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/login (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login success', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Has access token', function () { pm.expect(json.access_token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('admin_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('admin_refresh_token', json.refresh_token || '');",
+                  "if (json?.user?.id) pm.collectionVariables.set('admin_user_id', String(json.user.id));",
+                  "pm.collectionVariables.set('current_role', 'admin');",
+                  "pm.collectionVariables.set('current_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('current_refresh_token', json.refresh_token || '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nĐăng nhập admin, tự lưu `admin_access_token`, `admin_refresh_token`, `admin_user_id`.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/login`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Kiểm tra các biến đầu vào: `admin_email`, `admin_password`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `admin_access_token`, `admin_refresh_token`, `admin_user_id`, `current_role`, `current_access_token`, `current_refresh_token`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/login (lecturer approved)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login success', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Has access token', function () { pm.expect(json.access_token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('lecturer_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('lecturer_refresh_token', json.refresh_token || '');",
+                  "if (json?.user?.id) pm.collectionVariables.set('lecturer_user_id', String(json.user.id));",
+                  "pm.collectionVariables.set('current_role', 'lecturer');",
+                  "pm.collectionVariables.set('current_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('current_refresh_token', json.refresh_token || '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{lecturer_approved_email}}\",\n  \"password\": \"{{lecturer_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nĐăng nhập giảng viên đã approved KYC, tự lưu token/ids role lecturer.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/login`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Kiểm tra các biến đầu vào: `lecturer_approved_email`, `lecturer_password`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `lecturer_access_token`, `lecturer_refresh_token`, `lecturer_user_id`, `current_role`, `current_access_token`, `current_refresh_token`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/login (student A)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login success', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Has access token', function () { pm.expect(json.access_token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('student_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('student_refresh_token', json.refresh_token || '');",
+                  "if (json?.user?.id) pm.collectionVariables.set('student_user_id', String(json.user.id));",
+                  "pm.collectionVariables.set('current_role', 'student');",
+                  "pm.collectionVariables.set('current_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('current_refresh_token', json.refresh_token || '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{student_a_email}}\",\n  \"password\": \"{{student_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nĐăng nhập student A, tự lưu token/ids role student.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/login`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Kiểm tra các biến đầu vào: `student_a_email`, `student_password`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `student_access_token`, `student_refresh_token`, `student_user_id`, `current_role`, `current_access_token`, `current_refresh_token`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/login (student B, capture target_user_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login success', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Has access token', function () { pm.expect(json.access_token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('student_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('student_refresh_token', json.refresh_token || '');",
+                  "if (json?.user?.id) pm.collectionVariables.set('student_user_id', String(json.user.id));",
+                  "pm.collectionVariables.set('current_role', 'student');",
+                  "pm.collectionVariables.set('current_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('current_refresh_token', json.refresh_token || '');",
+                  "const json = pm.response.json();",
+                  "if (json?.user?.id) pm.collectionVariables.set('target_user_id', String(json.user.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{student_b_email}}\",\n  \"password\": \"{{student_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nĐăng nhập student B để lấy id dùng cho admin toggle status (`target_user_id`).\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/login`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Kiểm tra các biến đầu vào: `student_b_email`, `student_password`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `student_access_token`, `student_refresh_token`, `student_user_id`, `current_role`, `current_access_token`, `current_refresh_token`, `target_user_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/refresh (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login success', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Has access token', function () { pm.expect(json.access_token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('admin_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('admin_refresh_token', json.refresh_token || '');",
+                  "if (json?.user?.id) pm.collectionVariables.set('admin_user_id', String(json.user.id));",
+                  "pm.collectionVariables.set('current_role', 'admin');",
+                  "pm.collectionVariables.set('current_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('current_refresh_token', json.refresh_token || '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_refresh_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy access/refresh token mới cho admin bằng refresh token (Bearer refresh token).\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/refresh`\n- Auth: `Bearer {{admin_refresh_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_refresh_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `admin_refresh_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `admin_access_token`, `admin_refresh_token`, `admin_user_id`, `current_role`, `current_access_token`, `current_refresh_token`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/refresh (lecturer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login success', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Has access token', function () { pm.expect(json.access_token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('lecturer_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('lecturer_refresh_token', json.refresh_token || '');",
+                  "if (json?.user?.id) pm.collectionVariables.set('lecturer_user_id', String(json.user.id));",
+                  "pm.collectionVariables.set('current_role', 'lecturer');",
+                  "pm.collectionVariables.set('current_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('current_refresh_token', json.refresh_token || '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_refresh_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy access/refresh token mới cho lecturer bằng refresh token.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/refresh`\n- Auth: `Bearer {{lecturer_refresh_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_refresh_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_refresh_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `lecturer_access_token`, `lecturer_refresh_token`, `lecturer_user_id`, `current_role`, `current_access_token`, `current_refresh_token`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/refresh (student)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login success', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.test('Has access token', function () { pm.expect(json.access_token).to.be.a('string').and.not.empty; });",
+                  "pm.collectionVariables.set('student_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('student_refresh_token', json.refresh_token || '');",
+                  "if (json?.user?.id) pm.collectionVariables.set('student_user_id', String(json.user.id));",
+                  "pm.collectionVariables.set('current_role', 'student');",
+                  "pm.collectionVariables.set('current_access_token', json.access_token || '');",
+                  "pm.collectionVariables.set('current_refresh_token', json.refresh_token || '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_refresh_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy access/refresh token mới cho student bằng refresh token.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/refresh`\n- Auth: `Bearer {{student_refresh_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `student_refresh_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `student_refresh_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `student_access_token`, `student_refresh_token`, `student_user_id`, `current_role`, `current_access_token`, `current_refresh_token`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/logout (student)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{student_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nĐăng xuất user hiện tại (clear refresh token đã lưu phía backend).\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/logout`\n- Auth: `Bearer {{student_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `student_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `student_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/forgot-password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{student_a_email}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nYêu cầu reset password; backend tạo token reset và gửi mail/queue.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/forgot-password`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Kiểm tra các biến đầu vào: `student_a_email`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/reset-password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Reset password success', function () { pm.response.to.have.status(200); });",
+                  "pm.collectionVariables.set('student_password', 'NewPassword123!');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{reset_password_token}}\",\n  \"newPassword\": \"NewPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nĐặt lại mật khẩu theo token reset. Token seed có sẵn trong biến `reset_password_token`.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/auth/reset-password`\n- Auth: `No Auth`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Request này không yêu cầu token.\n3. Kiểm tra các biến đầu vào: `reset_password_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `student_password`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API xác thực: register, verify email, login, refresh token, forgot/reset password, logout."
+    },
+    {
+      "name": "02 - Teacher Profile",
+      "item": [
+        {
+          "name": "GET /teachers/me/profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "profile"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy hồ sơ giảng viên đang đăng nhập.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/profile`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /teachers/me/profile (JSON)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Lecturer API Updated\",\n  \"phone\": \"0909990001\",\n  \"bio\": \"Updated by optimized Postman collection\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/teachers/me/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "profile"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nCập nhật thông tin profile dạng JSON (không upload file).\n\n## Thông tin request\n- Method: `PUT`\n- URL: `{{base_url}}/teachers/me/profile`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /teachers/me/profile (Multipart + KYC files)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "fullName",
+                  "value": "Lecturer Multipart Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "0909990002",
+                  "type": "text"
+                },
+                {
+                  "key": "bio",
+                  "value": "Multipart update profile",
+                  "type": "text"
+                },
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": "{{sample_image_path}}"
+                },
+                {
+                  "key": "identityCard",
+                  "type": "file",
+                  "src": "{{sample_image_path}}"
+                },
+                {
+                  "key": "supportingDocuments",
+                  "type": "file",
+                  "src": "{{sample_doc_path}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/teachers/me/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "profile"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nCập nhật profile + upload avatar + KYC cùng lúc.\n\nForm-data fields:\n- `avatar` (file)\n- `identityCard` (file)\n- `supportingDocuments` (file, có thể nhiều)\n\n## Thông tin request\n- Method: `PUT`\n- URL: `{{base_url}}/teachers/me/profile`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `multipart/form-data`\n- Body mẫu: `multipart/form-data`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `sample_image_path`, `sample_doc_path`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API profile giảng viên. Cần token lecturer."
+    },
+    {
+      "name": "03 - Teacher Classes",
+      "item": [
+        {
+          "name": "GET /teachers/me/classes/subjects",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/subjects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "subjects"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy danh sách môn học để tạo/cập nhật lớp.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/classes/subjects`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /teachers/me/classes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create class success', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+                  "const json = pm.response.json();",
+                  "if (json?.id) pm.collectionVariables.set('class_id', String(json.id));",
+                  "if (json?.id) pm.collectionVariables.set('active_class_id', String(json.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Class Created From Optimized Collection\",\n  \"description\": \"Class for e2e route testing\",\n  \"price\": 149000,\n  \"type\": \"PUBLIC\",\n  \"maxStudents\": 35\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nTạo lớp học mới. Script tự lưu `class_id`.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/teachers/me/classes`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `class_id`, `active_class_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/classes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('List classes success', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "const first = Array.isArray(json) ? json[0] : json?.data?.[0] || json?.items?.[0];",
+                  "if (first?.id) pm.collectionVariables.set('class_id', String(first.id));",
+                  "const trash = (Array.isArray(json) ? json : json?.data || json?.items || []).find((x) => x?.status === 'PENDING_DELETE');",
+                  "if (trash?.id) pm.collectionVariables.set('trash_class_id', String(trash.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy danh sách lớp active của giảng viên. Script tự bắt `class_id` đầu tiên.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/classes`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `class_id`, `trash_class_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/classes/dashboard/stats",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/dashboard/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "dashboard",
+                "stats"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy thống kê dashboard lớp học của giảng viên.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/classes/dashboard/stats`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/classes/reviews/detailed",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/reviews/detailed",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "reviews",
+                "detailed"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy danh sách review chi tiết cho các lớp của giảng viên.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/classes/reviews/detailed`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/classes/trash",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const first = Array.isArray(json) ? json[0] : json?.data?.[0] || json?.items?.[0];",
+                  "if (first?.id) pm.collectionVariables.set('trash_class_id', String(first.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/trash",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "trash"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy danh sách lớp đang trong thùng rác.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/classes/trash`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `trash_class_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /teachers/me/classes/trash/cleanup",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/trash/cleanup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "trash",
+                "cleanup"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nXóa vĩnh viễn các lớp trong trash của giảng viên.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/teachers/me/classes/trash/cleanup`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/classes/export/all",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/export/all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "export",
+                "all"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nExport toàn bộ lớp của giảng viên dạng CSV.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/classes/export/all`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/classes/export/:id/members",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/export/{{class_id}}/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "export",
+                "{{class_id}}",
+                "members"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nExport danh sách thành viên lớp theo `class_id` dạng CSV.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/classes/export/{{class_id}}/members`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/classes/:id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/{{class_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "{{class_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy chi tiết 1 lớp học.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/classes/{{class_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /teachers/me/classes/:id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Class Patched By Collection\",\n  \"price\": 179000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/{{class_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "{{class_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nCập nhật một phần thông tin lớp học.\n\n## Thông tin request\n- Method: `PATCH`\n- URL: `{{base_url}}/teachers/me/classes/{{class_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /teachers/me/classes/:id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Class Replaced By Collection\",\n  \"description\": \"Full update request\",\n  \"price\": 189000,\n  \"type\": \"PRIVATE\",\n  \"maxStudents\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/{{class_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "{{class_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nCập nhật đầy đủ thông tin lớp học.\n\n## Thông tin request\n- Method: `PUT`\n- URL: `{{base_url}}/teachers/me/classes/{{class_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /teachers/me/classes/:id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/{{class_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "{{class_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nChuyển lớp vào trash.\n\n## Thông tin request\n- Method: `DELETE`\n- URL: `{{base_url}}/teachers/me/classes/{{class_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /teachers/me/classes/:id/restore",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/classes/{{class_id}}/restore",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "classes",
+                "{{class_id}}",
+                "restore"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nKhôi phục lớp từ trash về active.\n\n## Thông tin request\n- Method: `PATCH`\n- URL: `{{base_url}}/teachers/me/classes/{{class_id}}/restore`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API quản lý lớp học của giảng viên."
+    },
+    {
+      "name": "04 - Teacher Class Members",
+      "item": [
+        {
+          "name": "POST /teachers/me/class-members",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"classId\": \"{{class_id}}\",\n  \"studentId\": \"{{student_user_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/teachers/me/class-members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "class-members"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nThêm học sinh vào lớp (dùng `class_id` + `student_user_id`).\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/teachers/me/class-members`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `student_user_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/class-members/class/:classId",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/class-members/class/{{class_id}}?status=ACTIVE",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "class-members",
+                "class",
+                "{{class_id}}"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy danh sách thành viên của lớp theo trạng thái.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/class-members/class/{{class_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Query mẫu: `{\"status\":\"ACTIVE\"}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /teachers/me/class-members/class/:classId/student/:studentId",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/class-members/class/{{class_id}}/student/{{student_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "class-members",
+                "class",
+                "{{class_id}}",
+                "student",
+                "{{student_user_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nXóa học sinh khỏi lớp.\n\n## Thông tin request\n- Method: `DELETE`\n- URL: `{{base_url}}/teachers/me/class-members/class/{{class_id}}/student/{{student_user_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `student_user_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /class-members (alias)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"classId\": \"{{class_id}}\",\n  \"studentId\": \"{{student_user_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/class-members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "class-members"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nAlias route của add class member.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/class-members`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `student_user_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /class-members/class/:classId (alias)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/class-members/class/{{class_id}}?status=ACTIVE",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "class-members",
+                "class",
+                "{{class_id}}"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nAlias route của list class members.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/class-members/class/{{class_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Query mẫu: `{\"status\":\"ACTIVE\"}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /class-members/class/:classId/student/:studentId (alias)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/class-members/class/{{class_id}}/student/{{student_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "class-members",
+                "class",
+                "{{class_id}}",
+                "student",
+                "{{student_user_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nAlias route của remove class member.\n\n## Thông tin request\n- Method: `DELETE`\n- URL: `{{base_url}}/class-members/class/{{class_id}}/student/{{student_user_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `student_user_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API quản lý thành viên lớp của giảng viên (bao gồm alias routes)."
+    },
+    {
+      "name": "05 - Teacher Students",
+      "item": [
+        {
+          "name": "GET /teachers/me/students",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const first = json?.data?.[0];",
+                  "if (first?.id) pm.collectionVariables.set('student_user_id', String(first.id));",
+                  "if (first?.id && !pm.collectionVariables.get('target_user_id')) pm.collectionVariables.set('target_user_id', String(first.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/students?skip=0&take=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "students"
+              ],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "take",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy danh sách học sinh đã mua khóa học của giảng viên.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/students`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Query mẫu: `{\"skip\":0,\"take\":20}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `student_user_id`, `target_user_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/students/search/query",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/students/search/query?q=student&skip=0&take=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "students",
+                "search",
+                "query"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "student"
+                },
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "take",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nTìm kiếm học sinh theo từ khóa `q`.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/students/search/query`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Query mẫu: `{\"q\":\"student\",\"skip\":0,\"take\":20}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/students/stats/overview",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/students/stats/overview",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "students",
+                "stats",
+                "overview"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy thống kê tổng quan học sinh của giảng viên.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/students/stats/overview`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/students/export/all",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/students/export/all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "students",
+                "export",
+                "all"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nExport toàn bộ học sinh của giảng viên dạng CSV.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/students/export/all`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/students/export/course/:courseId",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/students/export/course/{{course_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "students",
+                "export",
+                "course",
+                "{{course_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nExport học sinh theo course cụ thể. Cần set `course_id` trước.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/students/export/course/{{course_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `course_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/students/:studentId",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/students/{{student_user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "students",
+                "{{student_user_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy chi tiết 1 học sinh thuộc tập học sinh của giảng viên.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/students/{{student_user_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `student_user_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API quản lý học sinh của giảng viên."
+    },
+    {
+      "name": "06 - Teacher Revenue",
+      "item": [
+        {
+          "name": "GET /teachers/me/revenue/summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const firstCourse = json?.revenueByCourse?.[0];",
+                  "if (firstCourse?.courseId) pm.collectionVariables.set('course_id', String(firstCourse.courseId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/revenue/summary",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "revenue",
+                "summary"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy tóm tắt doanh thu của giảng viên.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/revenue/summary`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `course_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /teachers/me/revenue/monthly",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/teachers/me/revenue/monthly?year=%7B%7Brevenue_year%7D%7D",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "teachers",
+                "me",
+                "revenue",
+                "monthly"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "{{revenue_year}}"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy doanh thu theo tháng trong 1 năm.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/teachers/me/revenue/monthly`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Query mẫu: `{\"year\":\"{{revenue_year}}\"}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `revenue_year`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API doanh thu của giảng viên."
+    },
+    {
+      "name": "07 - KYC",
+      "item": [
+        {
+          "name": "POST /kyc/submit",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "identityCard",
+                  "type": "file",
+                  "src": "{{sample_image_path}}"
+                },
+                {
+                  "key": "supportingDocuments",
+                  "type": "file",
+                  "src": "{{sample_doc_path}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/kyc/submit",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kyc",
+                "submit"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nNộp hồ sơ KYC cho giảng viên.\n\nBắt buộc gửi multipart/form-data với:\n- `identityCard` (1 file)\n- `supportingDocuments` (>=1 file)\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/kyc/submit`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `multipart/form-data`\n- Body mẫu: `multipart/form-data`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `sample_image_path`, `sample_doc_path`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /kyc/me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Get my KYC success', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "if (json?.id) pm.collectionVariables.set('my_kyc_id', String(json.id));",
+                  "if (json?.id) pm.collectionVariables.set('kyc_application_id', String(json.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/kyc/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kyc",
+                "me"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy hồ sơ KYC của giảng viên hiện tại. Script tự lưu `kyc_application_id`.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/kyc/me`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `my_kyc_id`, `kyc_application_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /kyc/:id/review (admin endpoint in KycController)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/kyc/{{kyc_application_id}}/review",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "kyc",
+                "{{kyc_application_id}}",
+                "review"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nDuyệt KYC qua route `/kyc/:id/review` (chỉ admin).\n\n## Thông tin request\n- Method: `PATCH`\n- URL: `{{base_url}}/kyc/{{kyc_application_id}}/review`\n- Auth: `Bearer {{admin_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `kyc_application_id`, `admin_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /admin/kyc",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('KYC list success', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "const first = Array.isArray(json) ? json[0] : json?.data?.[0] || json?.items?.[0];",
+                  "if (first?.id) pm.collectionVariables.set('kyc_application_id', String(first.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/kyc?page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "kyc"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy danh sách KYC cho admin. Script tự bắt id bản ghi đầu tiên.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/admin/kyc`\n- Auth: `Bearer {{admin_access_token}}`\n- Content-Type: `application/json`\n- Query mẫu: `{\"page\":1,\"limit\":10}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `admin_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `kyc_application_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /admin/kyc/stats",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/kyc/stats?start=2026-01-01&end=2026-12-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "kyc",
+                "stats"
+              ],
+              "query": [
+                {
+                  "key": "start",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "end",
+                  "value": "2026-12-31"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy thống kê KYC theo khoảng thời gian.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/admin/kyc/stats`\n- Auth: `Bearer {{admin_access_token}}`\n- Content-Type: `application/json`\n- Query mẫu: `{\"start\":\"2026-01-01\",\"end\":\"2026-12-31\"}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `admin_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /admin/kyc/:id/review",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REJECTED\",\n  \"rejectionReason\": \"Need clearer supporting documents\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/kyc/{{kyc_application_id}}/review",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "kyc",
+                "{{kyc_application_id}}",
+                "review"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nReview KYC từ route admin chuẩn.\n\n## Thông tin request\n- Method: `PATCH`\n- URL: `{{base_url}}/admin/kyc/{{kyc_application_id}}/review`\n- Auth: `Bearer {{admin_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `kyc_application_id`, `admin_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API KYC của lecturer/admin."
+    },
+    {
+      "name": "08 - Lessons",
+      "item": [
+        {
+          "name": "POST /lessons/cloud-doc",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Create cloud doc success', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+                  "const json = pm.response.json();",
+                  "if (json?.id) pm.collectionVariables.set('cloud_doc_id', String(json.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"classId\": \"{{class_id}}\",\n  \"title\": \"Lesson cloud doc from optimized collection\",\n  \"url\": \"https://docs.google.com/document/d/EXAMPLE_ID/edit\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/lessons/cloud-doc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lessons",
+                "cloud-doc"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nTạo bài học cloud-doc cho lớp. Script tự lưu `cloud_doc_id`.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/lessons/cloud-doc`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `cloud_doc_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /lessons/class/:classId/cloud-docs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length && json[0]?.id) pm.collectionVariables.set('cloud_doc_id', String(json[0].id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lessons/class/{{class_id}}/cloud-docs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lessons",
+                "class",
+                "{{class_id}}",
+                "cloud-docs"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy danh sách cloud-doc của lớp.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/lessons/class/{{class_id}}/cloud-docs`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `cloud_doc_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /lessons/:id/title",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Cloud doc title updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/lessons/{{cloud_doc_id}}/title",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lessons",
+                "{{cloud_doc_id}}",
+                "title"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nĐổi tiêu đề cloud-doc theo `cloud_doc_id`.\n\n## Thông tin request\n- Method: `PATCH`\n- URL: `{{base_url}}/lessons/{{cloud_doc_id}}/title`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `cloud_doc_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /lessons/:id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lessons/{{cloud_doc_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lessons",
+                "{{cloud_doc_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nXóa cloud-doc theo id.\n\n## Thông tin request\n- Method: `DELETE`\n- URL: `{{base_url}}/lessons/{{cloud_doc_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `cloud_doc_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API quản lý lesson cloud-doc."
+    },
+    {
+      "name": "09 - Chat",
+      "item": [
+        {
+          "name": "GET /classes/:classId/chat-history",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length && json[json.length - 1]?.id) pm.collectionVariables.set('chat_message_id', String(json[json.length - 1].id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/classes/{{class_id}}/chat-history?take=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "classes",
+                "{{class_id}}",
+                "chat-history"
+              ],
+              "query": [
+                {
+                  "key": "take",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy lịch sử chat lớp (route chuẩn).\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/classes/{{class_id}}/chat-history`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Query mẫu: `{\"take\":20}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `chat_message_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /classes/:classId/chat/messages",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Send chat message success', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+                  "const json = pm.response.json();",
+                  "if (json?.id) pm.collectionVariables.set('chat_message_id', String(json.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello class, this is an optimized test message.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/classes/{{class_id}}/chat/messages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "classes",
+                "{{class_id}}",
+                "chat",
+                "messages"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nGửi tin nhắn chat vào lớp (route chuẩn).\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/classes/{{class_id}}/chat/messages`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `chat_message_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /classes/:classId/chat/messages/:messageId",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/classes/{{class_id}}/chat/messages/{{chat_message_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "classes",
+                "{{class_id}}",
+                "chat",
+                "messages",
+                "{{chat_message_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nXóa tin nhắn chat theo `messageId` (route chuẩn).\n\n## Thông tin request\n- Method: `DELETE`\n- URL: `{{base_url}}/classes/{{class_id}}/chat/messages/{{chat_message_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `chat_message_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /chat/classes/:classId/chat-history (alias)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/chat/classes/{{class_id}}/chat-history?take=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "chat",
+                "classes",
+                "{{class_id}}",
+                "chat-history"
+              ],
+              "query": [
+                {
+                  "key": "take",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nAlias route của chat history.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/chat/classes/{{class_id}}/chat-history`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Query mẫu: `{\"take\":20}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /chat/classes/:classId/chat/messages (alias)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Send chat message success', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+                  "const json = pm.response.json();",
+                  "if (json?.id) pm.collectionVariables.set('chat_message_id', String(json.id));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Alias route message.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/chat/classes/{{class_id}}/chat/messages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "chat",
+                "classes",
+                "{{class_id}}",
+                "chat",
+                "messages"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nAlias route của gửi chat message.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/chat/classes/{{class_id}}/chat/messages`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `chat_message_id`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /chat/classes/:classId/chat/messages/:messageId (alias)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/chat/classes/{{class_id}}/chat/messages/{{chat_message_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "chat",
+                "classes",
+                "{{class_id}}",
+                "chat",
+                "messages",
+                "{{chat_message_id}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nAlias route của xóa chat message.\n\n## Thông tin request\n- Method: `DELETE`\n- URL: `{{base_url}}/chat/classes/{{class_id}}/chat/messages/{{chat_message_id}}`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `class_id`, `chat_message_id`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API chat trong lớp học (bao gồm route alias)."
+    },
+    {
+      "name": "10 - AI Assistant",
+      "item": [
+        {
+          "name": "GET /ai-assistant/models",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ai-assistant/models",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai-assistant",
+                "models"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy danh sách model AI assistant khả dụng.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/ai-assistant/models`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /ai-assistant/chat (JSON)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Tóm tắt nội dung bài học đại số bậc nhất\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/ai-assistant/chat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai-assistant",
+                "chat"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nChat với AI assistant bằng JSON body (không đính kèm file).\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/ai-assistant/chat`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /ai-assistant/chat (Multipart)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{lecturer_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "message",
+                  "value": "Phân tích file này giúp tôi",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{sample_doc_path}}"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/ai-assistant/chat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai-assistant",
+                "chat"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nChat với AI assistant kèm file đính kèm dạng multipart/form-data.\n\n## Thông tin request\n- Method: `POST`\n- URL: `{{base_url}}/ai-assistant/chat`\n- Auth: `Bearer {{lecturer_access_token}}`\n- Content-Type: `multipart/form-data`\n- Body mẫu: `multipart/form-data`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `lecturer_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `sample_doc_path`, `lecturer_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API AI assistant."
+    },
+    {
+      "name": "11 - Admin",
+      "item": [
+        {
+          "name": "GET /admin/settings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (Array.isArray(json) && json.length && json[0]?.key) pm.collectionVariables.set('setting_key', String(json[0].key));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/settings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "settings"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy toàn bộ system settings.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/admin/settings`\n- Auth: `Bearer {{admin_access_token}}`\n- Content-Type: `application/json`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `admin_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n5. Script của request sẽ tự cập nhật biến: `setting_key`.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /admin/settings/:key",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": \"18\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/settings/{{setting_key}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "settings",
+                "{{setting_key}}"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nCập nhật giá trị 1 setting theo key.\n\n## Thông tin request\n- Method: `PATCH`\n- URL: `{{base_url}}/admin/settings/{{setting_key}}`\n- Auth: `Bearer {{admin_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `setting_key`, `admin_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /admin/users/:id/status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false,\n  \"reason\": \"Seeded test lock action\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/users/{{target_user_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{target_user_id}}",
+                "status"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nKhóa/mở khóa tài khoản user theo `target_user_id`.\n\n## Thông tin request\n- Method: `PATCH`\n- URL: `{{base_url}}/admin/users/{{target_user_id}}/status`\n- Auth: `Bearer {{admin_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `target_user_id`, `admin_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /admin/courses/:id/review",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/courses/{{course_id}}/review",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "courses",
+                "{{course_id}}",
+                "review"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nDuyệt khóa học đang ở trạng thái `PENDING_REVIEW`.\n\nLưu ý: cần set đúng `course_id` của khóa đang pending review.\n\n## Thông tin request\n- Method: `PATCH`\n- URL: `{{base_url}}/admin/courses/{{course_id}}/review`\n- Auth: `Bearer {{admin_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `course_id`, `admin_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /admin/finance/dashboard",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/finance/dashboard?startDate=2026-01-01&endDate=2026-12-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "finance",
+                "dashboard"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-12-31"
+                }
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nLấy dashboard doanh thu nền tảng.\n\n## Thông tin request\n- Method: `GET`\n- URL: `{{base_url}}/admin/finance/dashboard`\n- Auth: `Bearer {{admin_access_token}}`\n- Content-Type: `application/json`\n- Query mẫu: `{\"startDate\":\"2026-01-01\",\"endDate\":\"2026-12-31\"}`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `admin_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /admin/finance/payouts/:id/review",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\",\n  \"transactionRef\": \"BANK-SEED-TXN-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/finance/payouts/{{payout_id}}/review",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "finance",
+                "payouts",
+                "{{payout_id}}",
+                "review"
+              ]
+            },
+            "description": "## API này dùng để làm gì?\nDuyệt yêu cầu payout (chỉ áp dụng khi payout đang `PENDING`).\n\nLưu ý: cần set `payout_id` trước.\n\n## Thông tin request\n- Method: `PATCH`\n- URL: `{{base_url}}/admin/finance/payouts/{{payout_id}}/review`\n- Auth: `Bearer {{admin_access_token}}`\n- Content-Type: `application/json`\n- Body mẫu: `JSON`\n\n## Chuẩn bị trước khi test\n1. Đảm bảo server chạy và `base_url` đúng.\n2. Đảm bảo biến token `admin_access_token` đã có giá trị hợp lệ (chạy login trước).\n3. Kiểm tra các biến đầu vào: `payout_id`, `admin_access_token`.\n\n## Cách test chi tiết\n1. Mở request và kiểm tra lại URL/query/body theo nhu cầu test.\n2. Bấm `Send`.\n3. Kiểm tra status code + response body trả về.\n4. Nếu test luồng lỗi, thử dữ liệu thiếu/sai format để xác nhận validation.\n\n## Kỳ vọng\n- Happy path: nhận response 2xx và dữ liệu đúng schema.\n- Error path: nhận 4xx/5xx với message phù hợp khi dữ liệu/token không hợp lệ."
+          },
+          "response": []
+        }
+      ],
+      "description": "Nhóm API quản trị hệ thống (settings/users/courses/finance/kyc)."
+    }
+  ]
+}

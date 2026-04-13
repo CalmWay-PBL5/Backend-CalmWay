@@ -1,0 +1,177 @@
+{
+  "info": {
+    "_postman_id": "2f7f7b02-4ad2-4f93-9d5f-c8b8a4f6d8a2",
+    "name": "FlyingClass - AI Assistant",
+    "description": "Collection test API AI Assistant (bao gồm login để lấy JWT).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "loginEmail",
+      "value": "admin@example.com"
+    },
+    {
+      "key": "loginPassword",
+      "value": "password123"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Login - Save access token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{loginEmail}}\",\n  \"password\": \"{{loginPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Đăng nhập và tự động lưu access_token vào biến accessToken."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const data = pm.response.json();",
+                  "if (data && data.access_token) {",
+                  "  pm.collectionVariables.set('accessToken', data.access_token);",
+                  "  pm.environment.set('accessToken', data.access_token);",
+                  "}",
+                  "",
+                  "pm.test('access_token exists', function () {",
+                  "  pm.expect(data.access_token).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. AI Assistant",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{accessToken}}",
+            "type": "string"
+          }
+        ]
+      },
+      "item": [
+        {
+          "name": "GET Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ai-assistant/models",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai-assistant",
+                "models"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Chat (JSON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Xin chào, hãy giới thiệu ngắn về Flying Class\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai-assistant/chat",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai-assistant",
+                "chat"
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Chat (multipart/form-data + file)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "message",
+                  "value": "Phân tích giúp tôi nội dung file đính kèm",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai-assistant/chat",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai-assistant",
+                "chat"
+              ]
+            },
+            "description": "Chọn file ở key 'file' trước khi gửi request."
+          }
+        }
+      ]
+    }
+  ]
+}

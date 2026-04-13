@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../../src/features/teacher/classes/list-my-subjects.query.ts"],"sourcesContent":["export class ListMySubjectsQuery {}\n"],"names":["ListMySubjectsQuery"],"mappings":";;;;+BAAaA;;;eAAAA;;;AAAN,IAAA,AAAMA,sBAAN,MAAMA;AAAqB"}
