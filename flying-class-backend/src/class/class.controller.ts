@@ -15,6 +15,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as path from 'path';
 import type { Express } from 'express';
+import { } from 'multer';
 import { Response } from 'express';
 import { ClassService } from './class.service';
 import { ClassExportService } from './class-export.service';

@@ -278,7 +278,8 @@ model Lesson {
   orderIndex    Int     @default(0)
   aiSummaryText String? @db.Text
   aiKeywords    Json?
-
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
   class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
   attachments Attachment[]
   comments    Comment[]

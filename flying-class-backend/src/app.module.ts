@@ -17,7 +17,7 @@ import { ClassMemberModule } from './class-member/class-member.module';
 import { AiAssistantModule } from './ai-assistant/ai-assistant.module';
 import { ChatModule } from './chat/chat.module';
 import { RevenueModule } from './teacher/revenue/revenue.module'; // Import RevenueModule vào đây
-
+import { LessonModule } from './lesson/lesson.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -71,6 +71,7 @@ import { RevenueModule } from './teacher/revenue/revenue.module'; // Import Reve
     AiAssistantModule,
     ChatModule,
     RevenueModule,
+    LessonModule,
   ],
   controllers: [AppController],
   providers: [AppService]
