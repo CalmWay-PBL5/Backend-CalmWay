@@ -4,7 +4,7 @@
   "service": "backend",
   "workspaceFolder": "/app",
 
-  "runServices": ["postgres", "redis", "backend"],
+  "runServices": ["postgres", "redis", "backend", "minio", "minio-setup"],
   "shutdownAction": "stopCompose",
 
   "remoteUser": "node",
@@ -22,8 +22,13 @@
       "extensions": [
         "firsttris.vscode-jest-runner",
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "humao.rest-client",
+        "prisma.prisma",
+        "bocovo.prisma-erd-visualizer",
+        "bierner.markdown-mermaid"
       ]
     }
   }
+  
 }

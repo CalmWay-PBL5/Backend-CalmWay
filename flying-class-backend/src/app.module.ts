@@ -8,6 +8,10 @@ import { envValidationSchema } from './config/env.validation';
 import { LoggerModule } from 'nestjs-pino';
 import { randomUUID } from 'crypto';
 import { TerminusModule } from '@nestjs/terminus';
+import { UserModule } from './modules/user/user.module';
+import { SubjectModule } from './modules/subject/subject.module';
+import { ClassModule } from './modules/class/class.module';
+import { LessonModule } from './modules/lesson/lesson.module';
 
 @Module({
   imports: [
@@ -50,7 +54,11 @@ import { TerminusModule } from '@nestjs/terminus';
       },
     }),
     TerminusModule,
-    InfrastructureModule
+    InfrastructureModule,
+    UserModule,
+    SubjectModule,
+    ClassModule,
+    LessonModule,
   ],
   controllers: [AppController],
   providers: [AppService]

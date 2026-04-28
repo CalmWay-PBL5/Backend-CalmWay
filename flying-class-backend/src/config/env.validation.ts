@@ -4,6 +4,7 @@ export const envValidationSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
   PORT: Joi.number().port(),
   API_PORT: Joi.number().port(),
+  CORS_ORIGIN: Joi.string().optional(), // biến môi trường cho CORS
   
   POSTGRES_DB: Joi.string().required(),
   POSTGRES_USER: Joi.string().required(),

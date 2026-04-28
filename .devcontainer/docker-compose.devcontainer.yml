@@ -7,10 +7,13 @@ services:
       - ../flying-class-backend/.env
     environment:
       NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     volumes:
       - ../flying-class-backend:/app:cached
@@ -43,7 +46,39 @@ services:
       timeout: 3s
       retries: 10
 
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    env_file:
+      - ../flying-class-backend/.env
+    ports:
+      - "9000:9000" # S3 API Port
+      - "9001:9001" # Web UI Port
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
+  minio-setup:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    env_file:
+      - ../flying-class-backend/.env
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 $${S3_ACCESS_KEY} $${S3_SECRET_KEY};
+      /usr/bin/mc mb myminio/$${S3_BUCKET_NAME} --ignore-existing;
+      /usr/bin/mc anonymous set download myminio/$${S3_BUCKET_NAME};
+      exit 0;
+      "
+
 volumes:
   backend_node_modules:
   pgdata:
   redisdata:
+  minio_data:
