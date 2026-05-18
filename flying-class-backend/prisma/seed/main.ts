@@ -4,13 +4,14 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { FullDatasetSeeder } from "./seeders/full-dataset.seeder";
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.PRISMA_DATABASE_URL || process.env.DATABASE_URL;
 if (!databaseUrl) {
-  throw new Error("DATABASE_URL is required to run seed.");
+  throw new Error("PRISMA_DATABASE_URL or DATABASE_URL is required to run seed.");
 }
 
+const databaseSchema = new URL(databaseUrl).searchParams.get("schema") || "public";
 const pool = new Pool({ connectionString: databaseUrl });
-const adapter = new PrismaPg(pool);
+const adapter = new PrismaPg(pool, { schema: databaseSchema });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {

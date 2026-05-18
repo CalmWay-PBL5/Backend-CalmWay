@@ -37,7 +37,7 @@ loadDotEnv(path.join(__dirname, ".env"));
 module.exports = defineConfig({
     schema: "prisma/schema.prisma",
     migrations: {
-        seed: "tsx prisma/seed.ts",
+        seed: "node --import tsx prisma/seed/main.ts",
     },
     datasource: {
         url: process.env.PRISMA_DATABASE_URL || process.env.DATABASE_URL,
