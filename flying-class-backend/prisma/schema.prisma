@@ -1,422 +1,470 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["auth", "course", "lesson", "payment", "system"]
 }
 
-// Vai trò tài khoản trong hệ thống.
-enum UserRole {
-  // Quản trị viên hệ thống.
-  ADMIN
-  // Giáo viên tạo/lên lớp học và chấm bài.
-  TEACHER
-  // Học sinh tham gia lớp, làm bài và theo dõi tiến độ.
+// =======================
+// ENUMS
+// =======================
+enum Role {
   STUDENT
-
-  @@schema("auth")
+  ADMIN
+  LECTURER
 }
 
-// Trạng thái hoạt động của tài khoản.
 enum UserStatus {
-  // Tài khoản đang hoạt động bình thường.
   ACTIVE
-  // Tài khoản bị khóa/chặn truy cập.
   BANNED
-
-  @@schema("auth")
 }
 
-// Bảng người dùng gốc cho toàn hệ thống (đăng nhập, phân quyền, liên kết dữ liệu học tập).
+enum ClassType {
+  PUBLIC
+  PRIVATE
+}
+
+enum ClassStatus {
+  ACTIVE
+  PAUSED
+  PENDING_DELETE
+}
+
+enum ClassMemberStatus {
+  ACTIVE
+  DROPPED
+}
+
+enum ContentType {
+  VIDEO
+  DOCUMENT
+  TEXT
+  CLOUD_DOC
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  ESSAY
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum NotificationType {
+  SYSTEM
+  COURSE_UPDATE
+  PAYMENT
+  EXAM
+}
+
+enum AIFeatureType {
+  QUIZ_GEN
+  SUMMARY
+  CHAT_BUDDY
+  MODERATION
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum CourseStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum PayoutStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
+enum DataType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+}
+
+// =======================
+// MODELS
+// =======================
+
 model User {
-  // Khóa chính định danh người dùng.
-  id           String     @id @default(uuid())
-  // Email đăng nhập, duy nhất toàn hệ thống.
-  email        String     @unique
-  // Mật khẩu đã băm (null nếu đăng nhập social-only).
-  passwordHash String?
-  // ID người dùng từ Google OAuth, duy nhất nếu có.
-  googleId     String?    @unique
-  // Vai trò tài khoản: ADMIN / TEACHER / STUDENT.
-  role         UserRole   @default(STUDENT)
-  // Trạng thái xác minh email/tài khoản.
-  isVerified   Boolean    @default(false)
-  // Trạng thái tài khoản: ACTIVE hoặc BANNED.
-  status       UserStatus @default(ACTIVE)
-  // Thời điểm tạo bản ghi.
-  createdAt    DateTime   @default(now())
-  // Thời điểm cập nhật gần nhất.
-  updatedAt    DateTime   @updatedAt
+  id          String     @id @default(uuid())
+  email       String     @unique
+  password    String?    // Optional for Google OAuth users
+  google_id   String?    @unique
+  role        Role       @default(STUDENT)
+  is_verified Boolean    @default(false)
+  isActive    Boolean    @default(true)
+  banReason   String?
+  status      UserStatus @default(ACTIVE)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  hashedRefreshToken String?
 
-  // Quan hệ 1-1 với hồ sơ cá nhân mở rộng.
-  profile      Profile?
-  // Danh sách lớp do giáo viên này tạo/quản lý.
-  classes      Class[]
-  // Danh sách ghi danh lớp của học sinh.
-  enrollments  Enrollment[]
-  // Danh sách bài nộp thi của học sinh.
-  submissions  Submission[]
-  // Nhật ký sử dụng tính năng AI của người dùng.
-  aiLogs       AiUsageLog[]
-  // Danh sách nội dung bị gắn cờ của người dùng.
-  flagged      FlaggedContent[]
-  // Tiến độ học theo từng bài học.
-  progresses   LessonProgress[]
-  // Lịch sử giao dịch thanh toán lớp học.
-  transactions Transaction[]
-
-  @@schema("auth")
+  // Relations
+  profile         Profile?
+  classesTaught   Class[]          @relation("TeacherClasses")
+  submissions     Submission[]
+  transactions    Transaction[]
+  classMembers    ClassMember[]
+  chatMessages    ChatMessage[]
+  notifications   Notification[]
+  ai_usage_logs   AI_Usage_Log[]
+  classReviews    ClassReview[]
+  kycApplication  KycApplication?
+  courses         Course[]
+  courseTransactions CourseTransaction[]
+  wallet          Wallet?
+  payoutRequests  PayoutRequest[] @relation("InstructorPayoutRequests")
+  
   @@map("users")
 }
 
-// Hồ sơ người dùng mở rộng (thông tin cá nhân, liên hệ, giấy tờ).
+model Wallet {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  balance       Float    @default(0)
+  lockedBalance Float    @default(0)
+  updatedAt     DateTime @updatedAt
+
+  @@map("wallets")
+}
+
+model PayoutRequest {
+  id                String       @id @default(uuid())
+  instructorId      String
+  instructor        User         @relation("InstructorPayoutRequests", fields: [instructorId], references: [id])
+  amount            Float
+  status            PayoutStatus @default(PENDING)
+  bankCode          String
+  bankAccountNumber String
+  bankAccountName   String
+  transactionRef    String?
+  rejectionReason   String?
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@map("payout_requests")
+}
+
+model SystemSetting {
+  key         String   @id
+  value       String
+  dataType    DataType @default(STRING)
+  name        String
+  description String?
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("email_verifications")
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_resets")
+}
+
+model KycApplication {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  identityCardUrl String?
+  supportingDocumentUrls Json?
+  status          KycStatus @default(PENDING)
+  rejectionReason String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("kyc_applications")
+}
+
+model Course {
+  id              String       @id @default(uuid())
+  title           String
+  description     String?
+  thumbnailUrl    String?
+  instructorId    String
+  instructor      User         @relation(fields: [instructorId], references: [id])
+  transactions    CourseTransaction[]
+  status          CourseStatus @default(DRAFT)
+  rejectionReason String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("courses")
+}
+
+model CourseTransaction {
+  id                String            @id @default(uuid())
+  courseId          String
+  course            Course            @relation(fields: [courseId], references: [id])
+  studentId         String
+  student           User              @relation(fields: [studentId], references: [id])
+  amount            Float
+  platformFee       Float
+  instructorRevenue Float
+  status            TransactionStatus @default(PENDING)
+  paymentMethod     String?
+  transactionRef    String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([createdAt, status])
+  @@map("course_transactions")
+}
+
 model Profile {
-  // Khóa chính hồ sơ.
-  id              String   @id @default(uuid())
-  // Khóa ngoại tới users.id, duy nhất để đảm bảo 1 user chỉ có 1 profile.
-  userId          String   @unique
-  // Họ và tên hiển thị.
-  fullName        String?
-  // Số điện thoại liên hệ.
-  phone           String?
-  // URL ảnh đại diện.
-  avatar          String?
-  // Mô tả ngắn về người dùng.
-  bio             String?
-  // Email phụ huynh (dành cho học sinh).
-  parentEmail     String?
-  // URL ảnh CCCD/CMND hoặc giấy tờ định danh.
-  identifyCardUrl String?
-  // Thời điểm cập nhật hồ sơ gần nhất.
-  updatedAt       DateTime @updatedAt
+  id                String   @id @default(uuid())
+  user_id           String   @unique
+  full_name         String
+  phone             String?
+  avatar            String?
+  bio               String?  @db.Text
+  parent_email      String?
+  identify_card_url String?
+  updated_at        DateTime @updatedAt
 
-  // Quan hệ ngược về user; xóa user sẽ xóa profile.
-  user User @relation(fields: [userId], references:[id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@schema("auth")
   @@map("profiles")
 }
 
-// Danh mục môn học (Toán, Lý, Anh...) để gắn cho lớp học.
 model Subject {
-  // Khóa chính môn học.
-  id          String  @id @default(uuid())
-  // Tên môn học duy nhất.
-  name        String  @unique
-  // Mô tả môn học.
-  description String?
-  // Danh sách lớp thuộc môn này.
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  created_at  DateTime @default(now())
+  
   classes     Class[]
 
-  @@schema("course")
   @@map("subjects")
 }
 
-// Bảng lớp học do giáo viên tạo để quản lý nội dung, học sinh, kiểm tra.
 model Class {
-  // Khóa chính lớp học.
-  id          String   @id @default(uuid())
-  // ID giáo viên phụ trách lớp.
-  teacherId   String
-  // ID môn học (có thể null nếu lớp tự do/chưa gắn môn).
-  subjectId   String?
-  // Tiêu đề lớp học.
-  title       String
-  // Mô tả ngắn lớp học.
-  description String?
-  // Học phí lớp học.
-  price       Decimal  @default(0) @db.Decimal(12, 2)
-  // Mã lớp duy nhất để chia sẻ/tham gia.
-  classCode   String   @unique
-  // Loại lớp (online/offline/hybrid... tùy quy ước hệ thống).
-  type        String
-  // Trạng thái lớp (ví dụ: active, archived...).
-  status      String   @default("active")
-  // Thời điểm tạo lớp.
-  createdAt   DateTime @default(now())
-  // Thời điểm cập nhật lớp gần nhất.
-  updatedAt   DateTime @updatedAt
+  id               String      @id @default(uuid())
+  teacher_id       String
+  subject_id       String
+  title            String
+  description      String?     @db.Text
+  price            Decimal     @default(0.00) @db.Decimal(10, 2)
+  cover_image      String?
+  class_code       String      @unique
+  invitation_token String?     @unique
+  max_students     Int         @default(50)
+  type             ClassType   @default(PUBLIC)
+  status           ClassStatus @default(ACTIVE)
+  created_at       DateTime    @default(now())
+  deleted_at       DateTime?
 
-  // Giáo viên phụ trách lớp.
-  teacher User     @relation(fields:[teacherId], references: [id])
-  // Môn học của lớp (nếu có).
-  subject Subject? @relation(fields: [subjectId], references:[id])
-  // Danh sách học sinh ghi danh.
-  enrollments Enrollment[]
-  // Danh sách đề thi thuộc lớp.
-  exams       Exam[]
-  // Danh sách lời mời tham gia lớp.
-  invitations ClassInvitation[]
-  // Danh sách bài học của lớp.
-  lessons     Lesson[]
-  // Danh sách giao dịch thanh toán liên quan lớp.
+  // Relations
+  teacher      User          @relation("TeacherClasses", fields: [teacher_id], references: [id])
+  subject      Subject       @relation(fields: [subject_id], references: [id])
+  lessons      Lesson[]
+  exams        Exam[]
   transactions Transaction[]
+  classMembers ClassMember[]
+  chatMessages ChatMessage[]
+  reviews      ClassReview[]
 
-  @@schema("course")
   @@map("classes")
 }
 
-// Bảng ghi danh: liên kết học sinh với lớp học và tiến độ tổng quan.
-model Enrollment {
-  // Khóa chính bản ghi ghi danh.
-  id        String   @id @default(uuid())
-  // ID học sinh ghi danh.
-  studentId String
-  // ID lớp học được ghi danh.
-  classId   String
-  // Trạng thái ghi danh: active, completed...
-  status    String   @default("active")
-  // Tiến độ hoàn thành lớp (%).
-  progress  Float    @default(0)
-  // Thời điểm tham gia lớp.
-  joinedAt  DateTime @default(now())
+model ClassMember {
+  id         String            @id @default(uuid())
+  class_id   String
+  student_id String
+  status     ClassMemberStatus @default(ACTIVE)
+  joined_at  DateTime          @default(now())
+  dropped_at DateTime?
+  updated_at DateTime          @updatedAt
 
-  // Quan hệ tới user (vai trò học sinh).
-  student User  @relation(fields: [studentId], references: [id])
-  // Quan hệ tới lớp học.
-  class   Class @relation(fields: [classId], references: [id])
+  class   Class @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  student User  @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
-  // Mỗi học sinh chỉ được ghi danh 1 lần cho mỗi lớp.
-  @@unique([studentId, classId])
-  @@schema("course")
-  @@map("enrollments")
+  @@unique([class_id, student_id])
+  @@index([class_id, status, joined_at])
+  @@index([student_id, status])
+  @@map("class_members")
 }
 
-// Bảng đề thi của lớp (quiz/test/kiểm tra định kỳ).
-model Exam {
-  // Khóa chính đề thi.
-  id              String   @id @default(uuid())
-  // ID lớp học sở hữu đề thi.
-  classId         String
-  // Tiêu đề đề thi.
-  title           String
-  // Thời lượng làm bài (phút).
-  durationMinutes Int      @default(60)
-  // Số lần làm tối đa cho mỗi học sinh.
-  maxAttempts     Int      @default(1)
-  // Trạng thái đề thi: draft, published...
-  status          String   @default("published")
-  // Thời điểm tạo đề.
-  createdAt       DateTime @default(now())
+model ClassReview {
+  id         String   @id @default(uuid())
+  class_id   String
+  student_id String
+  rating     Int
+  content    String?  @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  // Lớp học chứa đề thi.
-  class       Class        @relation(fields: [classId], references: [id])
-  // Danh sách câu hỏi trong đề.
-  questions   Question[]
-  // Danh sách bài nộp của học sinh.
-  submissions Submission[]
+  class   Class @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  student User  @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
-  @@schema("course")
-  @@map("exams")
+  @@unique([class_id, student_id])
+  @@index([class_id, created_at])
+  @@index([student_id])
+  @@map("class_reviews")
 }
 
-// Bảng câu hỏi thuộc đề thi.
-model Question {
-  // Khóa chính câu hỏi.
-  id            String  @id @default(uuid())
-  // ID đề thi chứa câu hỏi.
-  examId        String
-  // Nội dung câu hỏi.
-  content       String  @db.Text
-  // Loại câu hỏi: multiple_choice, essay...
-  type          String  @default("multiple_choice")
-  // Danh sách lựa chọn (JSON array), thường dùng cho trắc nghiệm.
-  options       Json?
-  // Đáp án đúng (nếu có thể xác định tự động).
-  correctAnswer String?
-  // Độ khó câu hỏi: easy, medium, hard.
-  difficulty    String  @default("medium")
-  // Thứ tự hiển thị câu hỏi trong đề.
-  orderIndex    Int     @default(0)
+model ChatMessage {
+  id         String   @id @default(uuid())
+  class_id   String
+  sender_id  String
+  content    String   @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  // Xóa đề thi sẽ xóa toàn bộ câu hỏi của đề.
-  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+  class  Class @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  sender User  @relation(fields: [sender_id], references: [id], onDelete: Cascade)
 
-  @@schema("course")
-  @@map("questions")
+  @@index([class_id, created_at])
+  @@index([sender_id, created_at])
+  @@map("chat_messages")
 }
 
-// Bảng bài nộp của học sinh cho một đề thi.
-model Submission {
-  // Khóa chính bài nộp.
-  id             String   @id @default(uuid())
-  // ID đề thi được nộp.
-  examId         String
-  // ID học sinh nộp bài.
-  studentId      String
-  // Nội dung câu trả lời (JSON).
-  answers        Json
-  // Điểm số sau khi chấm (có thể null nếu chưa chấm).
-  score          Float?
-  // Nhận xét của giáo viên.
-  teacherComment String?  @db.Text
-  // Thời điểm nộp bài.
-  submittedAt    DateTime @default(now())
-
-  // Quan hệ tới đề thi.
-  exam    Exam @relation(fields: [examId], references: [id])
-  // Quan hệ tới học sinh.
-  student User @relation(fields: [studentId], references: [id])
-
-  @@schema("course")
-  @@map("submissions")
-}
-
-// Bảng lời mời vào lớp (qua token/email).
-model ClassInvitation {
-  // Khóa chính lời mời.
-  id        String   @id @default(uuid())
-  // ID lớp học được mời tham gia.
-  classId   String
-  // Token duy nhất để xác thực lời mời.
-  token     String   @unique
-  // Email được mời đích danh (null nếu mời công khai bằng link).
-  email     String?
-  // Cờ đã sử dụng hay chưa.
-  isUsed    Boolean  @default(false)
-  // Hạn dùng của lời mời.
-  expiresAt DateTime?
-  // Thời điểm tạo lời mời.
-  createdAt DateTime @default(now())
-
-  // Quan hệ tới lớp học.
-  class Class @relation(fields: [classId], references: [id])
-
-  @@schema("course")
-  @@map("class_invitations")
-}
-
-// Bảng bài học của lớp, hỗ trợ nhiều loại nội dung và AI summary.
 model Lesson {
-  // Khóa chính bài học.
-  id            String   @id @default(uuid())
-  // ID lớp học chứa bài học.
-  classId       String
-  // Tiêu đề bài học.
-  title         String
-  // Loại nội dung: video, document, text...
-  contentType   String
-  // URL tài nguyên (video/file) nếu có.
-  url           String?
-  // Nội dung văn bản bài học (khi là text hoặc trích xuất từ tài liệu).
-  bodyText      String?  @db.Text
-  // Thứ tự bài học trong lớp.
-  orderIndex    Int
-  // Nội dung tóm tắt do AI sinh.
-  aiSummaryText String?  @db.Text
-  // Từ khóa chính do AI trích xuất (JSON array).
-  aiKeywords    Json?
-  // Thời điểm tạo bài học.
-  createdAt     DateTime @default(now())
+  id              String      @id @default(uuid())
+  class_id        String
+  title           String
+  content_type    ContentType
+  url             String?
+  body_text       String?     @db.Text
+  order_index     Int
+  
+  // AI Support Fields
+  ai_summary_text String?     @db.Text
+  ai_keywords     Json?       // Stores array of keywords
 
-  // Quan hệ tới lớp học.
-  class      Class            @relation(fields: [classId], references: [id])
-  // Quan hệ tới bảng tiến độ theo học sinh.
-  progresses LessonProgress[]
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
 
-  @@schema("lesson")
+  class Class @relation(fields: [class_id], references: [id], onDelete: Cascade)
+
   @@map("lessons")
 }
 
-// Bảng theo dõi tiến độ từng học sinh trên từng bài học.
-model LessonProgress {
-  // Khóa chính bản ghi tiến độ.
-  id          String   @id @default(uuid())
-  // ID học sinh.
-  studentId   String
-  // ID bài học.
-  lessonId    String
-  // Đánh dấu đã hoàn thành bài học hay chưa.
-  isCompleted Boolean  @default(false)
-  // Thời điểm cập nhật tiến độ gần nhất.
-  updatedAt   DateTime @updatedAt
+model Exam {
+  id               String   @id @default(uuid())
+  class_id         String
+  title            String
+  duration_minutes Int
+  start_date       DateTime?
+  end_date         DateTime?
+  max_attempts     Int      @default(1)
+  created_at       DateTime @default(now())
 
-  // Quan hệ tới học sinh.
-  student User   @relation(fields: [studentId], references: [id])
-  // Quan hệ tới bài học.
-  lesson  Lesson @relation(fields: [lessonId], references: [id])
+  class       Class        @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  questions   Question[]
+  submissions Submission[]
 
-  // Mỗi học sinh chỉ có 1 bản ghi tiến độ cho mỗi bài học.
-  @@unique([studentId, lessonId])
-  @@schema("lesson")
-  @@map("lesson_progress")
+  @@map("exams")
 }
 
-// Bảng giao dịch thanh toán học phí (ví dụ qua MoMo).
+model Question {
+  id             String       @id @default(uuid())
+  exam_id        String
+  question_text  String       @db.Text
+  type           QuestionType
+  options        Json?        // Stores options e.g., ["A", "B", "C", "D"]
+  correct_answer String?
+  created_at     DateTime     @default(now())
+
+  exam Exam @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+
+  @@map("questions")
+}
+
+model Submission {
+  id              String   @id @default(uuid())
+  exam_id         String
+  student_id      String
+  answers         Json     // Stores student's answers map
+  score           Float?
+  teacher_comment String?  @db.Text
+  submitted_at    DateTime @default(now())
+
+  exam    Exam @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  student User @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@map("submissions")
+}
+
 model Transaction {
-  // Khóa chính giao dịch.
-  id          String   @id @default(uuid())
-  // ID học sinh thanh toán.
-  studentId   String
-  // ID lớp học được thanh toán.
-  classId     String
-  // Số tiền thanh toán.
-  amount      Decimal  @db.Decimal(12, 2)
-  // Mã đơn hàng từ cổng MoMo, duy nhất.
-  momoOrderId String   @unique
-  // Trạng thái giao dịch: pending, success, failed.
-  status      String   @default("pending")
-  // Thời điểm tạo giao dịch.
-  createdAt   DateTime @default(now())
+  id            String            @id @default(uuid())
+  user_id       String
+  class_id      String
+  amount        Decimal           @db.Decimal(10, 2)
+  momo_order_id String?           @unique
+  status        TransactionStatus @default(PENDING)
+  created_at    DateTime          @default(now())
 
-  // Quan hệ tới học sinh.
-  student User  @relation(fields: [studentId], references: [id])
-  // Quan hệ tới lớp học.
-  class   Class @relation(fields: [classId], references: [id])
+  user  User  @relation(fields: [user_id], references: [id])
+  class Class @relation(fields: [class_id], references: [id])
 
-  @@schema("payment")
   @@map("transactions")
 }
 
-// Bảng log sử dụng AI để theo dõi chi phí và hành vi dùng tính năng AI.
-model AiUsageLog {
-  // Khóa chính log.
-  id           String   @id @default(uuid())
-  // ID người dùng đã gọi tính năng AI.
-  userId       String
-  // Loại tính năng AI: quiz_gen, summary, chat_buddy, moderation...
-  featureType  String
-  // Tên model AI đã dùng (gpt-4o-mini, gemini-flash...).
-  modelUsed    String
-  // Số token đầu vào.
-  inputTokens  Int      @default(0)
-  // Số token đầu ra.
-  outputTokens Int      @default(0)
-  // Thời điểm phát sinh lượt dùng.
-  createdAt    DateTime @default(now())
+model Notification {
+  id         String           @id @default(uuid())
+  user_id    String
+  content    String           @db.Text
+  is_read    Boolean          @default(false)
+  type       NotificationType
+  created_at DateTime         @default(now())
 
-  // Quan hệ tới user.
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@schema("system")
-  @@map("ai_usage_logs")
+  @@map("notifications")
 }
 
-// Bảng nội dung bị AI/moderator gắn cờ để kiểm duyệt.
-model FlaggedContent {
-  // Khóa chính bản ghi gắn cờ.
-  id           String   @id @default(uuid())
-  // ID nội dung gốc (comment/message/post...) trong hệ thống nguồn.
-  contentId    String
-  // ID người tạo nội dung bị gắn cờ.
-  userId       String
-  // Nội dung gốc bị gắn cờ.
-  originalText String   @db.Text
-  // Lý do do AI trả về khi gắn cờ.
-  aiReason     String?
-  // Mức độ nghiêm trọng: low, medium, high.
-  severity     String   @default("low")
-  // Trạng thái xử lý: pending, deleted, ignored.
-  status       String   @default("pending")
-  // Thời điểm tạo bản ghi gắn cờ.
-  createdAt    DateTime @default(now())
+model AI_Usage_Log {
+  id            String        @id @default(uuid())
+  user_id       String
+  feature_type  AIFeatureType
+  input_tokens  Int           @default(0)
+  output_tokens Int           @default(0)
+  model_used    String        // e.g., "gpt-4o-mini" or "gemini-flash"
+  created_at    DateTime      @default(now())
 
-  // Quan hệ tới user tạo nội dung.
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@schema("system")
-  @@map("flagged_contents")
+  @@map("ai_usage_logs")
 }

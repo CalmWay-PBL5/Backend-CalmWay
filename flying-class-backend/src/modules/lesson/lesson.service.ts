@@ -3,30 +3,61 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/database/prisma/prisma.service';
+import { ContentType } from "@prisma/client";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
 import { CreateLessonDto } from './dto/create-lesson.dto';
 import { UpdateLessonDto } from './dto/update-lesson.dto';
 
 const lessonSelect = {
   id: true,
-  classId: true,
+  class_id: true,
   title: true,
-  contentType: true,
+  content_type: true,
   url: true,
-  bodyText: true,
-  orderIndex: true,
-  aiSummaryText: true,
-  aiKeywords: true,
-  createdAt: true,
-  updatedAt: true,
+  body_text: true,
+  order_index: true,
+  ai_summary_text: true,
+  ai_keywords: true,
+  created_at: true,
+  updated_at: true,
   class: {
     select: {
       id: true,
       title: true,
-      classCode: true,
+      class_code: true,
     },
   },
 } as const;
+
+const normalizeContentType = (value?: string) => {
+  if (!value) return undefined;
+  const normalized = value.toUpperCase();
+  if (normalized === ContentType.DOCUMENT) return ContentType.DOCUMENT;
+  if (normalized === ContentType.CLOUD_DOC) return ContentType.CLOUD_DOC;
+  if (normalized === ContentType.TEXT) return ContentType.TEXT;
+  return ContentType.VIDEO;
+};
+
+const toLessonResponse = (lesson: (typeof lessonSelect) & { class?: any }) => ({
+  id: lesson.id,
+  classId: lesson.class_id,
+  title: lesson.title,
+  contentType: lesson.content_type as unknown as ContentType,
+  url: lesson.url,
+  bodyText: lesson.body_text,
+  orderIndex: lesson.order_index,
+  aiSummaryText: lesson.ai_summary_text,
+  aiKeywords: lesson.ai_keywords,
+  createdAt: lesson.created_at,
+  updatedAt: lesson.updated_at,
+  class: lesson.class
+    ? {
+        id: lesson.class.id,
+        title: lesson.class.title,
+        classCode: lesson.class.class_code,
+      }
+    : null,
+});
 
 @Injectable()
 export class LessonService {
@@ -37,10 +68,12 @@ export class LessonService {
   }
 
   findAll() {
-    return this.lessonDelegate.findMany({
-      select: lessonSelect,
-      orderBy: [{ classId: 'asc' }, { orderIndex: 'asc' }],
-    });
+    return this.lessonDelegate
+      .findMany({
+        select: lessonSelect,
+        orderBy: [{ class_id: "asc" }, { order_index: "asc" }],
+      })
+      .then((lessons: any[]) => lessons.map((lesson) => toLessonResponse(lesson)));
   }
 
   async findOne(id: string) {
@@ -53,24 +86,25 @@ export class LessonService {
       throw new NotFoundException(`Lesson with id ${id} not found`);
     }
 
-    return lesson;
+    return toLessonResponse(lesson as any);
   }
 
   async create(dto: CreateLessonDto) {
     try {
-      return await this.lessonDelegate.create({
+      const lesson = await this.lessonDelegate.create({
         data: {
-          classId: dto.classId,
+          class_id: dto.classId,
           title: dto.title,
-          contentType: dto.contentType,
+          content_type: normalizeContentType(dto.contentType),
           url: dto.url,
-          bodyText: dto.bodyText,
-          orderIndex: dto.orderIndex,
-          aiSummaryText: dto.aiSummaryText,
-          aiKeywords: dto.aiKeywords,
+          body_text: dto.bodyText,
+          order_index: dto.orderIndex,
+          ai_summary_text: dto.aiSummaryText,
+          ai_keywords: dto.aiKeywords,
         },
         select: lessonSelect,
       });
+      return toLessonResponse(lesson as any);
     } catch (error: unknown) {
       this.handlePrismaError(error);
       throw error;
@@ -81,20 +115,23 @@ export class LessonService {
     await this.ensureLessonExists(id);
 
     try {
-      return await this.lessonDelegate.update({
+      const lesson = await this.lessonDelegate.update({
         where: { id },
         data: {
-          classId: dto.classId,
+          class_id: dto.classId,
           title: dto.title,
-          contentType: dto.contentType,
+          content_type: dto.contentType
+            ? normalizeContentType(dto.contentType)
+            : undefined,
           url: dto.url,
-          bodyText: dto.bodyText,
-          orderIndex: dto.orderIndex,
-          aiSummaryText: dto.aiSummaryText,
-          aiKeywords: dto.aiKeywords,
+          body_text: dto.bodyText,
+          order_index: dto.orderIndex,
+          ai_summary_text: dto.aiSummaryText,
+          ai_keywords: dto.aiKeywords,
         },
         select: lessonSelect,
       });
+      return toLessonResponse(lesson as any);
     } catch (error: unknown) {
       this.handlePrismaError(error);
       throw error;

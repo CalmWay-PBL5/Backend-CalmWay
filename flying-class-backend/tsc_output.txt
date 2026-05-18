@@ -1,0 +1,144 @@
+src/core/core.module.ts(24,64): error TS2551: Property 'getClient' does not exist on type 'RedisService'. Did you mean 'client'?
+src/core/health/indicators/database.health.ts(7,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/core/health/indicators/redis.health.ts(17,46): error TS2551: Property 'getClient' does not exist on type 'RedisService'. Did you mean 'client'?
+src/features/ai-assistant/ai-assistant.service.ts(75,7): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(input: string | URL | Request, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Type '{ "x-goog-api-key": string | undefined; }' is not assignable to type 'HeadersInit | undefined'.
+      Type '{ "x-goog-api-key": string | undefined; }' is not assignable to type 'undefined'.
+  Overload 2 of 2, '(input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Type '{ "x-goog-api-key": string | undefined; }' is not assignable to type 'HeadersInit | undefined'.
+      Type '{ "x-goog-api-key": string | undefined; }' is not assignable to type 'undefined'.
+src/features/ai-assistant/ai-assistant.service.ts(108,9): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(input: string | URL | Request, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Type '{ "Content-Type": string; "x-goog-api-key": string | undefined; }' is not assignable to type 'HeadersInit | undefined'.
+      Type '{ "Content-Type": string; "x-goog-api-key": string | undefined; }' is not assignable to type 'undefined'.
+  Overload 2 of 2, '(input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Type '{ "Content-Type": string; "x-goog-api-key": string | undefined; }' is not assignable to type 'HeadersInit | undefined'.
+      Type '{ "Content-Type": string; "x-goog-api-key": string | undefined; }' is not assignable to type 'undefined'.
+src/features/auth/auth.module.ts(30,38): error TS2307: Cannot find module '@/infrastructure/redis/redis-connection.util' or its corresponding type declarations.
+src/features/auth/forgot-password/forgot-password.api.ts(5,3): error TS2564: Property 'email' has no initializer and is not definitely assigned in the constructor.
+src/features/auth/forgot-password/forgot-password.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/auth/login/login.api.ts(5,3): error TS2564: Property 'email' has no initializer and is not definitely assigned in the constructor.
+src/features/auth/login/login.api.ts(9,3): error TS2564: Property 'password' has no initializer and is not definitely assigned in the constructor.
+src/features/auth/login/login.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/auth/logout/logout.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/auth/refresh/refresh.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/auth/register/register.handler.ts(11,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/auth/register/register.handler.ts(52,16): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+src/features/auth/reset-password/reset-password.api.ts(6,3): error TS2564: Property 'token' has no initializer and is not definitely assigned in the constructor.
+src/features/auth/reset-password/reset-password.api.ts(10,3): error TS2564: Property 'newPassword' has no initializer and is not definitely assigned in the constructor.
+src/features/auth/reset-password/reset-password.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/auth/reset-password/reset-password.handler.ts(33,43): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+src/features/auth/strategies/jwt.strategy.ts(5,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/auth/verify-email/verify-email.api.ts(6,3): error TS2564: Property 'token' has no initializer and is not definitely assigned in the constructor.
+src/features/auth/verify-email/verify-email.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/auth/verify-email/verify-email.handler.ts(31,45): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+src/features/chat/messages/delete-class-message.handler.ts(6,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/chat/messages/get-class-chat-history.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/chat/messages/get-class-chat-history.handler.ts(40,25): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/chat/messages/send-class-message.handler.ts(8,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/courses/courses.module.ts(10,38): error TS2307: Cannot find module '@/infrastructure/redis/redis-connection.util' or its corresponding type declarations.
+src/features/courses/moderation/review-course.api.ts(8,3): error TS2564: Property 'status' has no initializer and is not definitely assigned in the constructor.
+src/features/courses/moderation/review-course.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/finance/dashboard/get-revenue-dashboard.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/finance/payouts/review-payout.api.ts(11,3): error TS2564: Property 'status' has no initializer and is not definitely assigned in the constructor.
+src/features/finance/payouts/review-payout.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/finance/payouts/review-payout.handler.ts(26,45): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+src/features/finance/transactions/list-transactions.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/finance/transactions/list-transactions.handler.ts(77,25): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+src/features/kyc/kyc.module.ts(16,38): error TS2307: Cannot find module '@/infrastructure/redis/redis-connection.util' or its corresponding type declarations.
+src/features/kyc/queries/get-kyc-list.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/kyc/queries/get-kyc-list.handler.ts(31,23): error TS7006: Parameter 'request' implicitly has an 'any' type.
+src/features/kyc/queries/get-kyc-stats.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/kyc/queries/get-my-kyc.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/kyc/review-kyc/review-kyc.api.ts(6,3): error TS2564: Property 'status' has no initializer and is not definitely assigned in the constructor.
+src/features/kyc/review-kyc/review-kyc.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/kyc/submit/submit-kyc.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/lessons/cloud-doc/create-cloud-doc.handler.ts(7,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/lessons/cloud-doc/delete-cloud-doc.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/lessons/cloud-doc/list-cloud-docs.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/lessons/cloud-doc/list-cloud-docs.handler.ts(24,25): error TS7006: Parameter 'lesson' implicitly has an 'any' type.
+src/features/lessons/cloud-doc/update-cloud-doc-title.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/lessons/lessons.controller.ts(82,9): error TS2367: This comparison appears to be unintentional because the types 'boolean' and 'string' have no overlap.
+src/features/system/settings/update-setting.api.ts(6,3): error TS2564: Property 'value' has no initializer and is not definitely assigned in the constructor.
+src/features/system/settings/update-setting.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/system/system-admin.controller.ts(15,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/class-members/add-my-class-member.handler.ts(7,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/class-members/list-my-class-members.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/class-members/list-my-class-members.handler.ts(58,41): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/teacher/class-members/list-my-class-members.handler.ts(69,26): error TS7006: Parameter 'member' implicitly has an 'any' type.
+src/features/teacher/class-members/remove-my-class-member.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/cleanup-my-trash-classes.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/cleanup-my-trash-classes.handler.ts(48,37): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/teacher/classes/create-my-class.handler.ts(8,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/export-my-class-members.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/export-my-class-members.handler.ts(90,24): error TS7006: Parameter 'member' implicitly has an 'any' type.
+src/features/teacher/classes/export-my-class-members.handler.ts(90,32): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/features/teacher/classes/export-my-class-members.handler.ts(100,32): error TS7006: Parameter 'member' implicitly has an 'any' type.
+src/features/teacher/classes/export-my-class-members.handler.ts(100,40): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/features/teacher/classes/export-my-classes.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/export-my-classes.handler.ts(60,22): error TS7006: Parameter 'classItem' implicitly has an 'any' type.
+src/features/teacher/classes/export-my-classes.handler.ts(60,33): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/features/teacher/classes/export-my-classes.handler.ts(62,47): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/teacher/classes/export-my-classes.handler.ts(63,47): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/teacher/classes/get-admin-class-detail.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/get-my-class-dashboard-stats.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/get-my-class-dashboard-stats.handler.ts(69,55): error TS7006: Parameter 'member' implicitly has an 'any' type.
+src/features/teacher/classes/get-my-class-dashboard-stats.handler.ts(70,55): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/teacher/classes/get-my-class.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/list-admin-classes.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/list-admin-classes.handler.ts(77,25): error TS7006: Parameter 'classItem' implicitly has an 'any' type.
+src/features/teacher/classes/list-my-class-detailed-reviews.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/list-my-class-detailed-reviews.handler.ts(43,25): error TS7006: Parameter 'review' implicitly has an 'any' type.
+src/features/teacher/classes/list-my-classes.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/list-my-classes.handler.ts(44,25): error TS7006: Parameter 'classItem' implicitly has an 'any' type.
+src/features/teacher/classes/list-my-subjects.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/list-my-trash-classes.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/list-my-trash-classes.handler.ts(46,25): error TS7006: Parameter 'classItem' implicitly has an 'any' type.
+src/features/teacher/classes/move-my-class-to-trash.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/pause-class-by-admin.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/restore-my-class.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/resume-class-by-admin.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/classes/update-my-class.handler.ts(7,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/profile/get-my-teacher-profile.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/profile/update-my-teacher-profile.handler.ts(8,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/revenue/get-my-teacher-monthly-revenue.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/revenue/get-my-teacher-revenue-summary.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/students/export-my-teacher-course-students.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/students/export-my-teacher-course-students.handler.ts(62,24): error TS7006: Parameter 'purchase' implicitly has an 'any' type.
+src/features/teacher/students/export-my-teacher-course-students.handler.ts(62,34): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/features/teacher/students/export-my-teacher-students.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/students/export-my-teacher-students.handler.ts(70,23): error TS7006: Parameter 'student' implicitly has an 'any' type.
+src/features/teacher/students/export-my-teacher-students.handler.ts(70,32): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/features/teacher/students/export-my-teacher-students.handler.ts(77,44): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/features/teacher/students/export-my-teacher-students.handler.ts(77,49): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/teacher/students/export-my-teacher-students.handler.ts(78,41): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/teacher/students/get-my-teacher-student-detail.handler.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/students/get-my-teacher-student-detail.handler.ts(77,8): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/features/teacher/students/get-my-teacher-student-detail.handler.ts(77,13): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/teacher/students/get-my-teacher-student-detail.handler.ts(99,56): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/teacher/students/get-my-teacher-student-stats.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/students/get-my-teacher-students.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/students/get-my-teacher-students.handler.ts(74,27): error TS7006: Parameter 'student' implicitly has an 'any' type.
+src/features/teacher/students/get-my-teacher-students.handler.ts(76,12): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/features/teacher/students/get-my-teacher-students.handler.ts(76,17): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/teacher/students/get-my-teacher-students.handler.ts(94,61): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+src/features/teacher/students/search-my-teacher-students.handler.ts(3,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/features/teacher/students/search-my-teacher-students.handler.ts(97,27): error TS7006: Parameter 'student' implicitly has an 'any' type.
+src/features/teacher/students/search-my-teacher-students.handler.ts(110,59): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/features/users/toggle-status/toggle-status.api.ts(5,3): error TS2564: Property 'isActive' has no initializer and is not definitely assigned in the constructor.
+src/features/users/toggle-status/toggle-status.handler.ts(2,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/infrastructure/infrastructure.module.ts(3,31): error TS2307: Cannot find module './database/prisma.service' or its corresponding type declarations.
+src/infrastructure/queue/bull-config.service.ts(7,38): error TS2307: Cannot find module '@/infrastructure/redis/redis-connection.util' or its corresponding type declarations.
+src/infrastructure/storage/s3-storage.service.ts(107,31): error TS2532: Object is possibly 'undefined'.
+src/infrastructure/storage/s3-storage.service.ts(190,53): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/modules/class/class.service.ts(8,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/modules/lesson/lesson.service.ts(7,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/modules/subject/subject.service.ts(6,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/modules/subject/subject.service.ts(34,14): error TS7006: Parameter 'subjects' implicitly has an 'any' type.
+src/modules/subject/subject.service.ts(34,41): error TS7006: Parameter 'subject' implicitly has an 'any' type.
+src/modules/user/user.service.ts(7,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.
+src/modules/user/user.service.ts(64,14): error TS7006: Parameter 'users' implicitly has an 'any' type.
+src/modules/user/user.service.ts(64,35): error TS7006: Parameter 'user' implicitly has an 'any' type.
+src/shared/settings/system-setting.service.ts(4,31): error TS2307: Cannot find module '@/infrastructure/database/prisma.service' or its corresponding type declarations.

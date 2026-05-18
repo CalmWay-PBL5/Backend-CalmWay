@@ -1,43 +1,54 @@
-import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
-import { ValidationPipe } from '@nestjs/common';
-import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
-import { Logger } from 'nestjs-pino';
+import "module-alias/register";
+import "reflect-metadata";
+import { NestFactory } from "@nestjs/core";
+import { NestFastifyApplication } from "@nestjs/platform-fastify";
+import { Logger, ValidationPipe } from "@nestjs/common";
+import { AppModule } from "./app.module";
+import { AppConfigService } from "./core/config/app-config.service";
+import { createFastifyAdapter } from "./core/setup/fastify.setup";
+import multipart from "@fastify/multipart";
+import { GlobalExceptionFilter } from "./common/filters/global-exception.filter";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
-  const configService = app.get(ConfigService);
+  process.stdout.write("\n");
+  const logger = new Logger("Bootstrap");
 
-  app.useLogger(app.get(Logger));
+  try {
+    const app = await NestFactory.create<NestFastifyApplication>(
+      AppModule,
+      createFastifyAdapter(),
+      { bodyParser: false },
+    );
 
-  const corsOrigins = configService.get<string>('app.corsOrigin');
-  const allowedOrigins = corsOrigins
-    ? corsOrigins.split(',').map((origin) => origin.trim()).filter(Boolean)
-    : true;
+    await app.register(multipart, {
+      limits: { fileSize: 2 * 1024 * 1024 * 1024 }, // 2GB global hard cap
+    });
 
-  app.enableCors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
+    app.enableCors();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        stopAtFirstError: true,
+      }),
+    );
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, 
-      forbidNonWhitelisted: true, 
-      transform: true,
-    }),
-  );
+    app.useGlobalFilters(new GlobalExceptionFilter());
+    app.setGlobalPrefix("api/v1");
+    app.enableShutdownHooks();
 
-  app.useGlobalFilters(new GlobalExceptionFilter());
+    const config = app.get(AppConfigService);
+    const port = Number(config.get("PORT")) || 3001;
 
-  app.enableShutdownHooks();
+    (app.getHttpAdapter().getInstance() as { setTrustProxy?: (value: number) => void }).setTrustProxy?.(1);
 
-  const port = configService.get<number>('app.port', 3000);
-  
-  await app.listen(port, '0.0.0.0');
+    await app.listen(port, "0.0.0.0");
+    logger.log(`\uD83D\uDE80 Application is successfully running on: ${await app.getUrl()}`);
+  } catch (error) {
+    logger.error("Failed to start the application", error);
+    process.exit(1);
+  }
 }
+
 bootstrap();

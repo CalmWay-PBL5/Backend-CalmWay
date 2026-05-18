@@ -4,24 +4,25 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { PrismaService } from '../../infrastructure/database/prisma/prisma.service';
+import { ClassStatus, ClassType } from "@prisma/client";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
 import { CreateClassDto } from './dto/create-class.dto';
 import { UpdateClassDto } from './dto/update-class.dto';
 
 const classSelect = {
   id: true,
-  subjectId: true,
+  subject_id: true,
   title: true,
   description: true,
-  coverImage: true,
+  cover_image: true,
   price: true,
-  classCode: true,
-  invitationToken: true,
+  class_code: true,
+  invitation_token: true,
   type: true,
   status: true,
-  deletedAt: true,
-  createdAt: true,
-  updatedAt: true,
+  deleted_at: true,
+  created_at: true,
+  updated_at: true,
   subject: {
     select: {
       id: true,
@@ -29,6 +30,46 @@ const classSelect = {
     },
   },
 } as const;
+
+const normalizeClassType = (value?: string) => {
+  if (!value) return undefined;
+  const normalized = value.toUpperCase();
+  return normalized === ClassType.PRIVATE ? ClassType.PRIVATE : ClassType.PUBLIC;
+};
+
+const normalizeClassStatus = (value?: string) => {
+  if (!value) return undefined;
+  const normalized = value.toUpperCase();
+  if (normalized === "DELETED" || normalized === "PENDING_DELETE") {
+    return ClassStatus.PENDING_DELETE;
+  }
+  if (normalized === ClassStatus.PAUSED) {
+    return ClassStatus.PAUSED;
+  }
+  return ClassStatus.ACTIVE;
+};
+
+const toClassResponse = (item: (typeof classSelect) & { subject?: any }) => ({
+  id: item.id,
+  subjectId: item.subject_id,
+  title: item.title,
+  description: item.description,
+  coverImage: item.cover_image,
+  price: item.price,
+  classCode: item.class_code,
+  invitationToken: item.invitation_token,
+  type: item.type,
+  status: item.status,
+  deletedAt: item.deleted_at,
+  createdAt: item.created_at,
+  updatedAt: item.updated_at,
+  subject: item.subject
+    ? {
+        id: item.subject.id,
+        name: item.subject.name,
+      }
+    : null,
+});
 
 @Injectable()
 export class ClassService {
@@ -39,16 +80,18 @@ export class ClassService {
   }
 
   findAll() {
-    return this.classDelegate.findMany({
-      where: { deletedAt: null },
+    return this.classDelegate
+      .findMany({
+      where: { deleted_at: null },
       select: classSelect,
-      orderBy: { createdAt: 'desc' },
-    });
+      orderBy: { created_at: "desc" },
+    })
+      .then((classes: any[]) => classes.map((item) => toClassResponse(item)));
   }
 
   async findOne(id: string) {
     const item = await this.classDelegate.findFirst({
-      where: { id, deletedAt: null },
+      where: { id, deleted_at: null },
       select: classSelect,
     });
 
@@ -56,27 +99,28 @@ export class ClassService {
       throw new NotFoundException(`Class with id ${id} not found`);
     }
 
-    return item;
+    return toClassResponse(item as any);
   }
 
   async create(dto: CreateClassDto) {
     try {
       const invitationToken = `join_${randomUUID().replace(/-/g, '')}`;
 
-      return await this.classDelegate.create({
+      const item = await this.classDelegate.create({
         data: {
-          subjectId: dto.subjectId,
+          subject_id: dto.subjectId,
           title: dto.title,
           description: dto.description,
-          coverImage: dto.coverImage,
+          cover_image: dto.coverImage,
           price: dto.price,
-          classCode: dto.classCode,
-          invitationToken,
-          type: dto.type,
-          status: dto.status,
+          class_code: dto.classCode,
+          invitation_token: invitationToken,
+          type: normalizeClassType(dto.type),
+          status: normalizeClassStatus(dto.status),
         },
         select: classSelect,
       });
+      return toClassResponse(item as any);
     } catch (error: unknown) {
       this.handlePrismaError(error);
       throw error;
@@ -87,22 +131,23 @@ export class ClassService {
     await this.ensureClassExists(id);
 
     try {
-      return await this.classDelegate.update({
+      const item = await this.classDelegate.update({
         where: { id },
         data: {
-          subjectId: dto.subjectId,
+          subject_id: dto.subjectId,
           title: dto.title,
           description: dto.description,
-          coverImage: dto.coverImage,
+          cover_image: dto.coverImage,
           price: dto.price,
-          classCode: dto.classCode,
-          invitationToken: dto.invitationToken,
-          type: dto.type,
-          status: dto.status,
-          deletedAt: dto.deletedAt,
+          class_code: dto.classCode,
+          invitation_token: dto.invitationToken,
+          type: dto.type ? normalizeClassType(dto.type) : undefined,
+          status: dto.status ? normalizeClassStatus(dto.status) : undefined,
+          deleted_at: dto.deletedAt ? new Date(dto.deletedAt) : undefined,
         },
         select: classSelect,
       });
+      return toClassResponse(item as any);
     } catch (error: unknown) {
       this.handlePrismaError(error);
       throw error;
@@ -115,8 +160,8 @@ export class ClassService {
     await this.classDelegate.update({
       where: { id },
       data: {
-        status: 'deleted',
-        deletedAt: new Date(),
+        status: ClassStatus.PENDING_DELETE,
+        deleted_at: new Date(),
       },
     });
 
@@ -127,7 +172,7 @@ export class ClassService {
 
   private async ensureClassExists(id: string): Promise<void> {
     const item = await this.classDelegate.findFirst({
-      where: { id, deletedAt: null },
+      where: { id, deleted_at: null },
       select: { id: true },
     });
 

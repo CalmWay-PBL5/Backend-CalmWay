@@ -9,7 +9,7 @@ import {
   IsUUID,
 } from 'class-validator';
 
-const LESSON_CONTENT_TYPES = ['video', 'document', 'text'] as const;
+const LESSON_CONTENT_TYPES = ['video', 'document', 'text', 'cloud_doc'] as const;
 
 export class CreateLessonDto {
   @IsUUID()

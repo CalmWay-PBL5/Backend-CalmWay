@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/database/prisma/prisma.service';
+import { PrismaService } from "@/infrastructure/database/prisma.service";
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 
@@ -11,17 +11,27 @@ const subjectSelect = {
   id: true,
   name: true,
   description: true,
+  created_at: true,
 } as const;
+
+const toSubjectResponse = (subject: (typeof subjectSelect) & { created_at?: Date }) => ({
+  id: subject.id,
+  name: subject.name,
+  description: subject.description,
+  createdAt: subject.created_at,
+});
 
 @Injectable()
 export class SubjectService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.subject.findMany({
+    return this.prisma.subject
+      .findMany({
       select: subjectSelect,
       orderBy: { name: 'asc' },
-    });
+    })
+      .then((subjects) => subjects.map((subject) => toSubjectResponse(subject as any)));
   }
 
   async findOne(id: string) {
@@ -34,18 +44,19 @@ export class SubjectService {
       throw new NotFoundException(`Subject with id ${id} not found`);
     }
 
-    return subject;
+    return toSubjectResponse(subject as any);
   }
 
   async create(dto: CreateSubjectDto) {
     try {
-      return await this.prisma.subject.create({
+      const subject = await this.prisma.subject.create({
         data: {
           name: dto.name,
           description: dto.description,
         },
         select: subjectSelect,
       });
+      return toSubjectResponse(subject as any);
     } catch (error: unknown) {
       this.handlePrismaError(error, dto.name);
       throw error;
@@ -56,7 +67,7 @@ export class SubjectService {
     await this.ensureSubjectExists(id);
 
     try {
-      return await this.prisma.subject.update({
+      const subject = await this.prisma.subject.update({
         where: { id },
         data: {
           name: dto.name,
@@ -64,6 +75,7 @@ export class SubjectService {
         },
         select: subjectSelect,
       });
+      return toSubjectResponse(subject as any);
     } catch (error: unknown) {
       this.handlePrismaError(error, dto.name);
       throw error;

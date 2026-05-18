@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 const CLASS_TYPES = ['public', 'private'] as const;
-const CLASS_STATUSES = ['active', 'pending_delete', 'deleted'] as const;
+const CLASS_STATUSES = ['active', 'paused', 'pending_delete', 'deleted'] as const;
 
 type ClassTypeValue = (typeof CLASS_TYPES)[number];
 type ClassStatusValue = (typeof CLASS_STATUSES)[number];

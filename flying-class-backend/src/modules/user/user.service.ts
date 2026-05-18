@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UserRole, UserStatus } from '@prisma/client';
-import { PrismaService } from '../../infrastructure/database/prisma/prisma.service';
+import { Role, UserStatus } from "@prisma/client";
+import { PrismaService } from "@/infrastructure/database/prisma.service";
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -13,20 +13,45 @@ const userSelect = {
   email: true,
   role: true,
   status: true,
-  isVerified: true,
-  createdAt: true,
-  updatedAt: true,
+  is_verified: true,
+  created_at: true,
+  updated_at: true,
   profile: {
     select: {
-      fullName: true,
+      full_name: true,
       phone: true,
       avatar: true,
       bio: true,
-      parentEmail: true,
-      identifyCardUrl: true,
+      parent_email: true,
+      identify_card_url: true,
     },
   },
 } as const;
+
+const mapRole = (role?: Role | "TEACHER") => {
+  if (!role) return undefined;
+  return role === "TEACHER" ? Role.LECTURER : role;
+};
+
+const toUserResponse = (user: (typeof userSelect) & { profile?: any }) => ({
+  id: user.id,
+  email: user.email,
+  role: user.role,
+  status: user.status,
+  isVerified: user.is_verified,
+  createdAt: user.created_at,
+  updatedAt: user.updated_at,
+  profile: user.profile
+    ? {
+        fullName: user.profile.full_name,
+        phone: user.profile.phone,
+        avatar: user.profile.avatar,
+        bio: user.profile.bio,
+        parentEmail: user.profile.parent_email,
+        identifyCardUrl: user.profile.identify_card_url,
+      }
+    : null,
+});
 
 @Injectable()
 export class UserService {
@@ -35,8 +60,8 @@ export class UserService {
   findAll() {
     return this.prisma.user.findMany({
       select: userSelect,
-      orderBy: { createdAt: 'desc' },
-    });
+      orderBy: { created_at: "desc" },
+    }).then((users) => users.map((user) => toUserResponse(user as any)));
   }
 
   async findOne(id: string) {
@@ -49,7 +74,7 @@ export class UserService {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    return user;
+    return toUserResponse(user as any);
   }
 
   async create(dto: CreateUserDto) {
@@ -57,10 +82,10 @@ export class UserService {
       const user = await this.prisma.user.create({
         data: {
           email: dto.email,
-          passwordHash: dto.passwordHash,
-          role: dto.role ?? UserRole.STUDENT,
+          password: dto.passwordHash,
+          role: mapRole(dto.role) ?? Role.STUDENT,
           status: dto.status ?? UserStatus.ACTIVE,
-          isVerified: dto.isVerified ?? false,
+          is_verified: dto.isVerified ?? false,
           profile:
             dto.fullName ||
             dto.phone ||
@@ -70,12 +95,12 @@ export class UserService {
             dto.identifyCardUrl
               ? {
                   create: {
-                    fullName: dto.fullName,
+                    full_name: dto.fullName,
                     phone: dto.phone,
                     avatar: dto.avatar,
                     bio: dto.bio,
-                    parentEmail: dto.parentEmail,
-                    identifyCardUrl: dto.identifyCardUrl,
+                    parent_email: dto.parentEmail,
+                    identify_card_url: dto.identifyCardUrl,
                   },
                 }
               : undefined,
@@ -83,7 +108,7 @@ export class UserService {
         select: userSelect,
       });
 
-      return user;
+      return toUserResponse(user as any);
     } catch (error: unknown) {
       this.handlePrismaError(error, dto.email);
       throw error;
@@ -106,28 +131,28 @@ export class UserService {
         where: { id },
         data: {
           email: dto.email,
-          passwordHash: dto.passwordHash,
-          role: dto.role,
+          password: dto.passwordHash,
+          role: mapRole(dto.role),
           status: dto.status,
-          isVerified: dto.isVerified,
+          is_verified: dto.isVerified,
           profile: hasProfilePayload
             ? {
                 upsert: {
                   create: {
-                    fullName: dto.fullName,
+                    full_name: dto.fullName,
                     phone: dto.phone,
                     avatar: dto.avatar,
                     bio: dto.bio,
-                    parentEmail: dto.parentEmail,
-                    identifyCardUrl: dto.identifyCardUrl,
+                    parent_email: dto.parentEmail,
+                    identify_card_url: dto.identifyCardUrl,
                   },
                   update: {
-                    fullName: dto.fullName,
+                    full_name: dto.fullName,
                     phone: dto.phone,
                     avatar: dto.avatar,
                     bio: dto.bio,
-                    parentEmail: dto.parentEmail,
-                    identifyCardUrl: dto.identifyCardUrl,
+                    parent_email: dto.parentEmail,
+                    identify_card_url: dto.identifyCardUrl,
                   },
                 },
               }
@@ -136,7 +161,7 @@ export class UserService {
         select: userSelect,
       });
 
-      return user;
+      return toUserResponse(user as any);
     } catch (error: unknown) {
       this.handlePrismaError(error, dto.email);
       throw error;

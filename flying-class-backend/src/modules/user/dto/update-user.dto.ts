@@ -1,5 +1,5 @@
-import { UserRole, UserStatus } from '@prisma/client';
-import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, IsUrl } from 'class-validator';
+import { Role, UserStatus } from "@prisma/client";
+import { IsBoolean, IsEmail, IsIn, IsOptional, IsString, IsUrl } from "class-validator";
 
 export class UpdateUserDto {
   @IsOptional()
@@ -11,11 +11,11 @@ export class UpdateUserDto {
   passwordHash?: string;
 
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsIn(["STUDENT", "ADMIN", "LECTURER", "TEACHER"])
+  role?: Role | "TEACHER";
 
   @IsOptional()
-  @IsEnum(UserStatus)
+  @IsIn(["ACTIVE", "BANNED"])
   status?: UserStatus;
 
   @IsOptional()
